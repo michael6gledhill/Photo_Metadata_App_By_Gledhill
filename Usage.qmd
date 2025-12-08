@@ -1,93 +1,55 @@
 ---
 title: "How to Use"
-subtitle: "Quick guide to getting started with Photo Metadata Editor"
+subtitle: "Quick start guide"
 format:
   html:
     toc: true
     number-sections: false
     code-copy: true
-    toc-depth: 2
     css: styles.css
 execute: 
   echo: false
 ---
 
-# How to Use Photo Metadata Editor
+# How to Use
 
-## Installation
-
-### Prerequisites
-- Python 3.10 or later
-- `exiftool` (optional but recommended)
-  - macOS: `brew install exiftool`
-  - Linux: `apt-get install exiftool`
-  - Windows: Download from [exiftool.org](https://exiftool.org)
-
-### Setup
+## Install & Run
 
 ```bash
-# Clone or download the repository
 cd Photo_Metadata_App_By_Gledhill
-
-# Create and activate virtual environment
 python3 -m venv venv
-source venv/bin/activate  # macOS/Linux
-# OR: venv\Scripts\activate  # Windows
-
-# Install dependencies and run
+source venv/bin/activate
 pip install -r requirements.txt
 python3 photo_meta_editor.py
 ```
 
-## Quick Start
+## Basic Steps
 
-1. **Open the Application**
-   ```bash
-   python3 photo_meta_editor.py
-   ```
-
-2. **Add Photos**
-   - Click **Open Files** to select images, or
-   - Drag and drop files directly onto the window
-
-3. **View Metadata**
-   - Select a file
-   - Click **View Metadata** to see all EXIF and XMP tags
-
-4. **Apply Metadata**
-   - Select one or more files
-   - Choose a template from the dropdown (or create one)
-   - Click **Apply Template** to add metadata to your photos
-
-5. **Rename Files**
-   - Select one or more files
-   - Choose a naming convention from the dropdown
-   - Click **Preview New Names** to see the results
-   - Click **Rename Files** to apply
+1. **Add Photos** - Click "Open Files" or drag files in
+2. **View Metadata** - Click "View Metadata" to see tags
+3. **Apply Metadata** - Choose a template, click "Apply Template"
+4. **Rename Files** - Choose a naming pattern, click "Rename Files"
 
 ## Keyboard Shortcuts
 
 | Action | Shortcut |
 |--------|----------|
 | Open Files | Ctrl/Cmd + O |
-| Rename Files | Ctrl/Cmd + R |
+| Rename | Ctrl/Cmd + R |
 | Apply Template | Ctrl/Cmd + T |
 | View Metadata | Ctrl/Cmd + M |
-| Undo Last Action | Ctrl/Cmd + Z |
-| Clear Selection | Ctrl/Cmd + L |
-| Exit | Ctrl/Cmd + Q |
+| Undo | Ctrl/Cmd + Z |
 
-## Features
+## Key Features
 
-- **View & Edit Metadata**: Read/edit EXIF and XMP data
-- **Batch Operations**: Process multiple photos at once
-- **Custom Templates**: Save reusable metadata presets
-- **Smart Naming**: Create consistent filenames with patterns
-- **Undo Support**: Revert your last action
-- **Dry-Run Mode**: Preview changes before applying
-- **Safe Operations**: Automatic backups and collision handling
+- View and edit EXIF/XMP metadata
+- Create reusable templates
+- Custom file naming patterns
+- Batch processing
+- Dry run preview
+- Undo support
 
-## What's Next?
+## Next Steps
 
-- **Learn about Templates**: See [Templates & Metadata Guide](Templates.qmd) to create custom metadata templates
-- **View Technical Details**: Check [Reference](Reference.qmd) for supported formats and configuration
+- [Templates & Metadata Guide](Templates.qmd) - Create custom templates
+- [Technical Reference](Reference.qmd) - Configuration and settings

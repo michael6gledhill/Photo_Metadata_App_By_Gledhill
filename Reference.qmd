@@ -1,12 +1,11 @@
 ---
 title: "Technical Reference"
-subtitle: "File formats, configuration, and technical details"
+subtitle: "Configuration, file formats, and troubleshooting"
 format:
   html:
     toc: true
     number-sections: false
     code-copy: true
-    toc-depth: 2
     css: styles.css
 execute: 
   echo: false
@@ -14,277 +13,98 @@ execute:
 
 # Technical Reference
 
-## Supported File Formats
+## Supported Formats
 
-Photo Metadata Editor supports reading and writing metadata in:
+| Format | Support | Notes |
+|--------|---------|-------|
+| JPEG | ✅ Full | Recommended |
+| TIFF | ✅ Full | Professional quality |
+| PNG | ✅ Full | Web-friendly |
 
-| Format | EXIF Support | XMP Support | Notes |
-|--------|:---:|:---:|-------|
-| **JPEG** | ✅ Full | ✅ Full | Most common; best format for metadata |
-| **TIFF** | ✅ Full | ✅ Full | High quality; preserves all metadata |
-| **PNG** | ✅ Limited | ✅ Full | Modern PNG supports embedded metadata |
-
-### File Format Details
-
-**JPEG (.jpg, .jpeg)**
-- Industry standard for photographs
-- Supports all EXIF and XMP fields
-- Metadata embedded without re-encoding image data
-- Recommended format
-
-**TIFF (.tiff, .tif)**
-- Professional standard for archival
-- Lossless compression
-- Full metadata support
-- Larger file sizes
-
-**PNG (.png)**
-- Lossless format
-- Supports XMP metadata natively
-- EXIF support varies by implementation
-- Good for web and archival
-
-## Configuration & Storage
-
-### Default Storage Locations
-
-Templates and naming conventions are stored in your user directory:
+## Storage Locations
 
 ```
 ~/.photo_meta_editor/
-├── templates/
-│   ├── default_portrait.json
-│   ├── default_travel.json
-│   ├── default_landscape.json
-│   └── [your custom templates]
-└── naming_conventions/
-    ├── default_basic.json
-    ├── default_dated.json
-    ├── default_detailed.json
-    └── [your custom naming conventions]
+├── templates/          # Your template files
+├── naming/             # Your naming conventions
+└── undo/               # Undo history
 ```
 
-### Default Templates (Auto-Created on First Run)
+## Default Templates
 
-The application automatically creates three starter templates:
+Auto-created on first run:
+- **Portrait** - Photography template
+- **Travel** - Travel photos template
+- **Landscape** - Landscape template
 
-**default_portrait.json**
-```json
-{
-  "name": "Portrait",
-  "exif": {"Artist": "Your Name"},
-  "xmp": {"dc:creator": "Your Name", "dc:description": "Portrait"}
-}
-```
+## Default Naming Conventions
 
-**default_travel.json**
-```json
-{
-  "name": "Travel",
-  "exif": {"Artist": "Your Name"},
-  "xmp": {"dc:creator": "Your Name", "dc:keywords": "travel"}
-}
-```
+Auto-created on first run:
+- **Basic** - `{original_name}`
+- **Dated** - `{date}_{sequence:03d}`
+- **Detailed** - `{date}_{camera_model}_{sequence:03d}`
 
-**default_landscape.json**
-```json
-{
-  "name": "Landscape",
-  "exif": {"Artist": "Your Name"},
-  "xmp": {"dc:creator": "Your Name", "dc:keywords": "landscape"}
-}
-```
+## Metadata Tools
 
-### Default Naming Conventions (Auto-Created)
+The app auto-detects the best tool:
 
-**default_basic.json**
-```json
-{
-  "name": "Basic",
-  "pattern": "{original_name}"
-}
-```
+1. **exiftool** (if installed) - Fastest, recommended
+2. **Python fallback** - piexif + Pillow - Always available
 
-**default_dated.json**
-```json
-{
-  "name": "Dated",
-  "pattern": "{date}_{sequence:03d}"
-}
-```
+Install exiftool:
+- macOS: `brew install exiftool`
+- Linux: `apt-get install exiftool`
+- Windows: Download from [exiftool.org](https://exiftool.org)
 
-**default_detailed.json**
-```json
-{
-  "name": "Detailed",
-  "pattern": "{date}_{camera_model}_{sequence:03d}"
-}
-```
+## Options
 
-## Metadata Handling Strategy
-
-### Tool Detection
-
-The application intelligently chooses the best tool for your system:
-
-1. **exiftool (Preferred)**
-   - Fastest performance
-   - Most complete EXIF/XMP support
-   - Auto-detected if installed
-   - Recommended for best results
-
-2. **Fallback: Pure Python**
-   - `piexif` for EXIF reading/writing
-   - `Pillow` for image file handling
-   - Built-in; no additional installation needed
-   - Slightly slower but fully functional
-
-### How Metadata is Applied
-
-When you apply a template:
-
-1. **Read** current metadata from the photo
-2. **Parse** template fields (EXIF and XMP)
-3. **Merge or Replace**:
-   - Default: Merge (adds new fields, keeps existing ones)
-   - Option available: Replace entire metadata
-4. **Write** updated metadata back to file
-5. **Verify** changes were written successfully
-
-### Safety Mechanisms
-
-**Atomic Writes**
-- Metadata is written to a temporary file first
-- Temporary file is verified
-- Original file replaced only if write succeeds
-- Corruption prevented if operation fails
-
-**Collision Handling**
-- Detects duplicate filenames automatically
-- Appends sequence numbers: `photo.jpg` → `photo_2.jpg` → `photo_3.jpg`
-- Prevents accidental overwriting
-
-**Undo Support**
-- Last operation can be reverted
-- Original files backed up temporarily
-- Undo works for metadata changes and renames
-
-**Merge Mode**
-- Add new metadata without losing existing data
-- Useful for adding copyright to photos that already have keywords
-
-## Features & Options
-
-### Dry-Run Mode
-
-Preview all changes before applying:
-1. Select files and make your changes
-2. Click **Preview New Names** (for renaming)
-3. Review the preview dialog
-4. Click **Apply** only if satisfied
-
-### Batch Processing
-
-Process multiple photos at once:
-1. Select multiple files (Ctrl+Click or Cmd+Click)
-2. Choose a template
-3. Click **Apply Template**
-4. All files updated simultaneously with progress tracking
-
-### Keyboard Shortcuts
-
-| Action | Shortcut |
-|--------|----------|
-| Open Files | Ctrl/Cmd + O |
-| Rename Files | Ctrl/Cmd + R |
-| Apply Template | Ctrl/Cmd + T |
-| View Metadata | Ctrl/Cmd + M |
-| Undo | Ctrl/Cmd + Z |
-| Clear Selection | Ctrl/Cmd + L |
-| Exit | Ctrl/Cmd + Q |
+| Option | Purpose |
+|--------|---------|
+| **Dry Run** | Preview changes before applying |
+| **Merge Mode** | Add metadata without overwriting existing |
 
 ## Troubleshooting
 
-### Common Issues
+**"exiftool not found"**
+- Install it (see above) or app will use Python fallback
 
-**Issue: "exiftool not found"**
-- Install exiftool manually:
-  - macOS: `brew install exiftool`
-  - Linux: `apt-get install exiftool`
-  - Windows: Download from [exiftool.org](https://exiftool.org)
-- App will automatically use Python fallback if needed
+**"Cannot write metadata"**
+- Check file permissions
+- Ensure file format is supported
+- Check disk space
 
-**Issue: "Cannot write metadata"**
-- Check file permissions (must have write access)
-- Ensure file format is supported (JPEG, TIFF, PNG)
-- Try with Dry-Run to see error details
-- Check available disk space
+**"Metadata not visible"**
+- Different apps show different metadata
+- Use "View Metadata" in app to verify
 
-**Issue: "Metadata not visible in other apps"**
-- Different apps show different metadata fields
-- Standard EXIF should be visible in most apps
-- XMP fields are more specialized
-- Use "View Metadata" to confirm data was written
-
-**Issue: "Template not appearing in dropdown"**
-- Ensure JSON file is in correct location: `~/.photo_meta_editor/templates/`
-- Check JSON syntax is valid
-- Restart the application
-- Check template file has proper structure
+**"Template not loading"**
+- Check file location: `~/.photo_meta_editor/templates/`
+- Verify JSON syntax is valid
+- Restart app
 
 ## Testing
-
-The application includes comprehensive tests:
 
 ```bash
 python3 test_app.py
 ```
 
-Tests verify:
-- Module imports and dependencies
-- MetadataManager initialization and operations
-- TemplateManager file handling
-- NamingEngine token replacement
-- Configuration directory creation
-
-All tests should show ✅ PASSED.
+Verifies:
+- All modules import correctly
+- MetadataManager works
+- TemplateManager works
+- NamingEngine works
+- Configuration directories exist
 
 ## Dependencies
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| PySide6 | 6.7.0+ | GUI framework |
-| piexif | 1.1.3+ | EXIF reading/writing |
-| Pillow | 10.0.0+ | Image handling |
+| PySide6 | 6.7.0+ | GUI |
+| piexif | 1.1.3+ | EXIF |
+| Pillow | 10.0.0+ | Images |
 
-Optional (auto-detected):
-- `exiftool` - Faster metadata processing
+## Performance
 
-## Performance Notes
-
-- **Small batches** (1-10 files): < 1 second per file
-- **Medium batches** (10-100 files): < 0.5 seconds per file with exiftool
-- **Large batches** (100+ files): Still efficient with progress tracking
-- **exiftool vs Python**: exiftool ~2-3x faster for EXIF operations
-
-## Technical Architecture
-
-### Components
-
-- **MetadataManager**: Handles EXIF/XMP reading and writing
-- **TemplateManager**: Manages JSON templates and persistence
-- **NamingEngine**: Token replacement engine
-- **PhotoMetadataEditor**: Main GUI window with file handling
-- **Multiple QDialogs**: Template creation, metadata viewing, options
-
-### Design Principles
-
-- **No external modifications**: Works entirely within app
-- **Safe by default**: Atomic operations, collision detection
-- **Extensible**: Easy to add new token types or metadata fields
-- **Cross-platform**: Works on macOS, Linux, Windows
-- **Graceful degradation**: Works without exiftool using Python libraries
-
-## License
-
-This application is provided as-is for personal and professional use in managing photo metadata.
+- Small batches (1-10 files): < 1 sec/file
+- Medium batches (10-100 files): < 0.5 sec/file (with exiftool)
+- Large batches (100+ files): Progressive with tracking

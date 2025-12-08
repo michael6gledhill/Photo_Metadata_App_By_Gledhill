@@ -1,301 +1,96 @@
 ---
-title: "Templates & Metadata Guide"
-subtitle: "Create and manage metadata templates with EXIF and XMP fields"
+title: "Templates & Metadata"
+subtitle: "Create templates with EXIF and XMP metadata"
 format:
   html:
     toc: true
     number-sections: false
     code-copy: true
-    toc-depth: 2
     css: styles.css
 execute: 
   echo: false
 ---
 
-# Templates & Metadata Guide
+# Templates & Metadata
 
-## Creating a Metadata Template
+## Creating Templates
 
-Templates allow you to save reusable metadata that you can apply to photos in bulk. Each template is a JSON file containing EXIF and XMP field definitions.
+Templates store reusable metadata to apply to multiple photos.
 
-### How to Create a Template
-
-1. Click **Create Template** button in the application
-2. Enter a name for your template (e.g., "Travel Photos")
-3. Add EXIF and XMP fields as needed
+**Steps:**
+1. Click **Create Template**
+2. Enter a name (e.g., "Travel Photos")
+3. Add EXIF and XMP fields
 4. Click **Save Template**
-5. The template appears in the dropdown for future use
 
-### What are Templates?
+**Edit or Delete:**
+- Select a template
+- Click **Edit** to modify or **Remove** to delete
 
-Templates are JSON files stored in `~/.photo_meta_editor/templates/`. They contain metadata field definitions that you want to apply to photos:
-
-```json
-{
-  "name": "Professional Photography",
-  "exif": {
-    "Artist": "Your Name",
-    "Copyright": "© 2025 Your Name"
-  },
-  "xmp": {
-    "dc:creator": "Your Name",
-    "dc:description": "Professional photography",
-    "dc:keywords": ["photography", "professional"]
-  }
-}
-```
-
-## Adding Metadata to Templates
+## Common Metadata Fields
 
 ### EXIF Fields
-
-EXIF (Exchangeable Image File Format) is the standard format for camera metadata.
-
-#### Common EXIF Fields
 
 | Field | Purpose | Example |
 |-------|---------|---------|
 | `Artist` | Photographer name | "Jane Doe" |
-| `Copyright` | Copyright statement | "© 2025 Jane Doe" |
-| `ImageDescription` | Photo description | "Portrait session" |
-| `UserComment` | Additional notes | "Shot at golden hour" |
-| `Software` | Editing software used | "Lightroom 6.0" |
-
-#### How to Add EXIF Fields
-
-In the template creation dialog, add EXIF fields in the left section:
-
-```
-Artist: Your Name
-Copyright: © 2025 Your Name
-ImageDescription: What the photo shows
-```
+| `Copyright` | Copyright notice | "© 2025 Jane Doe" |
+| `ImageDescription` | Description | "Portrait session" |
 
 ### XMP Fields
-
-XMP (Extensible Metadata Platform) is a flexible format that allows custom fields and nested structures.
-
-#### Common XMP Fields
 
 | Field | Purpose | Example |
 |-------|---------|---------|
 | `dc:creator` | Creator name | "Jane Doe" |
-| `dc:keywords` | Searchable tags | "portrait, studio, professional" |
-| `dc:description` | Detailed description | "Professional portrait session 2025" |
+| `dc:keywords` | Tags (comma-separated) | "portrait, studio" |
+| `dc:description` | Detailed description | "Professional portraits" |
 | `dc:subject` | Main subject | "Portrait" |
-| `dc:rights` | Rights holder | "Jane Doe" |
-| `photoshop:Headline` | Short title | "Portrait Session 2025" |
-| `photoshop:Credit` | Credit line | "Photo by Jane Doe" |
-| `photoshop:Location` | Photo location | "New York, USA" |
-| `xmpRights:UsageTerms` | Usage restrictions | "All rights reserved" |
 
-#### How to Add XMP Fields
+## Template Examples
 
-In the template creation dialog, add XMP fields in the right section. For keywords and arrays, use comma-separated values or JSON format:
-
+**Portrait Photography**
 ```
-dc:creator: Your Name
-dc:keywords: portrait, studio, professional
-dc:description: A detailed description
-dc:rights: Your Name
+Artist: Your Name
+Copyright: © 2025 Your Name
+Keywords: portrait, professional, studio
 ```
 
-## Metadata Templates by Photography Type
-
-### Portrait Photography
-
-```json
-{
-  "name": "Portrait Photography",
-  "exif": {
-    "Artist": "Your Name",
-    "Copyright": "© 2025 Your Name. All rights reserved.",
-    "ImageDescription": "Professional portrait photography"
-  },
-  "xmp": {
-    "dc:creator": "Your Name",
-    "dc:description": "Professional portrait session",
-    "photoshop:Headline": "Portrait Session",
-    "photoshop:Credit": "Your Name",
-    "xmpRights:UsageTerms": "All rights reserved"
-  }
-}
+**Travel Photography**
+```
+Artist: Your Name
+Keywords: travel, adventure
+Description: Travel photography
 ```
 
-**Key fields:**
-- Artist/Creator: Your name
-- Copyright: Full copyright notice
-- Description: What the portrait shows
-- Keywords: portrait, professional, studio
-
-### Travel Photography
-
-```json
-{
-  "name": "Travel Photography",
-  "exif": {
-    "Artist": "Your Name",
-    "Copyright": "© 2025 Your Name",
-    "ImageDescription": "Travel documentation"
-  },
-  "xmp": {
-    "dc:creator": "Your Name",
-    "dc:keywords": "travel, adventure, photography",
-    "dc:description": "Moment captured while traveling",
-    "photoshop:Location": "Location Name"
-  }
-}
+**Event Photography**
 ```
-
-**Key fields:**
-- Location: Where the photo was taken
-- Keywords: Include destination, landmarks
-- Description: Story or context
-
-### Landscape Photography
-
-```json
-{
-  "name": "Landscape Photography",
-  "exif": {
-    "Artist": "Your Name",
-    "Copyright": "© 2025 Your Name",
-    "ImageDescription": "Landscape photography"
-  },
-  "xmp": {
-    "dc:creator": "Your Name",
-    "dc:keywords": "landscape, nature, scenic",
-    "dc:subject": "Mountain landscape at sunset",
-    "dc:description": "Golden hour landscape photography",
-    "photoshop:Location": "Mountain Peak, State, Country"
-  }
-}
+Artist: Your Name
+Copyright: © 2025 Your Name
+Keywords: event, wedding, celebration
 ```
-
-**Key fields:**
-- Location: Specific location details
-- Keywords: Landscape, season, terrain type
-- Subject: Main subject of the photo
-
-### Event Photography
-
-```json
-{
-  "name": "Event Photography",
-  "exif": {
-    "Artist": "Your Name",
-    "Copyright": "© 2025 Your Name",
-    "ImageDescription": "Event photography"
-  },
-  "xmp": {
-    "dc:creator": "Your Name",
-    "dc:keywords": "event, wedding, celebration",
-    "dc:subject": "Event Name - Date",
-    "dc:description": "Event photography and coverage"
-  }
-}
-```
-
-**Key fields:**
-- Subject: Event name and date
-- Keywords: Event type, location
-- Description: Full event coverage details
-
-### Stock Photography
-
-```json
-{
-  "name": "Stock Photography",
-  "exif": {
-    "Artist": "Your Name",
-    "Copyright": "© 2025 Your Name",
-    "ImageDescription": "Stock photo"
-  },
-  "xmp": {
-    "dc:creator": "Your Name",
-    "dc:keywords": "keyword1, keyword2, keyword3, keyword4, keyword5",
-    "dc:description": "Detailed description for searchability",
-    "photoshop:Headline": "Selling headline",
-    "xmpRights:UsageTerms": "Licensed under Creative Commons or custom license"
-  }
-}
-```
-
-**Key fields:**
-- Keywords: 5+ relevant tags for discoverability
-- Description: Rich description for search engines
-- UsageTerms: License information
-
-### Product Photography
-
-```json
-{
-  "name": "Product Photography",
-  "exif": {
-    "Artist": "Your Studio",
-    "Copyright": "© 2025 Your Studio",
-    "ImageDescription": "Product photography"
-  },
-  "xmp": {
-    "dc:creator": "Your Studio",
-    "dc:keywords": "product, commercial, ecommerce",
-    "dc:subject": "Product Name",
-    "dc:description": "Professional product photography"
-  }
-}
-```
-
-**Key fields:**
-- Subject: Product name
-- Keywords: Product category, brand
-- Description: Product features and details
-
-## Using Templates
-
-### Applying a Template
-
-1. Select one or more photos
-2. Choose a template from the **Template** dropdown
-3. Click **Apply Template**
-4. Templates will add/merge metadata to your selected photos
-
-### Editing an Existing Template
-
-Templates are stored as JSON files in `~/.photo_meta_editor/templates/`. You can:
-1. Edit the file directly with a text editor
-2. Create a new template and delete the old one
-3. Use the app's **Create Template** to make variations
-
-### Template Best Practices
-
-- **Create templates for photo types**: Portrait, travel, events, etc.
-- **Keep artist/creator consistent**: Use the same name across all photos
-- **Include copyright**: Always protect your work
-- **Add meaningful keywords**: Make photos searchable
-- **Use descriptive names**: Name templates clearly (e.g., "2025 Professional Photos")
-- **Version your templates**: Create new versions when you change standards
 
 ## Naming Conventions
 
-Naming conventions define how your files are renamed using patterns and token replacement.
+Define how files are renamed using tokens and custom text.
 
-### Naming Tokens
+| Token | Result |
+|-------|--------|
+| `{date}` | 2025-12-08 |
+| `{original_name}` | IMG_1234 |
+| `{userid}` | john_doe |
+| `{sequence:03d}` | 001, 002, 003 |
 
-| Token | What It Does | Example |
-|-------|--------------|---------|
-| `{date}` | Photo capture date (YYYY-MM-DD) | 2025-12-08 |
-| `{datetime:%Y%m%d_%H%M%S}` | Full datetime with custom format | 20251208_143022 |
-| `{camera_model}` | Camera make and model | Canon_EOS_R5 |
-| `{sequence:03d}` | Auto-incrementing number (padded) | 001, 002, 003 |
-| `{title}` | Template title if available | My_Photo |
-| `{original_name}` | Original filename without extension | IMG_1234 |
-| `{userid}` | Your username | john_doe |
+**Examples:**
+- `{userid}_{date}_{original_name}` → `john_doe_2025-12-08_IMG_1234.jpg`
+- `{date}_ES-meeting_{sequence:03d}` → `2025-12-08_ES-meeting_001.jpg`
+- `{date}_Project-ABC_{title}` → `2025-12-08_Project-ABC_Meeting.jpg`
 
-### Creating a Naming Convention
-
-1. Click **Create Naming Convention**
-2. Enter a name (e.g., "Travel Photos")
-3. Enter a pattern using tokens:
+**Create/Edit Naming:**
+1. Click **Create Naming Convention** (or **Edit** existing)
+2. Enter a name
+3. Enter pattern using tokens and custom text
+4. Click **Save Convention**
+3. Enter a pattern using tokens and custom text:
    ```
    {date}_{location}_{sequence:03d}
    ```
@@ -303,11 +98,29 @@ Naming conventions define how your files are renamed using patterns and token re
 
 ### Example Naming Patterns
 
+**User + Date + Original name:**
+```
+{userid}_{date}_{original_name}
+```
+Result: `jane_doe_2025-12-08_IMG_1234.jpg`
+
+**Date + Meeting name + Sequence:**
+```
+{date}_ES-meeting_{sequence:03d}
+```
+Result: `2025-12-08_ES-meeting_001.jpg`
+
+**Date + Project + Camera + Sequence:**
+```
+{date}_Project-XYZ_{camera_model}_{sequence:03d}
+```
+Result: `2025-12-08_Project-XYZ_Canon_EOS_R5_001.jpg`
+
 **Travel photos:**
 ```
-{date}_{camera_model}_{sequence:03d}
+2025_{date}_{original_name}
 ```
-Result: `2025-12-08_Canon_EOS_R5_001.jpg`
+Result: `2025_2025-12-08_IMG_1234.jpg`
 
 **Studio work:**
 ```

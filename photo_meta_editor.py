@@ -594,15 +594,19 @@ class NamingEngine:
 class TemplateDialog(QDialog):
     """Dialog for creating/editing templates."""
     
-    def __init__(self, parent=None, template_manager=None):
-        """Initialize template creation dialog."""
+    def __init__(self, parent=None, template_manager=None, template_name=None):
+        """Initialize template creation/editing dialog."""
         super().__init__(parent)
         self.template_manager = template_manager
+        self.template_name = template_name
+        self.is_editing = template_name is not None
         self.init_ui()
+        if self.is_editing:
+            self.load_template(template_name)
     
     def init_ui(self):
-        """Build UI for template creation."""
-        self.setWindowTitle("Create Template")
+        """Build UI for template creation/editing."""
+        self.setWindowTitle("Edit Template" if self.is_editing else "Create Template")
         self.setGeometry(100, 100, 600, 500)
         
         layout = QVBoxLayout()
@@ -611,6 +615,8 @@ class TemplateDialog(QDialog):
         name_layout = QHBoxLayout()
         name_layout.addWidget(QLabel("Template Name:"))
         self.name_input = QLineEdit()
+        if self.is_editing:
+            self.name_input.setReadOnly(True)  # Prevent changing name when editing
         name_layout.addWidget(self.name_input)
         layout.addLayout(name_layout)
         
@@ -680,6 +686,29 @@ class TemplateDialog(QDialog):
         if current_row >= 0:
             table.removeRow(current_row)
     
+    def load_template(self, template_name: str):
+        """Load existing template for editing."""
+        templates = self.template_manager.get_templates()
+        if template_name in templates:
+            template = templates[template_name]
+            self.name_input.setText(template_name)
+            
+            # Load EXIF data
+            exif_data = template.get('exif', {})
+            for tag, value in exif_data.items():
+                row = self.exif_table.rowCount()
+                self.exif_table.insertRow(row)
+                self.exif_table.setItem(row, 0, QTableWidgetItem(tag))
+                self.exif_table.setItem(row, 1, QTableWidgetItem(str(value)))
+            
+            # Load XMP data
+            xmp_data = template.get('xmp', {})
+            for prop, value in xmp_data.items():
+                row = self.xmp_table.rowCount()
+                self.xmp_table.insertRow(row)
+                self.xmp_table.setItem(row, 0, QTableWidgetItem(prop))
+                self.xmp_table.setItem(row, 1, QTableWidgetItem(str(value)))
+    
     def save_template(self):
         """Save the template."""
         name = self.name_input.text().strip()
@@ -705,25 +734,40 @@ class TemplateDialog(QDialog):
             QMessageBox.warning(self, "Error", "Please add at least one EXIF tag or XMP property.")
             return
         
-        if self.template_manager.save_template(name, exif_data, xmp_data):
-            QMessageBox.information(self, "Success", f"Template '{name}' saved successfully!")
-            self.accept()
+        if self.is_editing:
+            # Delete old template and save updated version
+            if self.template_manager.delete_template(name):
+                if self.template_manager.save_template(name, exif_data, xmp_data):
+                    QMessageBox.information(self, "Success", f"Template '{name}' updated successfully!")
+                    self.accept()
+                else:
+                    QMessageBox.critical(self, "Error", "Failed to save template.")
+            else:
+                QMessageBox.critical(self, "Error", "Failed to update template.")
         else:
-            QMessageBox.critical(self, "Error", "Failed to save template.")
+            if self.template_manager.save_template(name, exif_data, xmp_data):
+                QMessageBox.information(self, "Success", f"Template '{name}' saved successfully!")
+                self.accept()
+            else:
+                QMessageBox.critical(self, "Error", "Failed to save template.")
 
 
 class NamingDialog(QDialog):
-    """Dialog for creating naming conventions."""
+    """Dialog for creating/editing naming conventions."""
     
-    def __init__(self, parent=None, template_manager=None):
+    def __init__(self, parent=None, template_manager=None, naming_name=None):
         """Initialize naming convention dialog."""
         super().__init__(parent)
         self.template_manager = template_manager
+        self.naming_name = naming_name
+        self.is_editing = naming_name is not None
         self.init_ui()
+        if self.is_editing:
+            self.load_naming(naming_name)
     
     def init_ui(self):
-        """Build UI for naming convention creation."""
-        self.setWindowTitle("Create Naming Convention")
+        """Build UI for naming convention creation/editing."""
+        self.setWindowTitle("Edit Naming Convention" if self.is_editing else "Create Naming Convention")
         self.setGeometry(100, 100, 600, 300)
         
         layout = QVBoxLayout()
@@ -732,6 +776,8 @@ class NamingDialog(QDialog):
         name_layout = QHBoxLayout()
         name_layout.addWidget(QLabel("Convention Name:"))
         self.name_input = QLineEdit()
+        if self.is_editing:
+            self.name_input.setReadOnly(True)  # Prevent changing name when editing
         name_layout.addWidget(self.name_input)
         layout.addLayout(name_layout)
         
@@ -739,24 +785,34 @@ class NamingDialog(QDialog):
         pattern_layout = QHBoxLayout()
         pattern_layout.addWidget(QLabel("Pattern:"))
         self.pattern_input = QLineEdit()
-        self.pattern_input.setPlaceholderText("{date}_{title}_{sequence:03d}")
+        self.pattern_input.setPlaceholderText("{userid}_{date}_{original_name}")
         pattern_layout.addWidget(self.pattern_input)
         layout.addLayout(pattern_layout)
+        
+        # Info label about custom text
+        info_label = QLabel("💡 Tip: Mix tokens with custom text (e.g., {date}_ES-meeting_{sequence:03d})")
+        info_label.setStyleSheet("color: #0066cc; font-style: italic;")
+        layout.addWidget(info_label)
         
         # Help text
         help_text = QTextEdit()
         help_text.setReadOnly(True)
         help_text.setText(
-            "Available tokens:\n"
+            "Available tokens (mix with custom text):\n\n"
+            "TOKENS:\n"
             "  {date} - YYYY-MM-DD format\n"
-            "  {datetime:%Y%m%d_%H%M%S} - Custom datetime format\n"
+            "  {datetime:%Y%m%d_%H%M%S} - Custom datetime\n"
             "  {title} - Image title/description\n"
             "  {camera_model} - Camera model from EXIF\n"
-            "  {sequence:03d} - Sequence number with padding\n"
+            "  {sequence:03d} - Sequence number\n"
             "  {original_name} - Original filename\n"
-            "  {userid} - Current system user"
+            "  {userid} - System username\n\n"
+            "EXAMPLES:\n"
+            "  {userid}_{date}_{original_name}\n"
+            "  {date}_ES-meeting_{sequence:03d}\n"
+            "  {date}_Project-ABC_{title}"
         )
-        help_text.setMaximumHeight(150)
+        help_text.setMaximumHeight(200)
         layout.addWidget(help_text)
         
         # Buttons
@@ -771,6 +827,14 @@ class NamingDialog(QDialog):
         
         self.setLayout(layout)
     
+    def load_naming(self, naming_name: str):
+        """Load existing naming convention for editing."""
+        namings = self.template_manager.get_namings()
+        if naming_name in namings:
+            naming = namings[naming_name]
+            self.name_input.setText(naming_name)
+            self.pattern_input.setText(naming.get('pattern', ''))
+    
     def save_convention(self):
         """Save the naming convention."""
         name = self.name_input.text().strip()
@@ -780,11 +844,22 @@ class NamingDialog(QDialog):
             QMessageBox.warning(self, "Error", "Please enter both name and pattern.")
             return
         
-        if self.template_manager.save_naming(name, pattern):
-            QMessageBox.information(self, "Success", f"Naming convention '{name}' saved!")
-            self.accept()
+        if self.is_editing:
+            # Delete old naming and save updated version
+            if self.template_manager.delete_naming(name):
+                if self.template_manager.save_naming(name, pattern):
+                    QMessageBox.information(self, "Success", f"Naming convention '{name}' updated!")
+                    self.accept()
+                else:
+                    QMessageBox.critical(self, "Error", "Failed to save naming convention.")
+            else:
+                QMessageBox.critical(self, "Error", "Failed to update naming convention.")
         else:
-            QMessageBox.critical(self, "Error", "Failed to save naming convention.")
+            if self.template_manager.save_naming(name, pattern):
+                QMessageBox.information(self, "Success", f"Naming convention '{name}' saved!")
+                self.accept()
+            else:
+                QMessageBox.critical(self, "Error", "Failed to save naming convention.")
 
 
 class MetadataViewDialog(QDialog):
@@ -957,9 +1032,16 @@ class PhotoMetadataEditor(QMainWindow):
         self.template_list.itemSelectionChanged.connect(self.on_template_selected)
         templates_sublayout.addWidget(self.template_list)
         
-        delete_template_btn = QPushButton("Delete Selected Template")
+        template_btn_layout = QHBoxLayout()
+        edit_template_btn = QPushButton("Edit")
+        edit_template_btn.clicked.connect(self.edit_template)
+        template_btn_layout.addWidget(edit_template_btn)
+        
+        delete_template_btn = QPushButton("Remove")
         delete_template_btn.clicked.connect(self.delete_template)
-        templates_sublayout.addWidget(delete_template_btn)
+        template_btn_layout.addWidget(delete_template_btn)
+        
+        templates_sublayout.addLayout(template_btn_layout)
         
         templates_group.setLayout(templates_sublayout)
         right_layout.addWidget(templates_group)
@@ -972,9 +1054,16 @@ class PhotoMetadataEditor(QMainWindow):
         self.naming_list.itemSelectionChanged.connect(self.on_naming_selected)
         naming_sublayout.addWidget(self.naming_list)
         
-        delete_naming_btn = QPushButton("Delete Selected Convention")
+        naming_btn_layout = QHBoxLayout()
+        edit_naming_btn = QPushButton("Edit")
+        edit_naming_btn.clicked.connect(self.edit_naming)
+        naming_btn_layout.addWidget(edit_naming_btn)
+        
+        delete_naming_btn = QPushButton("Remove")
         delete_naming_btn.clicked.connect(self.delete_naming)
-        naming_sublayout.addWidget(delete_naming_btn)
+        naming_btn_layout.addWidget(delete_naming_btn)
+        
+        naming_sublayout.addLayout(naming_btn_layout)
         
         naming_group.setLayout(naming_sublayout)
         right_layout.addWidget(naming_group)
@@ -1097,6 +1186,32 @@ class PhotoMetadataEditor(QMainWindow):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.refresh_namings()
             self.log_status("Naming convention created successfully")
+    
+    def edit_template(self):
+        """Edit selected template."""
+        current_item = self.template_list.currentItem()
+        if not current_item:
+            QMessageBox.warning(self, "Warning", "Please select a template to edit.")
+            return
+        
+        template_name = current_item.text()
+        dialog = TemplateDialog(self, self.template_manager, template_name)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.refresh_templates()
+            self.log_status(f"Template '{template_name}' updated successfully")
+    
+    def edit_naming(self):
+        """Edit selected naming convention."""
+        current_item = self.naming_list.currentItem()
+        if not current_item:
+            QMessageBox.warning(self, "Warning", "Please select a naming convention to edit.")
+            return
+        
+        naming_name = current_item.text()
+        dialog = NamingDialog(self, self.template_manager, naming_name)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.refresh_namings()
+            self.log_status(f"Naming convention '{naming_name}' updated successfully")
     
     def delete_template(self):
         """Delete selected template."""

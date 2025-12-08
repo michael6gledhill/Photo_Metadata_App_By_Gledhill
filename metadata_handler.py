@@ -299,6 +299,14 @@ class MetadataManager:
                 except Exception as e:
                     logger.warning(f"piexif delete error: {e}")
             
+            # Delete embedded XMP from JPEG files
+            if self._is_jpeg(temp_path):
+                try:
+                    self._remove_xmp_from_jpeg(temp_path)
+                    logger.info(f"Deleted XMP metadata from {Path(file_path).name}")
+                except Exception as e:
+                    logger.warning(f"XMP deletion error: {e}")
+            
             if success:
                 shutil.move(temp_path, file_path)
                 return True
@@ -315,6 +323,54 @@ class MetadataManager:
         """Check if file is a JPEG."""
         ext = Path(file_path).suffix.lower()
         return ext in {'.jpg', '.jpeg'}
+    
+    def _remove_xmp_from_jpeg(self, file_path: str) -> None:
+        """Remove embedded XMP metadata from a JPEG file."""
+        with open(file_path, 'rb') as f:
+            data = f.read()
+        
+        # Parse JPEG markers and rebuild without XMP APP1
+        new_data = b''
+        i = 0
+        while i < len(data):
+            if data[i:i+2] == b'\xff\xd8':  # SOI
+                new_data += data[i:i+2]
+                i += 2
+            elif data[i:i+2] == b'\xff\xd9':  # EOI
+                new_data += data[i:i+2]
+                i += 2
+            elif data[i] == 0xff and i + 1 < len(data):
+                marker = data[i+1]
+                # APP1 marker
+                if marker == 0xe1 and i + 3 < len(data):
+                    length = (data[i+2] << 8) | data[i+3]
+                    segment_data = data[i+4:i+2+length]
+                    # Check if it's XMP (starts with "http://ns.adobe.com/xap/1.0/\x00")
+                    if segment_data.startswith(b'http://ns.adobe.com/xap/1.0/\x00'):
+                        # Skip XMP APP1 marker
+                        i += 2 + length
+                    else:
+                        # Keep EXIF APP1 marker
+                        new_data += data[i:i+2+length]
+                        i += 2 + length
+                elif marker in [0xd0, 0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9]:  # RSTn, EOI
+                    new_data += data[i:i+2]
+                    i += 2
+                else:
+                    # Other markers with length field
+                    if i + 3 < len(data):
+                        length = (data[i+2] << 8) | data[i+3]
+                        new_data += data[i:i+2+length]
+                        i += 2 + length
+                    else:
+                        new_data += data[i:i+2]
+                        i += 2
+            else:
+                new_data += data[i:i+1]
+                i += 1
+        
+        with open(file_path, 'wb') as f:
+            f.write(new_data)
 
     def _build_xmp_packet(self, xmp_data: Dict[str, Any]) -> str:
         """Build a minimal XMP packet from a dict of fields."""

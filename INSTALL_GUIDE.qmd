@@ -47,7 +47,7 @@ You should now see a window with white or black text on a dark or light backgrou
 Copy this entire command (click the copy button in the top-right corner):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
+sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
 ```
 
 :::{.callout-tip}

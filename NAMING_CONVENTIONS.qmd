@@ -1,0 +1,642 @@
+---
+title: "Naming Conventions Guide"
+subtitle: "Photo Metadata Editor - Dynamic Filename Patterns"
+author: "Michael Gledhill"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    theme: cosmo
+  pdf:
+    toc: true
+    number-sections: true
+---
+
+# Overview
+
+Naming conventions in Photo Metadata Editor allow you to automatically rename files using dynamic patterns called **tokens**. Tokens are placeholders that get replaced with actual metadata values from your photos.
+
+For example, the pattern:
+```
+{userid}_{date}_{original_name}
+```
+
+Could become:
+```
+MGledhill_2025-12-08_IMG_1234.jpg
+```
+
+---
+
+# Quick Reference Table
+
+| Token Syntax | Description |
+|---|---|
+| `{date}` | Current date in YYYY-MM-DD format |
+| `{datetime:%FORMAT%}` | Custom formatted date/time |
+| `{title}` | Photo title from metadata |
+| `{description}` | Photo description from metadata |
+| `{creator}` | Creator/artist name from metadata |
+| `{camera_model}` | Camera model used |
+| `{lens_model}` | Lens model used |
+| `{sequence:N}` | Sequential numbering with padding |
+| `{original_name}` | Original filename without extension |
+| `{userid}` | Custom user identifier |
+| `{copyright}` | Copyright information |
+| `{rating}` | Photo rating (0-5 stars) |
+
+---
+
+# Detailed Token Reference
+
+## Date and Time Tokens
+
+### `{date}`
+
+**What it does:** Inserts the current date in ISO 8601 format (YYYY-MM-DD).
+
+**Output format:** `2025-12-08`
+
+**Use case:** When you want a standardized date format that sorts correctly.
+
+**Example pattern:**
+```
+{date}_{original_name}
+```
+
+**Example output:**
+```
+2025-12-08_vacation_photo.jpg
+```
+
+---
+
+### `{datetime:%FORMAT%}`
+
+**What it does:** Inserts a custom formatted date/time using Python's strftime format codes.
+
+**Format codes:**
+- `%Y` - 4-digit year (2025)
+- `%y` - 2-digit year (25)
+- `%m` - 2-digit month (01-12)
+- `%d` - 2-digit day (01-31)
+- `%H` - 24-hour format hour (00-23)
+- `%I` - 12-hour format hour (01-12)
+- `%M` - Minutes (00-59)
+- `%S` - Seconds (00-59)
+- `%p` - AM/PM
+- `%b` - Abbreviated month name (Jan, Feb, etc.)
+- `%B` - Full month name (January, February, etc.)
+- `%A` - Full weekday name (Monday, Tuesday, etc.)
+
+**Use case:** When you need a specific date/time format for your workflow.
+
+**Example patterns:**
+
+Simple date and time:
+```
+{datetime:%Y%m%d_%H%M%S}_{original_name}
+```
+Output: `20251208_143025_photo.jpg`
+
+Human-readable format:
+```
+{datetime:%Y-%m-%d_%I.%M%p}_{original_name}
+```
+Output: `2025-12-08_02.30PM_photo.jpg`
+
+Month and year folder structure:
+```
+{datetime:%Y/%B}/{original_name}
+```
+Output: `2025/December/photo.jpg`
+
+Compact timestamp:
+```
+{datetime:%y%m%d%H%M}_{original_name}
+```
+Output: `251208143025_photo.jpg`
+
+---
+
+## Metadata Tokens
+
+### `{title}`
+
+**What it does:** Inserts the photo title from EXIF `ImageDescription` or XMP `dc:title`.
+
+**Output format:** Text string, spaces preserved
+
+**Use case:** When photos have descriptive titles you want in the filename.
+
+**Example pattern:**
+```
+{date}_{title}
+```
+
+**Example output:**
+```
+2025-12-08_Sunset_at_Beach.jpg
+```
+
+**Notes:**
+- Returns empty string if no title exists
+- Special characters (/, \, :, etc.) are removed or replaced
+- Spaces are preserved by default
+
+---
+
+### `{description}`
+
+**What it does:** Inserts the photo description from XMP `dc:description`.
+
+**Output format:** Text string, truncated if too long
+
+**Use case:** When you want a brief description in the filename.
+
+**Example pattern:**
+```
+{userid}_{description}_{sequence:03d}
+```
+
+**Example output:**
+```
+MGledhill_Family_Reunion_001.jpg
+```
+
+**Notes:**
+- Automatically truncated to reasonable length for filenames
+- Useful for photo series with descriptions
+
+---
+
+### `{creator}`
+
+**What it does:** Inserts the photographer/artist name from EXIF `Artist` or XMP `dc:creator`.
+
+**Output format:** Text string
+
+**Use case:** When organizing photos by photographer in multi-photographer projects.
+
+**Example pattern:**
+```
+{creator}_{date}_{original_name}
+```
+
+**Example output:**
+```
+John_Doe_2025-12-08_portrait.jpg
+```
+
+---
+
+### `{copyright}`
+
+**What it does:** Inserts copyright information from EXIF `Copyright` or XMP `dc:rights`.
+
+**Output format:** Text string
+
+**Use case:** When embedding copyright owner in filename for rights management.
+
+**Example pattern:**
+```
+{date}_{title}_©{copyright}
+```
+
+**Example output:**
+```
+2025-12-08_Wedding_Shot_©Smith_Photography.jpg
+```
+
+---
+
+### `{rating}`
+
+**What it does:** Inserts the photo rating from XMP `xmp:Rating` (typically 0-5 stars).
+
+**Output format:** Single digit number
+
+**Use case:** When organizing photos by rating/quality.
+
+**Example pattern:**
+```
+{rating}star_{date}_{original_name}
+```
+
+**Example output:**
+```
+5star_2025-12-08_best_shot.jpg
+```
+
+---
+
+## Camera Information Tokens
+
+### `{camera_model}`
+
+**What it does:** Inserts the camera model from EXIF `Model` tag.
+
+**Output format:** Text string (manufacturer name often included)
+
+**Use case:** When organizing photos by camera body, especially useful for photographers with multiple cameras.
+
+**Example pattern:**
+```
+{camera_model}_{date}_{sequence:04d}
+```
+
+**Example output:**
+```
+Canon_EOS_R5_2025-12-08_0001.jpg
+```
+
+**Notes:**
+- Usually includes manufacturer name (Canon EOS R5, Nikon Z9, etc.)
+- Spaces and special characters are preserved
+
+---
+
+### `{lens_model}`
+
+**What it does:** Inserts the lens model from EXIF `LensModel` tag.
+
+**Output format:** Text string
+
+**Use case:** When testing different lenses or organizing by focal length/lens type.
+
+**Example pattern:**
+```
+{date}_{lens_model}_{original_name}
+```
+
+**Example output:**
+```
+2025-12-08_RF24-70mm_F2.8_L_IS_USM_test_shot.jpg
+```
+
+**Notes:**
+- Includes full lens designation
+- Useful for lens comparison projects
+
+---
+
+## Sequential and File Tokens
+
+### `{sequence:N}`
+
+**What it does:** Inserts an automatically incrementing number with zero-padding.
+
+**Format:** `{sequence:NNd}` where NN is the number of digits
+
+**Common formats:**
+- `{sequence:01d}` - Single digit: 1, 2, 3...
+- `{sequence:02d}` - Two digits: 01, 02, 03...
+- `{sequence:03d}` - Three digits: 001, 002, 003...
+- `{sequence:04d}` - Four digits: 0001, 0002, 0003...
+
+**Use case:** Creating numbered sequences of photos that sort correctly.
+
+**Example patterns:**
+
+Standard 3-digit sequence:
+```
+{userid}_{date}_{sequence:03d}
+```
+Output: `MGledhill_2025-12-08_001.jpg`
+
+4-digit sequence for large batches:
+```
+{datetime:%Y%m%d}_{sequence:04d}
+```
+Output: `20251208_0001.jpg`
+
+Named sequence:
+```
+{title}_img{sequence:02d}
+```
+Output: `Wedding_Reception_img01.jpg`
+
+**Notes:**
+- Counter resets for each batch operation
+- Zero-padding ensures proper alphabetical sorting
+- More digits = supports larger batches
+
+---
+
+### `{original_name}`
+
+**What it does:** Inserts the original filename without the file extension.
+
+**Output format:** Text string
+
+**Use case:** When you want to preserve part of the original filename while adding metadata.
+
+**Example pattern:**
+```
+{date}_{original_name}
+```
+
+**Example output:**
+```
+2025-12-08_IMG_1234.jpg
+```
+
+**Notes:**
+- Extension is NOT included (added automatically)
+- Preserves original camera-generated names
+- Useful when combining with other tokens
+
+---
+
+### `{userid}`
+
+**What it does:** Inserts a custom user identifier that you can set in the application.
+
+**Output format:** Text string (you define it)
+
+**Use case:** Adding your initials, company name, or project code to all files.
+
+**Example pattern:**
+```
+{userid}_{datetime:%Y%m%d}_{sequence:03d}
+```
+
+**Example output:**
+```
+MGledhill_20251208_001.jpg
+```
+
+**Notes:**
+- You set this value once in the app settings
+- Great for personal branding
+- Ideal for multi-user workflows
+
+---
+
+# Pattern Examples by Use Case
+
+## Personal Photography
+
+**Simple date-based:**
+```
+{date}_{original_name}
+→ 2025-12-08_IMG_1234.jpg
+```
+
+**Date with sequence:**
+```
+{datetime:%Y-%m-%d}_{sequence:03d}
+→ 2025-12-08_001.jpg
+```
+
+**Personal branding:**
+```
+{userid}_{date}_{title}
+→ JDoe_2025-12-08_Mountain_Sunrise.jpg
+```
+
+---
+
+## Professional Photography
+
+**Client + date + sequence:**
+```
+{userid}_Client_{date}_{sequence:04d}
+→ SmithPhoto_Client_2025-12-08_0001.jpg
+```
+
+**Event photography:**
+```
+{title}_{datetime:%Y%m%d}_{sequence:03d}
+→ Johnson_Wedding_20251208_001.jpg
+```
+
+**Timestamped deliverables:**
+```
+{datetime:%Y%m%d_%H%M%S}_{original_name}
+→ 20251208_143025_portrait.jpg
+```
+
+---
+
+## Archive and Organization
+
+**Year/Month structure:**
+```
+{datetime:%Y}/{datetime:%m}_{date}_{original_name}
+→ 2025/12_2025-12-08_vacation.jpg
+```
+
+**Camera-based organization:**
+```
+{camera_model}/{date}_{sequence:04d}
+→ Canon_EOS_R5/2025-12-08_0001.jpg
+```
+
+**Rating-based:**
+```
+Rating{rating}/{date}_{title}
+→ Rating5/2025-12-08_Best_Shot.jpg
+```
+
+---
+
+## Technical/Test Shots
+
+**Lens testing:**
+```
+{date}_{lens_model}_{sequence:02d}
+→ 2025-12-08_RF24-70mm_F2.8_01.jpg
+```
+
+**Camera comparison:**
+```
+{camera_model}_{datetime:%H%M%S}
+→ Sony_A7IV_143025.jpg
+```
+
+**Detailed timestamp:**
+```
+{datetime:%Y%m%d_%H%M%S}_{camera_model}
+→ 20251208_143025_Nikon_Z9.jpg
+```
+
+---
+
+# Tips and Best Practices
+
+## 1. Use Zero-Padding for Sequences
+
+**Good:**
+```
+{sequence:03d}  →  001, 002, ..., 099, 100
+```
+
+**Bad:**
+```
+{sequence:01d}  →  1, 2, ..., 9, 10 (sorts incorrectly)
+```
+
+## 2. Date Formats for Sorting
+
+For chronological sorting, use:
+```
+{datetime:%Y%m%d}  →  20251208
+```
+
+Not:
+```
+{datetime:%m-%d-%Y}  →  12-08-2025 (sorts incorrectly)
+```
+
+## 3. Avoid Special Characters
+
+Avoid these in patterns: `/ \ : * ? " < > |`
+
+Use underscores or hyphens instead:
+```
+{userid}_{date}  ✓
+{userid}/{date}  ✗ (creates subfolder)
+```
+
+## 4. Keep Filenames Reasonable Length
+
+Aim for under 60 characters total:
+```
+{datetime:%Y%m%d}_{sequence:03d}  ✓ (short)
+{datetime:%Y-%m-%d_%H:%M:%S}_{title}_{description}_{creator}  ✗ (too long)
+```
+
+## 5. Test Before Batch Processing
+
+Always test your naming convention on a few files first:
+- Use "Dry Run" mode
+- Check the preview
+- Verify sorting works as expected
+
+---
+
+# Common Patterns Cheat Sheet
+
+```
+# Minimal
+{date}_{sequence:03d}
+
+# Standard
+{userid}_{date}_{original_name}
+
+# Timestamped
+{datetime:%Y%m%d_%H%M%S}_{sequence:03d}
+
+# Descriptive
+{date}_{title}_{sequence:02d}
+
+# Professional
+{userid}_{title}_{datetime:%Y%m%d}_{sequence:04d}
+
+# Archive
+{datetime:%Y/%B/%d}_{original_name}
+
+# Technical
+{camera_model}_{lens_model}_{datetime:%Y%m%d_%H%M%S}
+```
+
+---
+
+# Troubleshooting
+
+## Token Not Replacing
+
+**Problem:** Token appears literally in filename (e.g., `{date}_photo.jpg`)
+
+**Solutions:**
+- Check spelling and formatting
+- Ensure curly braces are used: `{token}` not `(token)` or `[token]`
+- Verify token is supported (see reference table)
+
+## Empty Token Values
+
+**Problem:** Token gets replaced with nothing (e.g., `_photo.jpg` instead of `title_photo.jpg`)
+
+**Solutions:**
+- Check if metadata exists in the photo (use "View Metadata")
+- Add fallback text or use `{original_name}` as backup
+- Ensure metadata template was applied first
+
+## Invalid Filename Errors
+
+**Problem:** Files won't rename due to invalid characters
+
+**Solutions:**
+- Remove special characters: `/ \ : * ? " < > |`
+- Check datetime format doesn't include colons
+- Verify pattern doesn't create duplicate names
+
+## Files Not Sorting Correctly
+
+**Problem:** Files sort in wrong order (e.g., 1, 10, 2, 20...)
+
+**Solutions:**
+- Use zero-padding: `{sequence:03d}` instead of `{sequence:01d}`
+- Use YYYYMMDD date format for chronological sorting
+- Test sort order before applying to entire batch
+
+---
+
+# Advanced Techniques
+
+## Combining Multiple Tokens
+
+You can combine any tokens to create complex patterns:
+
+```
+{userid}_{camera_model}_{datetime:%Y%m%d}_{title}_{sequence:04d}
+```
+
+## Conditional Patterns
+
+While not directly supported, you can create different naming conventions for different scenarios:
+
+**Portrait Convention:**
+```
+Portrait_{creator}_{date}_{sequence:03d}
+```
+
+**Landscape Convention:**
+```
+Landscape_{location}_{datetime:%Y%m%d_%H%M}
+```
+
+## Organizing Into Folders
+
+Use the datetime token with `/` to create folder structures:
+
+```
+{datetime:%Y/%B}/{date}_{sequence:03d}
+→ 2025/December/2025-12-08_001.jpg
+```
+
+This creates year/month folders automatically!
+
+---
+
+:::{.callout-tip}
+## Save Your Patterns!
+
+Once you create a naming convention you like, save it as a template. You can:
+- Export it as JSON
+- Share it with team members
+- Import it on other computers
+:::
+
+---
+
+# Need Help?
+
+If you have questions about naming conventions or need help creating a custom pattern:
+
+1. Check the examples in this guide
+2. Use "Dry Run" mode to test safely
+3. View the preview before applying
+4. Check the [GitHub Issues](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues) for more examples

@@ -150,37 +150,82 @@ class TemplateDialog(QDialog):
         
         exif_data = {}
         for row in range(self.exif_table.rowCount()):
-            tag = self.exif_table.item(row, 0).text().strip()
-            value = self.exif_table.item(row, 1).text().strip()
-            if tag and value:
-                exif_data[tag] = value
+            tag = self.exif_table.item(row, 0)
+            value = self.exif_table.item(row, 1)
+            if tag and value and tag.text().strip() and value.text().strip():
+                exif_data[tag.text().strip()] = value.text().strip()
         
         xmp_data = {}
         for row in range(self.xmp_table.rowCount()):
-            prop = self.xmp_table.item(row, 0).text().strip()
-            value = self.xmp_table.item(row, 1).text().strip()
-            if prop and value:
-                xmp_data[prop] = value
+            prop = self.xmp_table.item(row, 0)
+            value = self.xmp_table.item(row, 1)
+            if prop and value and prop.text().strip() and value.text().strip():
+                xmp_data[prop.text().strip()] = value.text().strip()
         
         if not exif_data and not xmp_data:
             QMessageBox.warning(self, "Error", "Please add at least one EXIF tag or XMP property.")
             return
         
         if self.is_editing:
-            if self.template_manager.delete_template(name):
-                if self.template_manager.save_template(name, exif_data, xmp_data):
-                    QMessageBox.information(self, "Success", f"Template '{name}' updated!")
-                    self.accept()
+            # Check if renaming
+            new_name = self.rename_input.text().strip() if hasattr(self, 'rename_input') else ""
+            if new_name and new_name != name:
+                if self.template_manager.get_templates().get(new_name):
+                    QMessageBox.warning(self, "Error", f"Template '{new_name}' already exists.")
+                    return
+                # Delete old, save as new name
+                if self.template_manager.delete_template(name):
+                    if self.template_manager.save_template(new_name, exif_data, xmp_data):
+                        QMessageBox.information(self, "Success", f"Template renamed to '{new_name}' and updated!")
+                        self.accept()
+                    else:
+                        QMessageBox.critical(self, "Error", "Failed to save renamed template.")
                 else:
-                    QMessageBox.critical(self, "Error", "Failed to save template.")
+                    QMessageBox.critical(self, "Error", "Failed to rename template.")
             else:
-                QMessageBox.critical(self, "Error", "Failed to update template.")
+                # Update existing
+                if self.template_manager.delete_template(name):
+                    if self.template_manager.save_template(name, exif_data, xmp_data):
+                        QMessageBox.information(self, "Success", f"Template '{name}' updated!")
+                        self.accept()
+                    else:
+                        QMessageBox.critical(self, "Error", "Failed to save template.")
+                else:
+                    QMessageBox.critical(self, "Error", "Failed to update template.")
         else:
             if self.template_manager.save_template(name, exif_data, xmp_data):
                 QMessageBox.information(self, "Success", f"Template '{name}' saved!")
                 self.accept()
             else:
                 QMessageBox.critical(self, "Error", "Failed to save template.")
+    
+    def export_template(self):
+        """Export template as JSON file."""
+        name = self.name_input.text().strip()
+        templates = self.template_manager.get_templates()
+        
+        if name not in templates:
+            QMessageBox.warning(self, "Error", f"Template '{name}' not found.")
+            return
+        
+        template_data = templates[name]
+        export_data = {
+            "name": name,
+            "exif": template_data.get("exif", {}),
+            "xmp": template_data.get("xmp", {})
+        }
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Export Template", f"{name}.json", "JSON Files (*.json);;All Files (*)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'w') as f:
+                    json.dump(export_data, f, indent=2)
+                QMessageBox.information(self, "Success", f"Template exported to {Path(file_path).name}")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to export template: {str(e)}")
 
 
 class ImportDialog(QDialog):

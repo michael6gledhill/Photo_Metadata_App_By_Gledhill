@@ -51,6 +51,13 @@ class TemplateDialog(QDialog):
         if self.is_editing:
             self.name_input.setReadOnly(True)
         name_layout.addWidget(self.name_input)
+        
+        if self.is_editing:
+            self.rename_input = QLineEdit()
+            self.rename_input.setPlaceholderText("Enter new name to rename...")
+            name_layout.addWidget(QLabel("Rename to:"))
+            name_layout.addWidget(self.rename_input)
+        
         layout.addLayout(name_layout)
         
         layout.addWidget(QLabel("EXIF Tags:"))
@@ -87,6 +94,12 @@ class TemplateDialog(QDialog):
         cancel_btn = QPushButton("Cancel")
         cancel_btn.clicked.connect(self.reject)
         button_layout.addWidget(save_btn)
+        
+        if self.is_editing:
+            export_btn = QPushButton("Export as JSON")
+            export_btn.clicked.connect(self.export_template)
+            button_layout.addWidget(export_btn)
+        
         button_layout.addWidget(cancel_btn)
         layout.addLayout(button_layout)
         
@@ -276,6 +289,13 @@ class NamingDialog(QDialog):
         if self.is_editing:
             self.name_input.setReadOnly(True)
         name_layout.addWidget(self.name_input)
+        
+        if self.is_editing:
+            self.rename_input = QLineEdit()
+            self.rename_input.setPlaceholderText("Enter new name to rename...")
+            name_layout.addWidget(QLabel("Rename to:"))
+            name_layout.addWidget(self.rename_input)
+        
         layout.addLayout(name_layout)
         
         pattern_layout = QHBoxLayout()
@@ -296,6 +316,12 @@ class NamingDialog(QDialog):
         cancel_btn = QPushButton("Cancel")
         cancel_btn.clicked.connect(self.reject)
         button_layout.addWidget(save_btn)
+        
+        if self.is_editing:
+            export_btn = QPushButton("Export as JSON")
+            export_btn.clicked.connect(self.export_naming)
+            button_layout.addWidget(export_btn)
+        
         button_layout.addWidget(cancel_btn)
         layout.addLayout(button_layout)
         
@@ -317,20 +343,64 @@ class NamingDialog(QDialog):
             return
         
         if self.is_editing:
-            if self.template_manager.delete_naming(name):
-                if self.template_manager.save_naming(name, pattern):
-                    QMessageBox.information(self, "Success", f"Naming convention '{name}' updated!")
-                    self.accept()
+            # Check if renaming
+            new_name = self.rename_input.text().strip() if hasattr(self, 'rename_input') else ""
+            if new_name and new_name != name:
+                if self.template_manager.get_naming_conventions().get(new_name):
+                    QMessageBox.warning(self, "Error", f"Naming convention '{new_name}' already exists.")
+                    return
+                # Delete old, save as new name
+                if self.template_manager.delete_naming(name):
+                    if self.template_manager.save_naming(new_name, pattern):
+                        QMessageBox.information(self, "Success", f"Naming convention renamed to '{new_name}' and updated!")
+                        self.accept()
+                    else:
+                        QMessageBox.critical(self, "Error", "Failed to save renamed convention.")
                 else:
-                    QMessageBox.critical(self, "Error", "Failed to save.")
+                    QMessageBox.critical(self, "Error", "Failed to rename convention.")
             else:
-                QMessageBox.critical(self, "Error", "Failed to update.")
+                # Update existing
+                if self.template_manager.delete_naming(name):
+                    if self.template_manager.save_naming(name, pattern):
+                        QMessageBox.information(self, "Success", f"Naming convention '{name}' updated!")
+                        self.accept()
+                    else:
+                        QMessageBox.critical(self, "Error", "Failed to save.")
+                else:
+                    QMessageBox.critical(self, "Error", "Failed to update.")
         else:
             if self.template_manager.save_naming(name, pattern):
                 QMessageBox.information(self, "Success", f"Naming convention '{name}' saved!")
                 self.accept()
             else:
                 QMessageBox.critical(self, "Error", "Failed to save.")
+    
+    def export_naming(self):
+        """Export naming convention as JSON file."""
+        name = self.name_input.text().strip()
+        namings = self.template_manager.get_naming_conventions()
+        
+        if name not in namings:
+            QMessageBox.warning(self, "Error", f"Naming convention '{name}' not found.")
+            return
+        
+        naming_data = namings[name]
+        export_data = {
+            "name": name,
+            "pattern": naming_data.get("pattern", "")
+        }
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Export Naming Convention", f"{name}.json", "JSON Files (*.json);;All Files (*)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'w') as f:
+                    json.dump(export_data, f, indent=2)
+                QMessageBox.information(self, "Success", f"Naming convention exported to {Path(file_path).name}")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to export naming convention: {str(e)}")
 
 
 class MetadataViewDialog(QDialog):
@@ -509,6 +579,7 @@ class PhotoMetadataEditor(QMainWindow):
         template_btns = QHBoxLayout()
         template_btns.addWidget(QPushButton("Import", clicked=self.import_template))
         template_btns.addWidget(QPushButton("Edit", clicked=self.edit_template))
+        template_btns.addWidget(QPushButton("Export", clicked=self.export_template_main))
         template_btns.addWidget(QPushButton("Remove", clicked=self.delete_template))
         templates_layout.addLayout(template_btns)
         templates_group.setLayout(templates_layout)
@@ -524,6 +595,7 @@ class PhotoMetadataEditor(QMainWindow):
         naming_btns = QHBoxLayout()
         naming_btns.addWidget(QPushButton("Import", clicked=self.import_naming))
         naming_btns.addWidget(QPushButton("Edit", clicked=self.edit_naming))
+        naming_btns.addWidget(QPushButton("Export", clicked=self.export_naming_main))
         naming_btns.addWidget(QPushButton("Remove", clicked=self.delete_naming))
         naming_layout.addLayout(naming_btns)
         naming_group.setLayout(naming_layout)
@@ -669,6 +741,71 @@ class PhotoMetadataEditor(QMainWindow):
                 self.log_status(message)
             else:
                 QMessageBox.critical(self, "Import Failed", message)
+    
+    def export_template_main(self):
+        """Export selected template as JSON from main window."""
+        current_item = self.template_list.currentItem()
+        if not current_item:
+            QMessageBox.warning(self, "Warning", "Please select a template to export.")
+            return
+        
+        name = current_item.text()
+        templates = self.template_manager.get_templates()
+        
+        if name not in templates:
+            QMessageBox.warning(self, "Error", f"Template '{name}' not found.")
+            return
+        
+        template_data = templates[name]
+        export_data = {
+            "name": name,
+            "exif": template_data.get("exif", {}),
+            "xmp": template_data.get("xmp", {})
+        }
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Export Template", f"{name}.json", "JSON Files (*.json);;All Files (*)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'w') as f:
+                    json.dump(export_data, f, indent=2)
+                self.log_status(f"Template exported to {Path(file_path).name}")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to export template: {str(e)}")
+    
+    def export_naming_main(self):
+        """Export selected naming convention as JSON from main window."""
+        current_item = self.naming_list.currentItem()
+        if not current_item:
+            QMessageBox.warning(self, "Warning", "Please select a naming convention to export.")
+            return
+        
+        name = current_item.text()
+        namings = self.template_manager.get_naming_conventions()
+        
+        if name not in namings:
+            QMessageBox.warning(self, "Error", f"Naming convention '{name}' not found.")
+            return
+        
+        naming_data = namings[name]
+        export_data = {
+            "name": name,
+            "pattern": naming_data.get("pattern", "")
+        }
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Export Naming Convention", f"{name}.json", "JSON Files (*.json);;All Files (*)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'w') as f:
+                    json.dump(export_data, f, indent=2)
+                self.log_status(f"Naming convention exported to {Path(file_path).name}")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to export naming convention: {str(e)}")
     
     def delete_template(self):
         current_item = self.template_list.currentItem()

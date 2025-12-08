@@ -1,137 +1,146 @@
 # Photo Metadata Editor
 
-Edit EXIF and XMP metadata in your photos with an easy-to-use desktop app. Save templates, batch process, and organize your photo library.
+A professional macOS application for editing photo metadata (EXIF and XMP) and batch renaming files.
 
-## Quick Install
+## ⚡ Quick Install (macOS)
 
-**macOS/Linux/Windows:**
+Install with a single command:
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install.py | python3 -
+sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
 ```
 
-This installs everything and builds a macOS .app if applicable.
+This will:
+- Install dependencies (Git, Python 3)
+- Clone the repository
+- Build the macOS app
+- Install it to your Applications folder
 
-**Manual:**
+## Features
+
+- **EXIF Metadata Editing**: Edit standard EXIF tags (camera, lens, copyright, etc.)
+- **Embedded XMP Support**: Read and write XMP metadata directly in JPEG files
+- **Template System**: Create reusable metadata templates
+- **Batch Renaming**: Rename multiple files with custom patterns
+- **Drag & Drop**: Simple drag and drop file management
+- **Undo Support**: Undo last operation with automatic backups
+- **Import/Export**: Share templates and naming conventions as JSON
+
+## Manual Installation
+
+### Requirements
+- macOS 10.15 or later
+- Python 3.8 or later
+
+### Install from source:
+
 ```bash
+# Clone the repository
 git clone https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git
 cd Photo_Metadata_App_By_Gledhill
-pip install -r requirements.txt
+
+# Install dependencies
+pip3 install -r requirements.txt
+
+# Run the application
 python3 main.py
 ```
 
-## How to Use
+### Build as macOS App:
 
-### 1. Open Photos
-- Click "Open Files" or drag photos into the window
-- Works with JPEG, TIFF, PNG
+```bash
+# Install py2app
+pip3 install py2app
 
-### 2. Add Metadata
+# Build the app
+python3 setup.py py2app
 
-**Using Templates:**
-- Select a template from the dropdown (e.g., "Portrait Template")
-- Templates contain pre-configured EXIF and XMP fields
-- Click "Apply" to write metadata to your photos
+# The app will be in the dist/ folder
+# Copy it to Applications:
+cp -R "dist/Photo Metadata Editor.app" /Applications/
+```
 
-**Creating Custom Templates:**
-- Click "Manage Templates" → "Create Template"
-- Add EXIF fields (Artist, Copyright, etc.)
-- Add XMP fields (title, description, creator, subject, etc.)
-- Save with a name for reuse
+## Usage
 
-**Manual Entry:**
-- Use the EXIF and XMP tabs to add fields directly
-- EXIF: Artist, Copyright, ImageDescription, DateTimeOriginal, etc.
-- XMP: title, description, creator, subject, rights, Headline, DateCreated, etc.
+### Basic Workflow
 
-### 3. Supported Metadata Fields
+1. **Open Files**: Click "Open Files" or drag & drop images
+2. **Create Template**: Click "Create Template" to define metadata fields
+3. **Create Naming Convention**: Click "Create Naming" to define filename patterns
+4. **Select Template & Naming**: Choose from the lists on the right
+5. **Apply**: Click "APPLY TEMPLATE & RENAME"
 
-**EXIF (Camera/Technical Data):**
-- `Artist` - Photographer name
-- `Copyright` - Copyright notice
-- `ImageDescription` - Photo description
-- `DateTime` - Date/time modified
-- `DateTimeOriginal` - Date/time taken
-- `Make` / `Model` - Camera info
-- `UserComment` - Comments
+### Metadata Templates
 
-**XMP (Professional Metadata):**
-- `title` - Photo title
-- `description` - Detailed description
-- `creator` - Photographer/creator name(s)
-- `subject` - Keywords/tags (list)
-- `rights` - Rights/usage statement
-- `Headline` - Short headline (Photoshop)
-- `DateCreated` - Creation date (Photoshop)
-- `CreateDate` - Creation timestamp (XMP)
+Templates support:
+- **EXIF Tags**: Artist, Copyright, ImageDescription, Make, Model, LensModel, etc.
+- **XMP Properties**: 
+  - Dublin Core (dc:): title, creator, description, subject, rights
+  - Photoshop (photoshop:): Credit, AuthorsPosition, CaptionWriter
+  - XMP (xmp:): CreatorTool, Rating
 
-### 4. Examples
+### Naming Conventions
 
-**Portrait Photography:**
+Use tokens in your patterns:
+- `{date}` - Date in YYYY-MM-DD format
+- `{datetime:%Y%m%d_%H%M%S}` - Custom datetime format
+- `{title}` - XMP/EXIF title
+- `{camera_model}` - Camera model
+- `{sequence:03d}` - Sequential number (001, 002, etc.)
+- `{original_name}` - Original filename
+- `{userid}` - Custom user ID
+
+Example: `{userid}_{date}_{original_name}` → `MGledhill_2025-12-08_IMG_1234.jpg`
+
+### Import/Export Templates
+
+- **Export**: Edit a template/naming and click "Export as JSON"
+- **Import**: Click "Import" and select a JSON file or paste JSON
+
+JSON Format for templates:
 ```json
 {
-  "name": "Portrait Session",
+  "name": "My Template",
   "exif": {
-    "Artist": "Jane Photographer",
-    "Copyright": "© 2025 Jane Photographer"
+    "Artist": "John Doe",
+    "Copyright": "© 2025 John Doe"
   },
   "xmp": {
-    "creator": "Jane Photographer",
-    "subject": ["portrait", "professional"],
-    "Headline": "Professional Portrait Session"
+    "dc:creator": "John Doe",
+    "dc:rights": "© 2025 John Doe"
   }
 }
 ```
-
-**Travel Photography:**
-```json
-{
-  "name": "Travel Photos",
-  "exif": {
-    "Artist": "Your Name",
-    "ImageDescription": "Travel photography"
-  },
-  "xmp": {
-    "title": "Travel Adventure",
-    "description": "Photos from my trip",
-    "subject": ["travel", "adventure", "landscape"],
-    "rights": "All rights reserved"
-  }
-}
-```
-
-## Key Features
-
-- **Embedded XMP** - All XMP metadata is embedded directly in JPEG files (no sidecar files)
-- **EXIF Editing** - Full EXIF support for camera data, copyright, and more
-- **Templates** - Save and reuse metadata configurations
-- **Batch Processing** - Apply metadata to multiple files at once
-- **File Renaming** - Use patterns like `{date}_{title}_{sequence}`
-- **Safe Operations** - Atomic writes protect your original files
-
-## Requirements
-
-- Python 3.8+
-- PySide6 (GUI)
-- piexif (EXIF)
-- Pillow (images)
-
-Auto-installed by the installer.
 
 ## Troubleshooting
 
-**No metadata showing:**
-- Make sure your image has embedded XMP (this app reads embedded XMP only)
-- EXIF should always work for JPEG/TIFF files
+### Application won't open
+- Right-click the app → Open → Open (bypasses Gatekeeper)
+- Or: System Settings → Privacy & Security → Allow "Photo Metadata Editor"
 
-**Changes not saving:**
-- Check the status area for error messages
-- Ensure the file is not read-only
-- JPEGs support both EXIF and XMP; PNGs support XMP only
+### Metadata not saving
+- Ensure files are not read-only
+- Check you have write permissions for the directory
+- Try "View Metadata" to see current values
 
-**Need help?**
-- Check `test_app.py` to verify your installation
-- Review example templates in `example_templates/`
+### Build errors
+```bash
+# Clean build
+rm -rf build dist
+python3 setup.py py2app
+```
+
+## Uninstall
+
+Simply delete the app from your Applications folder, or run:
+```bash
+rm -rf "/Applications/Photo Metadata Editor.app"
+```
 
 ## License
 
-Free for personal and professional use.
+© 2025 Michael Gledhill
+
+## Support
+
+For issues or questions, please open an issue on GitHub.

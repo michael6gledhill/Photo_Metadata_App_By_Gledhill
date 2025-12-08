@@ -1,0 +1,13 @@
+project:
+  type: website
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+
+website:
+  title: "Photo Metadata Editor Docs"
+  navbar:
+    left:
+      - info.qmd

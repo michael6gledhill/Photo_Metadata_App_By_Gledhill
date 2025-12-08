@@ -1,6 +1,6 @@
 # Photo Metadata Editor
 
-A PySide6 desktop application for editing EXIF and XMP metadata in photos, with template support and flexible naming conventions.
+A professional PySide6 desktop application for editing EXIF and XMP metadata in photos. Includes template system, flexible naming conventions, and comprehensive metadata recommendations for different photography types.
 
 ## Quick Start
 
@@ -11,29 +11,38 @@ python3 photo_meta_editor.py
 
 ## Documentation
 
-**📖 Read the complete documentation on the [GitHub Pages site](https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/)**
+**📖 Full documentation available on [GitHub Pages](https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/)**
 
-The documentation includes:
-- **Home** - Welcome and feature overview
-- **Full Documentation** - Complete usage guide with examples
-- **Quick Start** - Get up and running in 5 minutes
-- **Setup Guide** - Detailed installation instructions
-- **Features** - Complete feature checklist
+Documentation covers:
+- Getting started and installation
+- Complete feature guide with examples
+- Metadata best practices for different photo types
+- EXIF and XMP field recommendations
+- Template examples for common workflows
+- Troubleshooting and support
 
-## Local Documentation (QMD Files)
+## Key Features
 
-- **[index.qmd](index.qmd)** - Homepage with quick links
-- **[Info.qmd](Info.qmd)** - Full feature documentation
+- **Dual Metadata Editing** - EXIF and XMP for JPEG, TIFF, PNG
+- **Smart Templates** - Pre-built and custom metadata templates
+- **Batch Processing** - Apply metadata to multiple files
+- **Flexible Naming** - Token-based renaming with collision handling
+- **Safe Operations** - Atomic writes, undo support, dry-run mode
+- **Metadata Recommendations** - Best practices for different photo types
 
-## Files
+## Local Documentation
+
+- **[index.qmd](index.qmd)** - Setup, quick start, features, troubleshooting
+- **[Info.qmd](Info.qmd)** - Complete guide, metadata recommendations, usage
+
+## Project Files
 
 - `photo_meta_editor.py` - Main application (1400+ lines)
 - `requirements.txt` - Python dependencies
 - `test_app.py` - Validation tests
 
-Run tests: `python3 test_app.py`
+Test: `python3 test_app.py` → ✅ Should pass all tests
 
 ## License
 
 Provided as-is for personal and professional use.
-

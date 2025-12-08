@@ -375,3 +375,298 @@ Common codes:
 ---
 
 **Questions?** Check the application's status bar and log output for detailed information about operations and errors.
+
+## Metadata Recommendations by Photography Type
+
+Properly tagged photos are valuable assets. Here are best practices for different photography styles using EXIF and XMP fields.
+
+### Portrait Photography
+
+**Recommended EXIF Fields:**
+- `Artist` - Photographer name
+- `Copyright` - Copyright notice (e.g., "© 2025 Jane Doe")
+- `ImageDescription` - Short description of the portrait
+
+**Recommended XMP Fields:**
+- `dc:creator` - Photographer/Artist name
+- `dc:description` - Detailed description
+- `photoshop:Headline` - Short headline
+- `photoshop:Credit` - Credit line
+- `xmpRights:UsageTerms` - Usage rights (e.g., "All rights reserved")
+
+**Example Template:**
+```json
+{
+  "name": "Portrait Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name. All rights reserved.",
+    "ImageDescription": "Professional portrait photography"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:description": "Professional portrait session",
+    "photoshop:Headline": "Portrait Session",
+    "photoshop:Credit": "Your Name",
+    "xmpRights:UsageTerms": "All rights reserved"
+  }
+}
+```
+
+### Travel Photography
+
+**Recommended EXIF Fields:**
+- `Artist` - Your name
+- `Copyright` - Copyright notice
+- `ImageDescription` - Location and context
+- `UserComment` - Trip details
+
+**Recommended XMP Fields:**
+- `dc:creator` - Photographer name
+- `dc:keywords` - Location, subject tags
+- `dc:description` - Detailed description
+- `photoshop:Location` - City, country
+- `Exif:DateTimeOriginal` - Date taken (auto-populated)
+
+**Example Template:**
+```json
+{
+  "name": "Travel Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name",
+    "ImageDescription": "Travel documentation"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:keywords": ["travel", "adventure", "photography"],
+    "dc:description": "Moment captured while traveling",
+    "photoshop:Location": "Location Name"
+  }
+}
+```
+
+### Landscape & Nature Photography
+
+**Recommended EXIF Fields:**
+- `Artist` - Photographer name
+- `Copyright` - Copyright notice
+- `ImageDescription` - Location and weather conditions
+- `UserComment` - Technical notes or story
+
+**Recommended XMP Fields:**
+- `dc:creator` - Photographer name
+- `dc:keywords` - Location, season, subject
+- `dc:subject` - Main subject (e.g., "Mountain landscape")
+- `dc:description` - Detailed scene description
+- `photoshop:Location` - Specific location
+- `lr:Rating` - Star rating (1-5)
+
+**Example Template:**
+```json
+{
+  "name": "Landscape Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name",
+    "ImageDescription": "Landscape photography"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:keywords": ["landscape", "nature", "scenic"],
+    "dc:subject": "Mountain landscape at sunset",
+    "dc:description": "Golden hour landscape photography",
+    "photoshop:Location": "Mountain Peak, State, Country"
+  }
+}
+```
+
+### Event Photography
+
+**Recommended EXIF Fields:**
+- `Artist` - Photographer name
+- `Copyright` - Copyright notice
+- `ImageDescription` - Event name and date
+
+**Recommended XMP Fields:**
+- `dc:creator` - Photographer name
+- `dc:keywords` - Event type, people, location
+- `dc:subject` - Event details
+- `dc:description` - Full event description
+- `photoshop:DateCreated` - Event date
+
+**Example Template:**
+```json
+{
+  "name": "Event Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name",
+    "ImageDescription": "Event photography"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:keywords": ["event", "wedding", "celebration"],
+    "dc:subject": "Event Name - Date",
+    "dc:description": "Event photography and coverage"
+  }
+}
+```
+
+### Stock Photography
+
+**Recommended EXIF Fields:**
+- `Artist` - Photographer name
+- `Copyright` - Copyright notice
+- `ImageDescription` - Subject and key details
+
+**Recommended XMP Fields:**
+- `dc:creator` - Photographer name
+- `dc:keywords` - Multiple relevant keywords (important!)
+- `dc:description` - Detailed description for search
+- `photoshop:Headline` - Selling headline
+- `xmpRights:UsageTerms` - License type
+- `dc:rights` - Rights holder
+
+**Example Template:**
+```json
+{
+  "name": "Stock Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name",
+    "ImageDescription": "Stock photo description"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
+    "dc:description": "Detailed description for searchability",
+    "photoshop:Headline": "Selling headline",
+    "xmpRights:UsageTerms": "Licensed under Creative Commons or custom license"
+  }
+}
+```
+
+### Product Photography
+
+**Recommended EXIF Fields:**
+- `Artist` - Photographer/Studio name
+- `Copyright` - Copyright notice
+- `ImageDescription` - Product name and details
+
+**Recommended XMP Fields:**
+- `dc:creator` - Photographer/Studio name
+- `dc:keywords` - Product category, brand
+- `dc:subject` - Product name
+- `dc:description` - Product features and benefits
+- `photoshop:Headline` - Product title
+
+**Example Template:**
+```json
+{
+  "name": "Product Photography",
+  "exif": {
+    "Artist": "Your Studio",
+    "Copyright": "© 2025 Your Studio",
+    "ImageDescription": "Product photography"
+  },
+  "xmp": {
+    "dc:creator": "Your Studio",
+    "dc:keywords": ["product", "commercial", "ecommerce"],
+    "dc:subject": "Product Name",
+    "dc:description": "Professional product photography for commerce"
+  }
+}
+```
+
+## Essential Metadata Fields Reference
+
+### Core EXIF Fields
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `Artist` | Photographer name | "Jane Doe" |
+| `Copyright` | Copyright statement | "© 2025 Jane Doe" |
+| `ImageDescription` | Photo description | "Portrait session in studio" |
+| `UserComment` | Additional notes | "Shot at golden hour" |
+| `Software` | Editing software | "Photoshop, Lightroom" |
+
+### Core XMP Fields
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `dc:creator` | Creator/Author name | "Jane Doe" |
+| `dc:keywords` | Searchable keywords | "portrait, studio, professional" |
+| `dc:description` | Detailed description | "Professional portrait of Jane" |
+| `dc:subject` | Main subject | "Portrait" |
+| `dc:rights` | Rights holder | "Jane Doe" |
+| `photoshop:Headline` | Short headline | "Portrait Session 2025" |
+| `photoshop:Credit` | Credit line | "Photo by Jane Doe" |
+| `photoshop:Location` | Photo location | "New York, USA" |
+| `xmpRights:UsageTerms` | Usage rights | "All rights reserved" |
+
+## Best Practices for Metadata
+
+### ✅ Do's
+
+- **Use consistent naming**: Keep artist/author names consistent across photos
+- **Add meaningful keywords**: Make photos searchable with relevant tags
+- **Include location data**: Help organize and remember where photos were taken
+- **Add copyright info**: Protect your work with proper copyright statements
+- **Describe your work**: Write detailed descriptions for context and archives
+- **Update regularly**: Review and update metadata periodically
+- **Use templates**: Create templates for repeated photo types to save time
+- **Include dates**: Ensure photos have accurate capture dates
+
+### ❌ Don'ts
+
+- **Don't leave metadata blank**: Empty fields reduce discoverability
+- **Don't use inconsistent formats**: Keep naming conventions consistent
+- **Don't expose personal info**: Avoid addresses, phone numbers in public photos
+- **Don't forget metadata on edits**: Reapply metadata after editing
+- **Don't use generic descriptions**: Be specific and descriptive
+- **Don't forget copyright**: Always include copyright for important work
+- **Don't mix languages**: Keep metadata language consistent
+
+## Workflow Examples
+
+### Quick Template for Daily Photography
+
+Create a template with your standard info:
+```json
+{
+  "name": "Daily Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:rights": "Your Name"
+  }
+}
+```
+
+Then add specific details per session using naming patterns:
+- `{date}_{location}_{sequence:03d}`
+
+### Batch Processing Workflow
+
+1. Take photos in a session
+2. Review and select keepers
+3. Create location-specific template with keywords
+4. Apply template to all files in batch
+5. Rename using date + location pattern
+6. Archive with consistent naming
+
+### Archive Organization
+
+Use templates to ensure every photo has:
+- Creator/Artist info
+- Copyright notice
+- Keywords for searching
+- Description for context
+- Date information
+
+This makes photos valuable for future reference and licensing.
+

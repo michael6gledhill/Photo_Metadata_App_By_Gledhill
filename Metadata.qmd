@@ -17,43 +17,54 @@ Metadata is information about your photos: who took them, when, where, copyright
 
 This app edits two types of metadata:
 
-## EXIF
+## EXIF Fields
 
-Standard format embedded in camera photos. Includes:
-- **Artist** - Photographer name
-- **Copyright** - Copyright notice (e.g., "© 2025 Jane Doe")
-- **ImageDescription** - What the photo shows
-- **UserComment** - Additional notes
-- **Software** - Editing software used
+Standard format embedded in camera photos. All available fields:
 
-Example:
-```
-Artist: Jane Doe
-Copyright: © 2025 Jane Doe
-ImageDescription: Portrait session at studio
-```
+| Field | Description | Example |
+|-------|-------------|---------|
+| **Artist** | Photographer/creator name | `Jane Doe` |
+| **Copyright** | Copyright notice | `© 2025 Jane Doe` |
+| **ImageDescription** | What the photo shows | `Portrait session at studio` |
+| **UserComment** | Additional notes or comments | `Shot with 50mm lens, f/1.8` |
+| **Software** | Software used to edit | `Adobe Photoshop 2025` |
+| **Make** | Camera manufacturer | `Canon` |
+| **Model** | Camera model | `EOS R5` |
+| **DateTime** | Date/time photo taken | `2025:12:08 14:30:00` |
+| **DateTimeOriginal** | Original capture date/time | `2025:12:08 14:30:00` |
+| **DateTimeDigitized** | Digitization date/time | `2025:12:08 14:30:00` |
 
-## XMP
+**Most commonly used:** Artist, Copyright, ImageDescription
 
-Flexible format for additional metadata. Includes:
-- **dc:creator** - Creator/photographer name
-- **dc:keywords** - Searchable tags (comma-separated)
-- **dc:description** - Detailed description
-- **dc:subject** - Main subject
-- **dc:rights** - Rights holder
-- **photoshop:Headline** - Short title
-- **photoshop:Credit** - Photo credit line
-- **photoshop:Location** - Photo location
-- **xmpRights:UsageTerms** - License type
+## XMP Fields
 
-Example:
-```
-dc:creator: Jane Doe
-dc:keywords: portrait, studio, professional
-dc:description: Professional portrait session, studio lighting
-dc:subject: Portrait Photography
-dc:rights: Jane Doe
-```
+Flexible format for extensive metadata. All available fields:
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| **dc:creator** | Creator/photographer name | `Jane Doe` |
+| **dc:title** | Photo title | `Sunset Over Mountains` |
+| **dc:description** | Detailed description | `Landscape photo at golden hour` |
+| **dc:subject** | Main subject/category | `Landscape Photography` |
+| **dc:rights** | Rights holder/copyright | `Jane Doe` |
+| **dc:keywords** | Searchable tags (comma-separated) | `landscape, sunset, mountains, nature` |
+| **dc:format** | File format | `image/jpeg` |
+| **photoshop:Headline** | Short title/headline | `Mountain Sunset` |
+| **photoshop:Credit** | Photo credit line | `Photo by Jane Doe` |
+| **photoshop:Source** | Source/origin | `Jane Doe Photography` |
+| **photoshop:City** | City where taken | `Aspen` |
+| **photoshop:State** | State/province | `Colorado` |
+| **photoshop:Country** | Country | `USA` |
+| **photoshop:Location** | Specific location | `Maroon Bells, Aspen, CO` |
+| **photoshop:CaptionWriter** | Caption author | `Jane Doe` |
+| **photoshop:Instructions** | Usage instructions | `Credit required` |
+| **xmpRights:UsageTerms** | License/usage terms | `Creative Commons BY-SA` |
+| **xmpRights:WebStatement** | Rights info URL | `https://example.com/rights` |
+| **Iptc4xmpCore:IntellectualGenre** | Genre/category | `Landscape` |
+| **Iptc4xmpCore:Location** | Location shown | `Maroon Bells` |
+| **Iptc4xmpCore:CountryCode** | ISO country code | `US` |
+
+**Most commonly used:** dc:creator, dc:keywords, dc:description, dc:rights, photoshop:Location
 
 ## Creating Templates
 

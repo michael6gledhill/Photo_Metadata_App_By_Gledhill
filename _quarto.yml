@@ -16,16 +16,12 @@ website:
   
   navbar:
     left:
-      - href: index.qmd
-        text: "Home"
-      - href: Install.qmd
+      - href: INSTALL_GUIDE.qmd
         text: "Install"
-      - href: Metadata.qmd
+      - href: METADATA_GUIDE.qmd
         text: "Metadata"
-      - href: Naming.qmd
+      - href: NAMING_CONVENTIONS.qmd
         text: "Naming"
-      - href: Usage.qmd
-        text: "How to Use"
     right:
       - href: https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill
         text: "GitHub"
@@ -37,11 +33,9 @@ website:
         - text: "Documentation"
           section: "docs"
           contents:
-            - href: Install.qmd
+            - href: INSTALL_GUIDE.qmd
               text: "Installation"
-            - href: Metadata.qmd
+            - href: METADATA_GUIDE.qmd
               text: "Metadata"
-            - href: Naming.qmd
+            - href: NAMING_CONVENTIONS.qmd
               text: "Naming Conventions"
-            - href: Usage.qmd
-              text: "How to Use"

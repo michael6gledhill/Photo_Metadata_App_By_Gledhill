@@ -34,10 +34,12 @@ python3 install.py
 - ✓ Verifies all files are present
 - ✓ (macOS only) Optionally builds a .app bundle
 
-**Build macOS App:**
+**Build macOS App (with icon):**
 ```bash
 python3 install.py --build-app
 ```
+
+This creates `dist/Photo Metadata Editor.app` with a generated "M" icon and includes a `storage/` folder for JSON templates.
 
 The installer is safe for students and hobbyists:
 - Never requires sudo or administrator privileges

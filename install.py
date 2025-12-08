@@ -36,6 +36,7 @@ import subprocess
 import platform
 import shutil
 import argparse
+import tempfile
 from pathlib import Path
 from typing import Tuple, Optional, List
 
@@ -48,13 +49,15 @@ REPO_URL = "https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill"
 REPO_NAME = "Photo_Metadata_App_By_Gledhill"
 MAIN_SCRIPT = "photo_meta_editor.py"
 REQUIREMENTS_FILE = "requirements.txt"
+ICON_REL_PATH = Path("assets") / "icon.icns"
 
 # Minimal list of files/folders needed for the app to run
 ESSENTIAL_FILES = [
     MAIN_SCRIPT,
     REQUIREMENTS_FILE,
     "example_templates/",
-    "test_app.py"
+    "test_app.py",
+    "storage/.keep",
 ]
 
 # Color codes for terminal output (works on most terminals)
@@ -139,6 +142,90 @@ def run_command(cmd: List[str], cwd: Optional[Path] = None, check: bool = True) 
         return False, e.stderr.strip()
     except Exception as e:
         return False, str(e)
+
+
+def ensure_storage_folder(repo_path: Path):
+    """Ensure storage folder exists (for bundled JSON files)."""
+    storage_dir = repo_path / 'storage'
+    storage_dir.mkdir(parents=True, exist_ok=True)
+    keep_file = storage_dir / '.keep'
+    if not keep_file.exists():
+        keep_file.write_text('Placeholder to keep storage folder in bundle\n')
+
+
+def generate_mac_icon(repo_path: Path) -> bool:
+    """Generate a simple macOS .icns with an 'M' logo if missing.
+
+    Uses Pillow to draw a letter on a colored background, then iconutil to
+    package it into an .icns. Works only on macOS. If iconutil is missing,
+    this will skip with a warning.
+    """
+    if platform.system() != "Darwin":
+        return False
+
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        print_warning("Pillow not available; cannot auto-generate icon")
+        return False
+
+    # Check iconutil availability
+    success, _ = run_command(['which', 'iconutil'], check=False)
+    if not success:
+        print_warning("iconutil not available; skipping icon generation")
+        return False
+
+    assets_dir = repo_path / 'assets'
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    icon_path = assets_dir / 'icon.icns'
+
+    base_size = 1024
+    background = (15, 48, 92)  # dark navy
+    foreground = (255, 255, 255)
+
+    # Create base image with centered 'M'
+    img = Image.new('RGBA', (base_size, base_size), background)
+    draw = ImageDraw.Draw(img)
+    try:
+        font = ImageFont.truetype("Arial.ttf", 720)
+    except Exception:
+        font = ImageFont.load_default()
+    text = "M"
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_w = text_bbox[2] - text_bbox[0]
+    text_h = text_bbox[3] - text_bbox[1]
+    draw.text(((base_size - text_w) / 2, (base_size - text_h) / 2), text, fill=foreground, font=font)
+
+    # Create iconset directory
+    with tempfile.TemporaryDirectory() as tmpdir:
+        iconset = Path(tmpdir) / 'icon.iconset'
+        iconset.mkdir(parents=True, exist_ok=True)
+
+        sizes = [
+            (16, 1), (16, 2),
+            (32, 1), (32, 2),
+            (128, 1), (128, 2),
+            (256, 1), (256, 2),
+            (512, 1), (512, 2),
+            (1024, 1)
+        ]
+
+        for size, scale in sizes:
+            scaled = img.resize((size * scale, size * scale), Image.LANCZOS)
+            name = f"icon_{size}x{size}" + ("@2x" if scale == 2 else "") + ".png"
+            scaled.save(iconset / name)
+
+        # Build icns
+        success, output = run_command([
+            'iconutil', '-c', 'icns', '-o', str(icon_path), str(iconset)
+        ], check=False)
+
+        if success and icon_path.exists():
+            print_success(f"Generated icon: {icon_path}")
+            return True
+        else:
+            print_warning(f"iconutil failed: {output}")
+            return False
 
 
 def get_system_info() -> dict:
@@ -491,6 +578,13 @@ def build_macos_app(repo_path: Path) -> bool:
     if not setup_path.exists():
         if not create_setup_py(repo_path):
             return False
+
+    # Ensure icon exists (auto-generate simple M logo if missing)
+    icon_path = repo_path / ICON_REL_PATH
+    if not icon_path.exists():
+        generate_mac_icon(repo_path)
+    if not icon_path.exists():
+        print_warning("Icon file missing; build will proceed without custom icon")
     
     print_info("Building .app bundle (this may take a few minutes)...")
     
@@ -598,6 +692,7 @@ def main():
     
     # Step 5: Verify files
     print_header("Step 5: Verifying Files")
+    ensure_storage_folder(repo_path)
     if not verify_essential_files(repo_path):
         print_error("Some essential files are missing")
         print_warning("The application may not work correctly")

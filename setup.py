@@ -20,6 +20,7 @@ Requirements:
 """
 
 from setuptools import setup
+from pathlib import Path
 
 # Main application script
 APP = ['photo_meta_editor.py']
@@ -40,9 +41,16 @@ DATA_FILES = [
         'example_templates/yearmonth_title_seq.json',
         'example_templates/README.md'
     ]),
+    # Storage folder inside app bundle for user JSON (metadata/naming) seeds
+    ('storage', [
+        'storage/.keep'
+    ]),
 ]
 
 # py2app options
+ICON_FILE = 'assets/icon.icns'
+ICON_FILE = ICON_FILE if Path(ICON_FILE).exists() else None
+
 OPTIONS = {
     # App behavior
     'argv_emulation': False,  # Don't emulate command-line arguments (not needed for GUI app)
@@ -50,7 +58,7 @@ OPTIONS = {
     'optimize': 2,  # Optimize Python bytecode
     
     # Icon (optional - add if you create an .icns file)
-    'iconfile': None,  # Set to 'icon.icns' if you create one
+    'iconfile': ICON_FILE,  # Uses generated icon when present
     
     # Bundle metadata (shown in Finder, About dialog, etc.)
     'plist': {

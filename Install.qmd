@@ -31,7 +31,7 @@ What it does:
 - Checks for Git, Python, and pip (prints instructions if missing)
 - Downloads/updates the app repo
 - Installs Python dependencies
-- (macOS optional) You can add `--build-app` to also build a .app bundle
+- (macOS optional) Add `--build-app` to also build a .app bundle (auto-generates an "M" icon)
 
 Example (macOS app build):
 ```bash
@@ -46,6 +46,8 @@ After the installer finishes, the app lives in your home directory:
 cd ~/Photo_Metadata_App_By_Gledhill
 python3 photo_meta_editor.py
 ```
+
+If you built the macOS app, you'll also get `dist/Photo Metadata Editor.app` with the custom icon and a bundled `storage/` folder for JSON templates.
 
 ## If Something Is Missing
 

@@ -65,8 +65,8 @@ from PySide6.QtWidgets import (
     QLineEdit, QTableWidget, QTableWidgetItem, QComboBox, QSpinBox, QCheckBox,
     QScrollArea, QGroupBox, QFormLayout, QTabWidget
 )
-from PySide6.QtCore import Qt, QSize, QMimeData, QPoint, QTimer
-from PySide6.QtGui import QIcon, QColor, QDragEnterEvent, QDropEvent, QFont
+from PySide6.QtCore import Qt, QSize, QMimeData, QPoint, QTimer, QItemSelectionModel
+from PySide6.QtGui import QIcon, QColor, QDragEnterEvent, QDropEvent, QFont, QPixmap
 
 # Optional imports for metadata handling
 try:
@@ -146,7 +146,17 @@ class MetadataManager:
             if result.returncode == 0:
                 data = json.loads(result.stdout)
                 if data:
-                    return {'exif': data[0], 'xmp': {}}
+                    raw = data[0]
+                    exif = {}
+                    xmp = {}
+                    for key, value in raw.items():
+                        if key == 'SourceFile':
+                            continue
+                        if key.lower().startswith('xmp'):
+                            xmp[key] = value
+                        else:
+                            exif[key] = value
+                    return {'exif': exif, 'xmp': xmp}
         except Exception as e:
             logger.warning(f"exiftool error: {e}")
         
@@ -231,20 +241,29 @@ class MetadataManager:
         """Write metadata using exiftool."""
         try:
             cmd = ['exiftool', '-overwrite_original']
-            
+
+            # If not merging, clear everything first. If merging, keep existing metadata.
             if not merge:
-                cmd.append('-all=')  # Clear all metadata first
-            
-            # Add EXIF tags
+                cmd.append('-all=')
+
+            # Add EXIF tags (explicit EXIF group)
             if exif_data:
                 for key, value in exif_data.items():
-                    cmd.append(f'-{key}={value}')
-            
-            # Add XMP tags
+                    if isinstance(value, (list, tuple)):
+                        value = ', '.join(map(str, value))
+                    cmd.append(f'-EXIF:{key}={value}')
+
+            # Add XMP tags (map dc:creator -> XMP-dc:creator)
             if xmp_data:
                 for key, value in xmp_data.items():
-                    cmd.append(f'-{key}={value}')
-            
+                    if isinstance(value, (list, tuple)):
+                        value = ', '.join(map(str, value))
+                    if ':' in key:
+                        prefix, prop = key.split(':', 1)
+                        cmd.append(f'-XMP-{prefix}:{prop}={value}')
+                    else:
+                        cmd.append(f'-XMP:{key}={value}')
+
             cmd.append(file_path)
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
@@ -260,12 +279,40 @@ class MetadataManager:
             # Write EXIF using piexif
             if HAS_PIEXIF and exif_data:
                 try:
-                    exif_dict = piexif.load(file_path) if merge else {"0th": {}, "Exif": {}, "GPS": {}}
-                    
+                    exif_dict = piexif.load(file_path) if merge else {"0th": {}, "Exif": {}, "GPS": {}, "1st": {}, "thumbnail": None}
+
+                    # Map common tag names to piexif constants
+                    tag_map = {
+                        "Artist": ("0th", piexif.ImageIFD.Artist),
+                        "Copyright": ("0th", piexif.ImageIFD.Copyright),
+                        "ImageDescription": ("0th", piexif.ImageIFD.ImageDescription),
+                        "Software": ("0th", piexif.ImageIFD.Software),
+                        "DateTime": ("0th", piexif.ImageIFD.DateTime),
+                        "DateTimeOriginal": ("Exif", piexif.ExifIFD.DateTimeOriginal),
+                        "DateTimeDigitized": ("Exif", piexif.ExifIFD.DateTimeDigitized),
+                        "Make": ("0th", piexif.ImageIFD.Make),
+                        "Model": ("0th", piexif.ImageIFD.Model),
+                        "UserComment": ("Exif", piexif.ExifIFD.UserComment),
+                    }
+
                     for key, value in exif_data.items():
-                        # Simplified EXIF writing - in production would need tag mapping
-                        pass
-                    
+                        if key in tag_map:
+                            if isinstance(value, str):
+                                try:
+                                    value_bytes = value.encode('utf-8')
+                                except Exception:
+                                    value_bytes = str(value).encode('utf-8', errors='ignore')
+                            else:
+                                value_bytes = value
+                            if isinstance(value_bytes, bytes) and key != "UserComment":
+                                # Most EXIF ascii fields expect bytes ending with null; piexif handles raw bytes
+                                pass
+                            if key == "UserComment" and isinstance(value_bytes, bytes):
+                                # UserComment should start with charset code; use ASCII prefix
+                                value_bytes = b"ASCII\x00\x00\x00" + value_bytes
+                            ifd_name, tag_id = tag_map[key]
+                            exif_dict[ifd_name][tag_id] = value_bytes
+
                     piexif.insert(piexif.dump(exif_dict), file_path)
                 except Exception as e:
                     logger.warning(f"piexif write error: {e}")
@@ -276,6 +323,9 @@ class MetadataManager:
                     xmp = XMPMeta.from_file(file_path) if merge else XMPMeta()
                     
                     for key, value in xmp_data.items():
+                        # Normalize lists to comma-separated strings for simplicity
+                        if isinstance(value, (list, tuple)):
+                            value = ', '.join(map(str, value))
                         xmp[key] = value
                     
                     xmp.serialize_to_file(file_path)
@@ -1126,6 +1176,7 @@ class PhotoMetadataEditor(QMainWindow):
         self.selected_template = None
         self.selected_naming = None
         self.last_operation = None
+        self.preview_index = 0
         
         # Build UI
         self.init_ui()
@@ -1151,6 +1202,7 @@ class PhotoMetadataEditor(QMainWindow):
         self.file_list_widget = QListWidget()
         self.file_list_widget.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
         self.file_list_widget.setMaximumHeight(100)
+        self.file_list_widget.itemSelectionChanged.connect(self.update_preview)
         
         file_layout.addWidget(self.file_list_widget)
         
@@ -1207,6 +1259,29 @@ class PhotoMetadataEditor(QMainWindow):
         
         options_group.setLayout(options_layout)
         left_layout.addWidget(options_group)
+
+        # Image Preview (selected file)
+        preview_image_group = QGroupBox("Image Preview")
+        preview_image_layout = QVBoxLayout()
+        self.image_preview_label = QLabel("No image selected")
+        self.image_preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.image_preview_label.setMinimumHeight(180)
+        self.image_preview_label.setStyleSheet("border: 1px solid #ccc; background: #fafafa;")
+        self.image_preview_label.setScaledContents(False)
+        preview_image_layout.addWidget(self.image_preview_label)
+
+        nav_layout = QHBoxLayout()
+        self.prev_btn = QPushButton("Prev")
+        self.prev_btn.clicked.connect(self.preview_prev)
+        nav_layout.addWidget(self.prev_btn)
+
+        self.next_btn = QPushButton("Next")
+        self.next_btn.clicked.connect(self.preview_next)
+        nav_layout.addWidget(self.next_btn)
+
+        preview_image_layout.addLayout(nav_layout)
+        preview_image_group.setLayout(preview_image_layout)
+        left_layout.addWidget(preview_image_group)
         
         left_layout.addStretch()
         left_panel.setLayout(left_layout)
@@ -1364,12 +1439,14 @@ class PhotoMetadataEditor(QMainWindow):
                     self.file_list_widget.addItem(item)
         
         self.log_status(f"Added {len(files)} file(s)")
+        self.preview_index = 0
         self.update_preview()
     
     def clear_files(self):
         """Clear all selected files."""
         self.selected_files.clear()
         self.file_list_widget.clear()
+        self.preview_index = 0
         self.update_preview()
     
     def create_template(self):
@@ -1532,10 +1609,79 @@ class PhotoMetadataEditor(QMainWindow):
         conventions = self.template_manager.get_naming_conventions()
         for name in conventions.keys():
             self.naming_list.addItem(name)
+
+    def _get_primary_file(self) -> Optional[str]:
+        """Return the currently selected file path or fallback to first in list."""
+        if not self.selected_files:
+            return None
+        # Clamp index
+        self.preview_index = max(0, min(self.preview_index, len(self.selected_files) - 1))
+        file_path = self.selected_files[self.preview_index]
+        # Sync selection in the list widget
+        for i in range(self.file_list_widget.count()):
+            item = self.file_list_widget.item(i)
+            if item.data(Qt.ItemDataRole.UserRole) == file_path:
+                self.file_list_widget.setCurrentItem(item, QItemSelectionModel.ClearAndSelect)
+                break
+        return file_path
+
+    def _update_image_preview(self):
+        """Update the image preview based on the selected file."""
+        file_path = self._get_primary_file()
+        if not file_path:
+            self.image_preview_label.setText("No image selected")
+            self.image_preview_label.setPixmap(QPixmap())
+            self.image_preview_label.setToolTip("")
+            return
+
+        pix = QPixmap(file_path)
+        if pix.isNull():
+            self.image_preview_label.setText("Preview unavailable")
+            self.image_preview_label.setPixmap(QPixmap())
+            self.image_preview_label.setToolTip("")
+            return
+
+        # Do not upscale; only scale down if larger than the preview area
+        target_size = self.image_preview_label.size()
+        if pix.width() > target_size.width() or pix.height() > target_size.height():
+            pix = pix.scaled(target_size, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+
+        self.image_preview_label.setPixmap(pix)
+        self.image_preview_label.setText("")
+
+        # Tooltip with metadata for this image
+        metadata = self.metadata_manager.get_metadata(file_path)
+        tooltip_lines = [f"File: {Path(file_path).name}"]
+        exif = metadata.get('exif', {})
+        xmp = metadata.get('xmp', {})
+        for key in ['Artist', 'Model', 'DateTime', 'ImageDescription']:
+            if key in exif:
+                tooltip_lines.append(f"EXIF {key}: {exif[key]}")
+        for key in ['dc:creator', 'dc:description', 'photoshop:Headline']:
+            if key in xmp:
+                tooltip_lines.append(f"XMP {key}: {xmp[key]}")
+        self.image_preview_label.setToolTip("\n".join(tooltip_lines))
+
+    def preview_next(self):
+        """Show next selected file in preview."""
+        if not self.selected_files:
+            return
+        self.preview_index = (self.preview_index + 1) % len(self.selected_files)
+        self.update_preview()
+
+    def preview_prev(self):
+        """Show previous selected file in preview."""
+        if not self.selected_files:
+            return
+        self.preview_index = (self.preview_index - 1) % len(self.selected_files)
+        self.update_preview()
     
     def update_preview(self):
         """Update preview of template and naming."""
         preview = []
+
+        # Update image preview pane
+        self._update_image_preview()
         
         if self.selected_template:
             templates = self.template_manager.get_templates()
@@ -1548,7 +1694,8 @@ class PhotoMetadataEditor(QMainWindow):
             for key, value in template.get('xmp', {}).items():
                 preview.append(f"  {key}: {value}\n")
         
-        if self.selected_naming and self.selected_files:
+        file_path_for_naming = self._get_primary_file()
+        if self.selected_naming and file_path_for_naming:
             conventions = self.template_manager.get_naming_conventions()
             convention = conventions.get(self.selected_naming, {})
             pattern = convention.get('pattern', '')
@@ -1557,9 +1704,8 @@ class PhotoMetadataEditor(QMainWindow):
             preview.append(f"Pattern: {pattern}\n")
             preview.append("\nPreview filenames:\n")
             
-            file_path = self.selected_files[0]
-            metadata = self.metadata_manager.get_metadata(file_path)
-            new_name = self.naming_engine.generate_filename(pattern, file_path, metadata, 1)
+            metadata = self.metadata_manager.get_metadata(file_path_for_naming)
+            new_name = self.naming_engine.generate_filename(pattern, file_path_for_naming, metadata, 1)
             preview.append(f"  {new_name}\n")
         
         self.preview_text.setText(''.join(preview))
@@ -1611,6 +1757,7 @@ class PhotoMetadataEditor(QMainWindow):
         success_count = 0
         failed_files = []
         operations = []
+        rename_map = {}
         
         for i, file_path in enumerate(self.selected_files):
             try:
@@ -1639,6 +1786,7 @@ class PhotoMetadataEditor(QMainWindow):
                         # Rename file
                         if str(new_path) != file_path:
                             shutil.move(file_path, new_path)
+                            rename_map[file_path] = str(new_path)
                         
                         success_count += 1
                         self.log_status(f"✓ Processed: {Path(file_path).name} → {new_path.name}")
@@ -1665,6 +1813,9 @@ class PhotoMetadataEditor(QMainWindow):
             QApplication.processEvents()
         
         progress.close()
+
+        # Update UI selection and list items to point to renamed files
+        self._refresh_after_renames(rename_map)
         
         # Summary
         if dry_run:
@@ -1697,6 +1848,26 @@ class PhotoMetadataEditor(QMainWindow):
                 self.log_status(f"Failed to undo: {Path(op['original']).name} - {str(e)}")
         
         self.last_operation = None
+
+    def _refresh_after_renames(self, rename_map: Dict[str, str]):
+        """Update selection and list widget to keep tracking renamed files."""
+        if not rename_map:
+            return
+
+        # Update selected file paths
+        self.selected_files = [rename_map.get(path, path) for path in self.selected_files]
+
+        # Update list widget entries
+        for i in range(self.file_list_widget.count()):
+            item = self.file_list_widget.item(i)
+            old_path = item.data(Qt.ItemDataRole.UserRole)
+            if old_path in rename_map:
+                new_path = rename_map[old_path]
+                item.setData(Qt.ItemDataRole.UserRole, new_path)
+                item.setText(Path(new_path).name)
+
+        self.preview_index = max(0, min(self.preview_index, len(self.selected_files) - 1))
+        self.update_preview()
         self.log_status("Undo complete")
     
     def log_status(self, message: str):

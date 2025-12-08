@@ -301,8 +301,169 @@ class MetadataManager:
             
             if success:
                 shutil.move(temp_path, file_path)
+                return True
+            else:
+                os.unlink(temp_path)
+                return False
         except Exception as e:
-            return False, f"Import failed: {str(e)}"
+            logger.error(f"Error deleting metadata: {e}")
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+            return False
+
+    def _is_jpeg(self, file_path: str) -> bool:
+        """Check if file is a JPEG."""
+        ext = Path(file_path).suffix.lower()
+        return ext in {'.jpg', '.jpeg'}
+
+    def _build_xmp_packet(self, xmp_data: Dict[str, Any]) -> str:
+        """Build a minimal XMP packet from a dict of fields."""
+        import xml.sax.saxutils as sax
+        def _escape(s): return sax.escape(str(s))
+        
+        lines = [
+            '<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>',
+            '<x:xmpmeta xmlns:x="adobe:ns:meta/">',
+            '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">',
+            '<rdf:Description xmlns:dc="http://purl.org/dc/elements/1.1/" '
+            'xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/" '
+            'xmlns:xmp="http://ns.adobe.com/xap/1.0/">'
+        ]
+        
+        # Dublin Core fields
+        if 'title' in xmp_data:
+            lines.append(f'<dc:title><rdf:Alt><rdf:li xml:lang="x-default">{_escape(xmp_data["title"])}</rdf:li></rdf:Alt></dc:title>')
+        if 'description' in xmp_data:
+            lines.append(f'<dc:description><rdf:Alt><rdf:li xml:lang="x-default">{_escape(xmp_data["description"])}</rdf:li></rdf:Alt></dc:description>')
+        if 'creator' in xmp_data:
+            creators = xmp_data['creator']
+            if not isinstance(creators, list): 
+                creators = [creators]
+            creator_items = ''.join([f'<rdf:li>{_escape(c)}</rdf:li>' for c in creators if c])
+            lines.append(f'<dc:creator><rdf:Seq>{creator_items}</rdf:Seq></dc:creator>')
+        if 'subject' in xmp_data:
+            subjects = xmp_data['subject']
+            if not isinstance(subjects, list): 
+                subjects = [subjects]
+            subj_items = ''.join([f'<rdf:li>{_escape(s)}</rdf:li>' for s in subjects if s])
+            lines.append(f'<dc:subject><rdf:Bag>{subj_items}</rdf:Bag></dc:subject>')
+        if 'rights' in xmp_data:
+            lines.append(f'<dc:rights><rdf:Alt><rdf:li xml:lang="x-default">{_escape(xmp_data["rights"])}</rdf:li></rdf:Alt></dc:rights>')
+        
+        # Photoshop fields
+        if 'Headline' in xmp_data:
+            lines.append(f'<photoshop:Headline>{_escape(xmp_data["Headline"])}</photoshop:Headline>')
+        if 'DateCreated' in xmp_data:
+            lines.append(f'<photoshop:DateCreated>{_escape(xmp_data["DateCreated"])}</photoshop:DateCreated>')
+        
+        # XMP fields
+        if 'CreateDate' in xmp_data:
+            lines.append(f'<xmp:CreateDate>{_escape(xmp_data["CreateDate"])}</xmp:CreateDate>')
+        
+        lines.append('</rdf:Description>')
+        lines.append('</rdf:RDF>')
+        lines.append('</x:xmpmeta>')
+        lines.append('<?xpacket end="w"?>')
+        
+        return '\n'.join(lines)
+
+    def _inject_xmp_into_jpeg(self, file_path: str, xmp_packet: bytes):
+        """Inject XMP packet into JPEG file as APP1 marker."""
+        try:
+            with open(file_path, 'rb') as f:
+                data = f.read()
+            
+            # JPEG structure: FFD8 (SOI) followed by markers
+            # APP1 marker for XMP: FFE1 [length] "http://ns.adobe.com/xap/1.0/\x00" [XMP packet]
+            XMP_NAMESPACE = b'http://ns.adobe.com/xap/1.0/\x00'
+            
+            # Remove existing XMP if present
+            output = bytearray()
+            pos = 0
+            
+            if data[0:2] != b'\xff\xd8':
+                raise ValueError("Not a valid JPEG file")
+            
+            output.extend(data[0:2])  # SOI marker
+            pos = 2
+            
+            xmp_injected = False
+            
+            while pos < len(data) - 1:
+                if data[pos] != 0xFF:
+                    # No more markers, rest is image data
+                    output.extend(data[pos:])
+                    break
+                
+                marker = data[pos+1]
+                pos += 2
+                
+                # Skip existing XMP APP1 markers
+                if marker == 0xE1:  # APP1
+                    if pos + 2 <= len(data):
+                        length = (data[pos] << 8) | data[pos+1]
+                        if pos + length <= len(data):
+                            segment_data = data[pos+2:pos+length]
+                            if segment_data.startswith(XMP_NAMESPACE):
+                                # Skip this XMP marker
+                                pos += length
+                                continue
+                
+                # For markers with length
+                if marker in [0xC0, 0xC2, 0xC4, 0xDB, 0xDD, 0xDA, 0xFE] or (0xE0 <= marker <= 0xEF):
+                    if pos + 2 > len(data):
+                        break
+                    length = (data[pos] << 8) | data[pos+1]
+                    
+                    # Inject XMP after first APP0/APP1 marker (before other data)
+                    if not xmp_injected and marker in [0xE0, 0xE1]:
+                        output.append(0xFF)
+                        output.append(marker)
+                        output.extend(data[pos:pos+length])
+                        pos += length
+                        
+                        # Now inject our XMP
+                        xmp_data = XMP_NAMESPACE + xmp_packet
+                        xmp_length = len(xmp_data) + 2
+                        if xmp_length <= 0xFFFF:
+                            output.append(0xFF)
+                            output.append(0xE1)
+                            output.append((xmp_length >> 8) & 0xFF)
+                            output.append(xmp_length & 0xFF)
+                            output.extend(xmp_data)
+                            xmp_injected = True
+                        continue
+                    
+                    output.append(0xFF)
+                    output.append(marker)
+                    output.extend(data[pos:pos+length])
+                    pos += length
+                elif marker == 0xD9:  # EOI
+                    # If we haven't injected yet, do it before EOI
+                    if not xmp_injected:
+                        xmp_data = XMP_NAMESPACE + xmp_packet
+                        xmp_length = len(xmp_data) + 2
+                        if xmp_length <= 0xFFFF:
+                            output.append(0xFF)
+                            output.append(0xE1)
+                            output.append((xmp_length >> 8) & 0xFF)
+                            output.append(xmp_length & 0xFF)
+                            output.extend(xmp_data)
+                            xmp_injected = True
+                    output.append(0xFF)
+                    output.append(marker)
+                    break
+                else:
+                    # Standalone marker
+                    output.append(0xFF)
+                    output.append(marker)
+            
+            # Write modified JPEG
+            with open(file_path, 'wb') as f:
+                f.write(output)
+                
+        except Exception as e:
+            raise Exception(f"Failed to inject XMP: {str(e)}")
     
     def get_naming_conventions(self) -> Dict[str, Any]:
         """Load all naming conventions from disk."""

@@ -1,6 +1,6 @@
 ---
 title: "How to Use"
-subtitle: "Quick start guide"
+subtitle: "Photo Metadata Editor - Main Features"
 format:
   html:
     toc: true
@@ -13,43 +13,145 @@ execute:
 
 # How to Use
 
-## Install & Run
+## Launch the App
 
 ```bash
-cd Photo_Metadata_App_By_Gledhill
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
 python3 photo_meta_editor.py
 ```
 
-## Basic Steps
+The app window opens with 4 main sections:
 
-1. **Add Photos** - Click "Open Files" or drag files in
-2. **View Metadata** - Click "View Metadata" to see tags
-3. **Apply Metadata** - Choose a template, click "Apply Template"
-4. **Rename Files** - Choose a naming pattern, click "Rename Files"
+1. **File List** (top) - Photos you're working with
+2. **Operations** (left) - Buttons for actions
+3. **Templates/Naming** (right) - Lists of your saved templates
+4. **Preview** (bottom) - Shows new filenames
+
+## Basic Workflow
+
+### Step 1: Add Photos
+
+Click **Open Files** to select images, or drag files directly into the window.
+
+You can select multiple photos at once.
+
+### Step 2: View Metadata
+
+Select a photo and click **View Metadata** to see all EXIF and XMP tags currently on it.
+
+A dialog shows all metadata in a table. This is read-only—it just shows what's there.
+
+### Step 3: Apply Metadata
+
+1. Select one or more photos
+2. Choose a template from the **Template** dropdown (or create one)
+3. Click **Apply Template**
+
+The template's metadata is added to all selected photos.
+
+Use **Merge Mode** (checkbox) to add without replacing existing metadata.
+
+### Step 4: Delete Metadata (Optional)
+
+Select photos and click **Delete Metadata** to remove all EXIF and XMP tags.
+
+Useful if you want to completely clean metadata from photos.
+
+### Step 5: Rename Files
+
+1. Select one or more photos
+2. Choose a naming convention from the **Naming** dropdown (or create one)
+3. Click **Preview New Names** to see how they'll be renamed
+4. Click **Rename Files** to apply
+
+The files are renamed based on your pattern.
+
+## Managing Templates
+
+### Create a Template
+
+Click **Create Template** → Enter name → Add EXIF/XMP fields → Click **Save Template**
+
+### Edit a Template
+
+Select template → Click **Edit** → Change fields → Click **Save Template**
+
+### Delete a Template
+
+Select template → Click **Remove** → Confirm
+
+## Managing Naming Conventions
+
+### Create a Naming Convention
+
+Click **Create Naming Convention** → Enter name → Enter pattern → Click **Save Convention**
+
+### Edit a Naming Convention
+
+Select convention → Click **Edit** → Change pattern → Click **Save Convention**
+
+### Delete a Naming Convention
+
+Select convention → Click **Remove** → Confirm
+
+## Useful Options
+
+### Dry Run
+
+Check **Dry run** (checkbox) to preview all changes without applying them.
+
+Use before renaming to verify the new names look right.
+
+### Merge Mode
+
+Check **Merge metadata** to add template data without removing existing tags.
+
+Uncheck to replace all metadata with the template.
+
+## Undo
+
+Click **Undo Last Operation** to revert your most recent action.
+
+Works for both metadata changes and file renames.
 
 ## Keyboard Shortcuts
 
 | Action | Shortcut |
 |--------|----------|
 | Open Files | Ctrl/Cmd + O |
-| Rename | Ctrl/Cmd + R |
+| Rename Files | Ctrl/Cmd + R |
 | Apply Template | Ctrl/Cmd + T |
 | View Metadata | Ctrl/Cmd + M |
 | Undo | Ctrl/Cmd + Z |
+| Clear Files | Ctrl/Cmd + L |
+| Exit | Ctrl/Cmd + Q |
 
-## Key Features
+## Clear Selection
 
-- View and edit EXIF/XMP metadata
-- Create reusable templates
-- Custom file naming patterns
-- Batch processing
-- Dry run preview
-- Undo support
+Click **Clear Selection** (or Ctrl/Cmd + L) to remove all files from the list.
 
-## Next Steps
+## Status Bar
 
-- [Templates & Metadata Guide](Templates.qmd) - Create custom templates
-- [Technical Reference](Reference.qmd) - Configuration and settings
+The bottom status bar shows:
+- Number of files selected
+- Last action performed
+- Metadata tool being used
+
+## Tips
+
+1. **Always preview first** - Click "Preview New Names" before renaming
+2. **Use templates** - Create templates for different photo types (portraits, travel, events)
+3. **Test with small batches** - Try with 3-5 photos first
+4. **Back up important photos** - Keep originals safe before renaming
+5. **Use meaningful names** - Include date or project info in naming patterns
+
+## Getting Help
+
+- **View Metadata** dialog - Shows exactly what metadata is on a photo
+- **Preview New Names** - Always check this before renaming
+- **Dry Run** mode - Lets you see what will happen without applying
+
+## More Information
+
+- [Installation](Install.qmd) - Setup and requirements
+- [Metadata Guide](Metadata.qmd) - EXIF and XMP fields
+- [Naming Conventions](Naming.qmd) - Naming patterns and tokens

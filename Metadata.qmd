@@ -1,0 +1,149 @@
+---
+title: "Metadata"
+subtitle: "EXIF and XMP fields for your photos"
+format:
+  html:
+    toc: true
+    number-sections: false
+    code-copy: true
+    css: styles.css
+execute: 
+  echo: false
+---
+
+# Metadata
+
+Metadata is information about your photos: who took them, when, where, copyright, keywords, etc.
+
+This app edits two types of metadata:
+
+## EXIF
+
+Standard format embedded in camera photos. Includes:
+- **Artist** - Photographer name
+- **Copyright** - Copyright notice (e.g., "© 2025 Jane Doe")
+- **ImageDescription** - What the photo shows
+- **UserComment** - Additional notes
+- **Software** - Editing software used
+
+Example:
+```
+Artist: Jane Doe
+Copyright: © 2025 Jane Doe
+ImageDescription: Portrait session at studio
+```
+
+## XMP
+
+Flexible format for additional metadata. Includes:
+- **dc:creator** - Creator/photographer name
+- **dc:keywords** - Searchable tags (comma-separated)
+- **dc:description** - Detailed description
+- **dc:subject** - Main subject
+- **dc:rights** - Rights holder
+- **photoshop:Headline** - Short title
+- **photoshop:Credit** - Photo credit line
+- **photoshop:Location** - Photo location
+- **xmpRights:UsageTerms** - License type
+
+Example:
+```
+dc:creator: Jane Doe
+dc:keywords: portrait, studio, professional
+dc:description: Professional portrait session, studio lighting
+dc:subject: Portrait Photography
+dc:rights: Jane Doe
+```
+
+## Creating Templates
+
+Templates save reusable metadata to apply to multiple photos.
+
+**Steps:**
+1. Click **Create Template** button
+2. Give it a name (e.g., "Travel Photos", "Wedding 2025")
+3. Fill in EXIF fields on the left
+4. Fill in XMP fields on the right
+5. Click **Save Template**
+
+**Edit or Remove:**
+- Select template in list
+- Click **Edit** to change it or **Remove** to delete
+
+## Template Examples
+
+### Portrait Photography
+```
+EXIF:
+  Artist: Your Name
+  Copyright: © 2025 Your Name
+  ImageDescription: Professional portrait
+
+XMP:
+  dc:creator: Your Name
+  dc:keywords: portrait, professional, studio
+  dc:description: Professional portrait photography
+```
+
+### Travel Photography
+```
+EXIF:
+  Artist: Your Name
+  Copyright: © 2025 Your Name
+  ImageDescription: Travel photography
+
+XMP:
+  dc:creator: Your Name
+  dc:keywords: travel, adventure
+  dc:description: Photos from [location]
+  photoshop:Location: [City, Country]
+```
+
+### Event Photography
+```
+EXIF:
+  Artist: Your Name
+  Copyright: © 2025 Your Name
+  ImageDescription: Event photography
+
+XMP:
+  dc:creator: Your Name
+  dc:keywords: event, wedding, celebration
+  dc:subject: Event Name
+  dc:description: [Event details]
+```
+
+### Stock Photography
+```
+EXIF:
+  Artist: Your Name
+  Copyright: © 2025 Your Name
+
+XMP:
+  dc:creator: Your Name
+  dc:keywords: keyword1, keyword2, keyword3, keyword4, keyword5
+  dc:description: Detailed description for searching
+  photoshop:Headline: Catchy title
+  xmpRights:UsageTerms: License type
+```
+
+## Using Templates
+
+1. Select one or more photos
+2. Choose a template from the **Template** dropdown
+3. Click **Apply Template**
+4. Metadata is added to all selected photos
+
+## What is Merge Mode?
+
+**Merge Mode** (checkbox in Options):
+- ✅ Checked: Adds new metadata without removing existing data
+- ❌ Unchecked: Replaces all metadata with template data
+
+Use Merge Mode when photos already have keywords or copyright you want to keep.
+
+## Supported Formats
+
+- **JPEG** (.jpg, .jpeg) - Best for metadata
+- **TIFF** (.tif, .tiff) - Professional quality
+- **PNG** (.png) - Web-friendly

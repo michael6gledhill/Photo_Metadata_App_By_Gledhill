@@ -1,0 +1,84 @@
+---
+title: "Installation"
+subtitle: "Get Photo Metadata Editor up and running"
+format:
+  html:
+    toc: false
+    number-sections: false
+    code-copy: true
+    css: styles.css
+execute: 
+  echo: false
+---
+
+# Installation
+
+## Requirements
+
+- Python 3.10 or later
+- 50 MB disk space
+- Optional: `exiftool` (for faster performance)
+
+## Install exiftool (Optional)
+
+For best performance, install exiftool:
+
+**macOS:**
+```bash
+brew install exiftool
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+apt-get install exiftool
+```
+
+**Windows:**
+Download from [exiftool.org](https://exiftool.org)
+
+The app works fine without exiftool—it will use Python libraries as fallback.
+
+## Setup
+
+1. **Clone or download the repository:**
+```bash
+cd Photo_Metadata_App_By_Gledhill
+```
+
+2. **Create virtual environment:**
+```bash
+python3 -m venv venv
+```
+
+3. **Activate virtual environment:**
+```bash
+# macOS/Linux:
+source venv/bin/activate
+
+# Windows:
+venv\Scripts\activate
+```
+
+4. **Install dependencies:**
+```bash
+pip install -r requirements.txt
+```
+
+5. **Run the app:**
+```bash
+python3 photo_meta_editor.py
+```
+
+## Verify Installation
+
+```bash
+python3 test_app.py
+```
+
+You should see: ✅ ALL TESTS PASSED
+
+## Next Steps
+
+- [Metadata Guide](Metadata.qmd) - Learn about EXIF and XMP
+- [Naming Conventions](Naming.qmd) - Custom file naming
+- [How to Use](Usage.qmd) - App features and workflow

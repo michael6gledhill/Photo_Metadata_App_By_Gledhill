@@ -18,12 +18,14 @@ website:
     left:
       - href: index.qmd
         text: "Home"
+      - href: Install.qmd
+        text: "Install"
+      - href: Metadata.qmd
+        text: "Metadata"
+      - href: Naming.qmd
+        text: "Naming"
       - href: Usage.qmd
         text: "How to Use"
-      - href: Templates.qmd
-        text: "Templates & Metadata"
-      - href: Reference.qmd
-        text: "Reference"
     right:
       - href: https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill
         text: "GitHub"
@@ -35,9 +37,11 @@ website:
         - text: "Documentation"
           section: "docs"
           contents:
+            - href: Install.qmd
+              text: "Installation"
+            - href: Metadata.qmd
+              text: "Metadata"
+            - href: Naming.qmd
+              text: "Naming Conventions"
             - href: Usage.qmd
               text: "How to Use"
-            - href: Templates.qmd
-              text: "Templates & Metadata"
-            - href: Reference.qmd
-              text: "Technical Reference"

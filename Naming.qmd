@@ -1,0 +1,146 @@
+---
+title: "Naming Conventions"
+subtitle: "Organize your photos with consistent naming patterns"
+format:
+  html:
+    toc: true
+    number-sections: false
+    code-copy: true
+    css: styles.css
+execute: 
+  echo: false
+---
+
+# Naming Conventions
+
+Naming conventions rename your photos using patterns with tokens and custom text.
+
+Instead of generic names like `IMG_1234.jpg`, create organized names like `2025-12-08_John_meeting_001.jpg`.
+
+## Available Tokens
+
+Replace these placeholders with actual values:
+
+| Token | Result | Example |
+|-------|--------|---------|
+| `{date}` | Photo date (YYYY-MM-DD) | 2025-12-08 |
+| `{datetime:%Y%m%d_%H%M%S}` | Date and time | 20251208_143022 |
+| `{original_name}` | Original filename | IMG_1234 |
+| `{camera_model}` | Camera from EXIF | Canon_EOS_R5 |
+| `{userid}` | Your username | john_doe |
+| `{sequence:03d}` | Auto-incrementing number | 001, 002, 003 |
+| `{title}` | From metadata template | Meeting |
+
+## Creating Patterns
+
+You can mix tokens with any custom text:
+
+**Format:** `{token}_custom-text_{another-token}`
+
+## Pattern Examples
+
+### Simple Date + Original Name
+```
+Pattern: {date}_{original_name}
+Result: 2025-12-08_IMG_1234.jpg
+```
+
+### Date + Custom Text + Sequence
+```
+Pattern: {date}_ES-meeting_{sequence:03d}
+Result: 2025-12-08_ES-meeting_001.jpg
+       2025-12-08_ES-meeting_002.jpg
+       2025-12-08_ES-meeting_003.jpg
+```
+
+### Username + Date + Original Name
+```
+Pattern: {userid}_{date}_{original_name}
+Result: john_doe_2025-12-08_IMG_1234.jpg
+```
+
+### Date + Project + Title
+```
+Pattern: {date}_Project-ABC_{title}
+Result: 2025-12-08_Project-ABC_Meeting.jpg
+```
+
+### Date + Camera + Travel + Sequence
+```
+Pattern: {date}_{camera_model}_travel_{sequence:03d}
+Result: 2025-12-08_Canon_EOS_R5_travel_001.jpg
+```
+
+### Year + Month + Sequence
+```
+Pattern: 2025-12_{sequence:03d}
+Result: 2025-12_001.jpg
+```
+
+### Client Name + Date + Sequence
+```
+Pattern: Client-XYZ_{date}_{sequence:03d}
+Result: Client-XYZ_2025-12-08_001.jpg
+```
+
+## Creating a Naming Convention
+
+1. Click **Create Naming Convention**
+2. Enter a name (e.g., "Travel Photos", "Work Meetings")
+3. Enter your pattern
+4. Click **Save Convention**
+
+The pattern appears in your naming dropdown for future use.
+
+## Edit or Remove
+
+- Select naming convention in list
+- Click **Edit** to change pattern or **Remove** to delete
+
+## Using Naming Conventions
+
+1. Select one or more photos
+2. Choose a naming convention from the **Naming** dropdown
+3. Click **Preview New Names** to see how they'll be renamed
+4. Click **Rename Files** to apply
+
+## Numbering Format
+
+`{sequence:03d}` creates 3-digit numbers:
+- 001, 002, 003... (for up to 999 photos)
+
+Use `{sequence:02d}` for 2-digit: 01, 02, 03...
+
+Or just `{sequence}` for auto-numbered: 1, 2, 3...
+
+## Common Mistakes
+
+❌ **Too many tokens**
+```
+{date}_{time}_{camera}_{location}_{subject}_{userid}_{sequence}
+```
+Creates very long names. Keep it simple.
+
+✅ **Better - keep it short**
+```
+{date}_{subject}_{sequence:03d}
+```
+
+❌ **Special characters**
+```
+{date} & {subject} / {sequence}
+```
+Slashes and ampersands cause problems on some systems.
+
+✅ **Better - use underscores and hyphens**
+```
+{date}_{subject}_{sequence:03d}
+```
+
+## Tips
+
+- Use underscores `_` or hyphens `-` to separate parts
+- Keep names under 80 characters
+- Avoid special characters: `& / \ : * ? " < > |`
+- Test with **Preview New Names** first
+- Use **Dry Run** checkbox for preview before applying

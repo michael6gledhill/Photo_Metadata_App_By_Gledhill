@@ -1,0 +1,22 @@
+{
+  "name": "Wedding Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name Photography",
+    "ImageDescription": "Wedding photography",
+    "Software": "Photo Metadata Editor"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:description": "Professional wedding photography",
+    "dc:subject": "[Couple Names] Wedding",
+    "dc:keywords": ["wedding", "ceremony", "celebration", "bride", "groom", "marriage"],
+    "photoshop:Headline": "[Couple Names] Wedding",
+    "photoshop:Credit": "Photo by Your Name Photography",
+    "photoshop:Location": "[Venue Name]",
+    "photoshop:City": "[City]",
+    "photoshop:State": "[State]",
+    "photoshop:Instructions": "For client use only. Credit required for publication.",
+    "xmpRights:UsageTerms": "All rights reserved. Client license granted."
+  }
+}

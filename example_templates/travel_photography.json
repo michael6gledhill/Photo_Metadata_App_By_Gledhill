@@ -1,0 +1,20 @@
+{
+  "name": "Travel Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name",
+    "ImageDescription": "Travel photography and documentation"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:description": "Travel photography capturing unique destinations and cultures",
+    "dc:subject": "Travel Photography",
+    "dc:keywords": ["travel", "adventure", "destination", "culture", "landscape"],
+    "photoshop:Headline": "Travel Adventures",
+    "photoshop:City": "[City Name]",
+    "photoshop:State": "[State/Province]",
+    "photoshop:Country": "[Country]",
+    "photoshop:Location": "[Specific Location]",
+    "xmpRights:UsageTerms": "Creative Commons BY-SA"
+  }
+}

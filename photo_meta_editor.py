@@ -502,6 +502,61 @@ class TemplateManager:
         
         return False
     
+    def import_template(self, data: Dict) -> Tuple[bool, str]:
+        """Import a template from JSON data.
+        
+        Args:
+            data: Template data dictionary with 'name', 'exif', and 'xmp' keys
+            
+        Returns:
+            Tuple of (success: bool, message: str)
+        """
+        try:
+            # Validate required keys
+            if 'name' not in data:
+                return False, "Template must have a 'name' field"
+            
+            name = data['name']
+            exif = data.get('exif', {})
+            xmp = data.get('xmp', {})
+            
+            # Save the template
+            if self.save_template(name, exif, xmp):
+                return True, f"Template '{name}' imported successfully"
+            else:
+                return False, "Failed to save template"
+                
+        except Exception as e:
+            return False, f"Import error: {str(e)}"
+    
+    def import_naming(self, data: Dict) -> Tuple[bool, str]:
+        """Import a naming convention from JSON data.
+        
+        Args:
+            data: Naming convention data dictionary with 'name' and 'pattern' keys
+            
+        Returns:
+            Tuple of (success: bool, message: str)
+        """
+        try:
+            # Validate required keys
+            if 'name' not in data:
+                return False, "Naming convention must have a 'name' field"
+            if 'pattern' not in data:
+                return False, "Naming convention must have a 'pattern' field"
+            
+            name = data['name']
+            pattern = data['pattern']
+            
+            # Save the naming convention
+            if self.save_naming(name, pattern):
+                return True, f"Naming convention '{name}' imported successfully"
+            else:
+                return False, "Failed to save naming convention"
+                
+        except Exception as e:
+            return False, f"Import error: {str(e)}"
+    
     def save_undo(self, filename: str, original_name: str, metadata_backup: Dict):
         """Save undo information."""
         try:
@@ -750,6 +805,142 @@ class TemplateDialog(QDialog):
                 self.accept()
             else:
                 QMessageBox.critical(self, "Error", "Failed to save template.")
+
+
+class ImportDialog(QDialog):
+    """Dialog for importing templates or naming conventions."""
+    
+    def __init__(self, import_type: str, parent=None):
+        """
+        Args:
+            import_type: Either 'template' or 'naming'
+            parent: Parent widget
+        """
+        super().__init__(parent)
+        self.import_type = import_type
+        self.import_data = None
+        self.init_ui()
+    
+    def init_ui(self):
+        type_name = "Template" if self.import_type == 'template' else "Naming Convention"
+        self.setWindowTitle(f"Import {type_name}")
+        self.setMinimumWidth(600)
+        self.setMinimumHeight(400)
+        
+        layout = QVBoxLayout()
+        
+        # Instructions
+        instructions = QLabel(
+            f"Import a {type_name.lower()} by selecting a JSON file or pasting JSON text below.\n\n"
+            f"Expected format for {type_name.lower()}:"
+        )
+        instructions.setWordWrap(True)
+        layout.addWidget(instructions)
+        
+        # Format example
+        example_text = QTextEdit()
+        example_text.setReadOnly(True)
+        example_text.setMaximumHeight(150)
+        
+        if self.import_type == 'template':
+            example_text.setPlainText(
+'''{
+  "name": "My Template",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:keywords": ["keyword1", "keyword2"]
+  }
+}''')
+        else:
+            example_text.setPlainText(
+'''{
+  "name": "My Naming Convention",
+  "pattern": "{date}_{title}_{sequence:03d}"
+}''')
+        
+        layout.addWidget(example_text)
+        
+        # File import button
+        file_btn = QPushButton("Select JSON File...")
+        file_btn.clicked.connect(self.select_file)
+        layout.addWidget(file_btn)
+        
+        # Separator
+        separator = QLabel("— OR —")
+        separator.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(separator)
+        
+        # Text paste area
+        paste_label = QLabel("Paste JSON here:")
+        layout.addWidget(paste_label)
+        
+        self.json_text = QTextEdit()
+        self.json_text.setPlaceholderText("Paste your JSON template here...")
+        layout.addWidget(self.json_text)
+        
+        # Buttons
+        btn_layout = QHBoxLayout()
+        
+        import_btn = QPushButton("Import")
+        import_btn.clicked.connect(self.do_import)
+        btn_layout.addWidget(import_btn)
+        
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(self.reject)
+        btn_layout.addWidget(cancel_btn)
+        
+        layout.addLayout(btn_layout)
+        
+        self.setLayout(layout)
+    
+    def select_file(self):
+        """Open file dialog to select JSON file."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select JSON File",
+            "",
+            "JSON Files (*.json);;All Files (*)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'r') as f:
+                    json_text = f.read()
+                    self.json_text.setPlainText(json_text)
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to read file: {str(e)}")
+    
+    def do_import(self):
+        """Parse and validate the JSON, then accept the dialog."""
+        json_text = self.json_text.toPlainText().strip()
+        
+        if not json_text:
+            QMessageBox.warning(self, "No Data", "Please select a file or paste JSON text.")
+            return
+        
+        try:
+            self.import_data = json.loads(json_text)
+            
+            # Validate structure
+            if self.import_type == 'template':
+                if 'name' not in self.import_data:
+                    raise ValueError("Template must have a 'name' field")
+            else:  # naming
+                if 'name' not in self.import_data or 'pattern' not in self.import_data:
+                    raise ValueError("Naming convention must have 'name' and 'pattern' fields")
+            
+            self.accept()
+            
+        except json.JSONDecodeError as e:
+            QMessageBox.critical(self, "Invalid JSON", f"Failed to parse JSON: {str(e)}")
+        except ValueError as e:
+            QMessageBox.critical(self, "Invalid Format", str(e))
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Import failed: {str(e)}")
 
 
 class NamingDialog(QDialog):
@@ -1033,6 +1224,10 @@ class PhotoMetadataEditor(QMainWindow):
         templates_sublayout.addWidget(self.template_list)
         
         template_btn_layout = QHBoxLayout()
+        import_template_btn = QPushButton("Import")
+        import_template_btn.clicked.connect(self.import_template)
+        template_btn_layout.addWidget(import_template_btn)
+        
         edit_template_btn = QPushButton("Edit")
         edit_template_btn.clicked.connect(self.edit_template)
         template_btn_layout.addWidget(edit_template_btn)
@@ -1055,6 +1250,10 @@ class PhotoMetadataEditor(QMainWindow):
         naming_sublayout.addWidget(self.naming_list)
         
         naming_btn_layout = QHBoxLayout()
+        import_naming_btn = QPushButton("Import")
+        import_naming_btn.clicked.connect(self.import_naming)
+        naming_btn_layout.addWidget(import_naming_btn)
+        
         edit_naming_btn = QPushButton("Edit")
         edit_naming_btn.clicked.connect(self.edit_naming)
         naming_btn_layout.addWidget(edit_naming_btn)
@@ -1212,6 +1411,30 @@ class PhotoMetadataEditor(QMainWindow):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.refresh_namings()
             self.log_status(f"Naming convention '{naming_name}' updated successfully")
+    
+    def import_template(self):
+        """Import a template from JSON file or paste."""
+        dialog = ImportDialog('template', self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            success, message = self.template_manager.import_template(dialog.import_data)
+            
+            if success:
+                self.refresh_templates()
+                self.log_status(message)
+            else:
+                QMessageBox.critical(self, "Import Failed", message)
+    
+    def import_naming(self):
+        """Import a naming convention from JSON file or paste."""
+        dialog = ImportDialog('naming', self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            success, message = self.template_manager.import_naming(dialog.import_data)
+            
+            if success:
+                self.refresh_namings()
+                self.log_status(message)
+            else:
+                QMessageBox.critical(self, "Import Failed", message)
     
     def delete_template(self):
         """Delete selected template."""

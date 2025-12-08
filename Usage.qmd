@@ -71,6 +71,31 @@ The files are renamed based on your pattern.
 
 Click **Create Template** → Enter name → Add EXIF/XMP fields → Click **Save Template**
 
+### Import a Template
+
+You can import pre-made templates from JSON files or by copying and pasting.
+
+**Method 1: Import from File**
+
+1. Click **Import** button (under Templates list)
+2. Click **Select JSON File...**
+3. Browse to a `.json` template file (see `example_templates/` folder in the GitHub repo)
+4. Click **Import**
+
+**Method 2: Copy & Paste**
+
+1. Copy a template's JSON from GitHub (see [example templates](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/tree/main/example_templates))
+2. Click **Import** button
+3. Paste the JSON in the text area
+4. Click **Import**
+
+**Available Example Templates:**
+- `portrait_professional.json` - Professional portraits with copyright
+- `travel_photography.json` - Travel photos with location fields
+- `wedding_photography.json` - Wedding events with client licensing
+- `event_photography.json` - General event documentation
+- `stock_photography.json` - Stock photos with extensive keywords
+
 ### Edit a Template
 
 Select template → Click **Edit** → Change fields → Click **Save Template**
@@ -84,6 +109,31 @@ Select template → Click **Remove** → Confirm
 ### Create a Naming Convention
 
 Click **Create Naming Convention** → Enter name → Enter pattern → Click **Save Convention**
+
+### Import a Naming Convention
+
+Just like templates, you can import naming conventions from JSON files.
+
+**Method 1: Import from File**
+
+1. Click **Import** button (under Naming Conventions list)
+2. Click **Select JSON File...**
+3. Browse to a `.json` naming convention file
+4. Click **Import**
+
+**Method 2: Copy & Paste**
+
+1. Copy a naming convention's JSON from GitHub
+2. Click **Import** button
+3. Paste the JSON in the text area
+4. Click **Import**
+
+**Available Example Naming Conventions:**
+- `date_sequence.json` - Date with 4-digit sequence (e.g., `2025-12-08_0001.jpg`)
+- `timestamp_camera.json` - Full timestamp + camera model
+- `user_date_title.json` - Username + date + photo title
+- `original_sequence.json` - Original filename + sequence
+- `yearmonth_title_seq.json` - Year-month grouping + title + sequence
 
 ### Edit a Naming Convention
 
@@ -140,9 +190,25 @@ The bottom status bar shows:
 
 1. **Always preview first** - Click "Preview New Names" before renaming
 2. **Use templates** - Create templates for different photo types (portraits, travel, events)
-3. **Test with small batches** - Try with 3-5 photos first
-4. **Back up important photos** - Keep originals safe before renaming
-5. **Use meaningful names** - Include date or project info in naming patterns
+3. **Import pre-made templates** - Check the `example_templates/` folder on GitHub for ready-to-use templates
+4. **Test with small batches** - Try with 3-5 photos first
+5. **Back up important photos** - Keep originals safe before renaming
+6. **Use meaningful names** - Include date or project info in naming patterns
+7. **Copy from GitHub** - You can copy JSON templates directly from the GitHub repo and paste them into the Import dialog
+
+## Quick Import Example
+
+To use a GitHub template:
+
+1. Visit [example_templates folder](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/tree/main/example_templates)
+2. Click on a template file (e.g., `portrait_professional.json`)
+3. Click the "Raw" button
+4. Copy all the text (Ctrl/Cmd + A, then Ctrl/Cmd + C)
+5. In the app, click **Import** button
+6. Paste into the text area (Ctrl/Cmd + V)
+7. Click **Import**
+
+Done! The template is now available in your templates list.
 
 ## Getting Help
 

@@ -1,0 +1,21 @@
+{
+  "name": "Stock Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name. All rights reserved.",
+    "ImageDescription": "Stock photography for commercial use"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:title": "[Descriptive Title]",
+    "dc:description": "[Detailed description with relevant keywords for searching]",
+    "dc:subject": "[Main Category]",
+    "dc:keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5", "keyword6", "keyword7"],
+    "photoshop:Headline": "[Catchy Short Title]",
+    "photoshop:Credit": "Your Name",
+    "photoshop:Source": "Your Name Photography",
+    "Iptc4xmpCore:IntellectualGenre": "[Category: Business, Nature, Technology, etc.]",
+    "xmpRights:UsageTerms": "Royalty-free license available",
+    "xmpRights:WebStatement": "https://yourwebsite.com/license"
+  }
+}

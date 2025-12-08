@@ -1,0 +1,4 @@
+{
+  "name": "User + Date + Title",
+  "pattern": "{userid}_{date}_{title}"
+}

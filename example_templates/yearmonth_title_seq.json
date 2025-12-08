@@ -1,0 +1,4 @@
+{
+  "name": "Year-Month + Title + Seq",
+  "pattern": "{datetime:%Y-%m}_{title}_{sequence:03d}"
+}

@@ -1,0 +1,4 @@
+{
+  "name": "Date + Sequence",
+  "pattern": "{date}_{sequence:04d}"
+}

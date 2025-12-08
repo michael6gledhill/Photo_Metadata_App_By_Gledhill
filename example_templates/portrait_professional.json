@@ -1,0 +1,18 @@
+{
+  "name": "Portrait Professional",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name. All rights reserved.",
+    "ImageDescription": "Professional portrait photography",
+    "UserComment": "Studio portrait session"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:description": "Professional portrait photography with studio lighting",
+    "dc:subject": "Portrait Photography",
+    "dc:keywords": ["portrait", "professional", "studio", "headshot"],
+    "photoshop:Headline": "Professional Portrait",
+    "photoshop:Credit": "Photo by Your Name",
+    "xmpRights:UsageTerms": "All rights reserved"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "name": "Original + Sequence",
+  "pattern": "{original_name}_{sequence:03d}"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "Event Photography",
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name",
+    "ImageDescription": "Event photography and documentation"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:description": "Professional event photography",
+    "dc:subject": "[Event Name]",
+    "dc:keywords": ["event", "conference", "party", "celebration", "gathering"],
+    "photoshop:Headline": "[Event Name]",
+    "photoshop:Credit": "Photo by Your Name",
+    "photoshop:Location": "[Venue Name]",
+    "photoshop:City": "[City]",
+    "photoshop:State": "[State]",
+    "photoshop:Country": "[Country]",
+    "photoshop:CaptionWriter": "Your Name"
+  }
+}

@@ -1,2 +1,23 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Ignore Quarto + docs stuff when downloading ZIP
+*.qmd export-ignore
+*.yaml export-ignore
+*.yml export-ignore
+
+# Ignore GitHub configs
+.github/ export-ignore
+
+# Ignore development docs
+docs/ export-ignore
+*.md export-ignore
+
+# Ignore build/work directories
+_site/ export-ignore
+dist/ export-ignore
+
+# Ignore everything except:
+# - your main python script
+# - example-templates folder
+# - references.txt

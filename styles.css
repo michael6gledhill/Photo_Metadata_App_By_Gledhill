@@ -1,0 +1,141 @@
+/* Photo Metadata Editor - Documentation Styles */
+
+:root {
+  --primary-color: #28a745;
+  --secondary-color: #17a2b8;
+  --danger-color: #dc3545;
+  --light-bg: #f8f9fa;
+  --dark-text: #212529;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--dark-text);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  border-bottom: 3px solid var(--primary-color);
+  padding-bottom: 0.5em;
+}
+
+/* Code blocks */
+code {
+  background-color: var(--light-bg);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.95em;
+}
+
+pre {
+  background-color: var(--light-bg);
+  border-left: 4px solid var(--primary-color);
+  padding: 1em;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+table th {
+  background-color: var(--light-bg);
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+  text-align: left;
+  font-weight: 600;
+}
+
+table td {
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+}
+
+table tbody tr:nth-child(odd) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Links */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+a:hover {
+  border-bottom-color: var(--primary-color);
+}
+
+/* Callouts / Blockquotes */
+blockquote {
+  border-left: 4px solid var(--primary-color);
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  background-color: var(--light-bg);
+}
+
+/* Lists */
+ul, ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+li {
+  margin: 0.5em 0;
+}
+
+/* Special elements */
+.highlight {
+  background-color: #fff3cd;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.75em;
+  }
+  
+  h2 {
+    font-size: 1.5em;
+  }
+  
+  pre {
+    font-size: 0.9em;
+    padding: 0.75em;
+  }
+}
+
+/* Print styles */
+@media print {
+  a {
+    text-decoration: underline;
+  }
+  
+  pre {
+    background-color: #fff;
+    border: 1px solid #ccc;
+  }
+  
+  h1 {
+    page-break-after: avoid;
+  }
+}

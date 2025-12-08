@@ -1,13 +1,44 @@
 project:
   type: website
+  output-dir: _site
 
 format:
   html:
     theme: cosmo
     toc: true
+    number-sections: false
+    code-copy: true
+    highlight-style: atom-one
 
 website:
-  title: "Photo Metadata Editor Docs"
+  title: "Photo Metadata Editor"
+  favicon: data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%2328a745'>📸</text></svg>
+  
   navbar:
     left:
-      - info.qmd
+      - href: index.qmd
+        text: "Home"
+      - href: Info.qmd
+        text: "Documentation"
+    right:
+      - href: https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill
+        text: "GitHub"
+        aria-label: "GitHub repository"
+  
+  sidebar:
+    - id: docs
+      contents:
+        - text: "Getting Started"
+          section: "docs"
+          contents:
+            - href: QUICK_START.md
+              text: "Quick Start"
+            - href: SETUP_GUIDE.md
+              text: "Setup Guide"
+        - text: "Reference"
+          section: "reference"
+          contents:
+            - href: Info.qmd
+              text: "Full Documentation"
+            - href: ACCEPTANCE_CRITERIA.md
+              text: "Features"

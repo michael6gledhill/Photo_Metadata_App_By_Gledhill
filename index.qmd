@@ -1,0 +1,116 @@
+---
+title: "Photo Metadata Editor"
+subtitle: "A PySide6 desktop application for EXIF and XMP metadata editing"
+---
+
+# Welcome to Photo Metadata Editor
+
+An elegant, powerful desktop application for managing image metadata across multiple photos. Build templates, apply consistent metadata, and rename files in bulk with flexible naming conventions.
+
+## Quick Links
+
+- **[📖 Full Documentation](Info.html)** - Complete usage guide
+- **[🚀 Quick Start](QUICK_START.md)** - Get started in 5 minutes  
+- **[⚙️ Setup Guide](SETUP_GUIDE.md)** - Installation and configuration
+- **[✅ Acceptance Criteria](ACCEPTANCE_CRITERIA.md)** - Feature checklist
+
+## Key Features
+
+✨ **Dual Metadata Editing**
+- Read and write EXIF and XMP metadata
+- Support for JPEG, TIFF, and PNG files
+
+🎯 **Template System**
+- Create and save metadata templates as JSON
+- Apply templates to single or batch files
+- Pre-made templates included
+
+🏷️ **Smart Naming**
+- Flexible naming conventions with token support
+- Pattern examples: `{date}_{title}_{sequence:03d}`
+- Automatic collision handling
+
+⚡ **Batch Operations**
+- Process multiple files simultaneously
+- Real-time progress tracking
+- Undo last operation
+
+🔒 **Safety First**
+- Atomic writes prevent file corruption
+- Confirmation dialogs for destructive actions
+- Dry-run mode to preview changes
+
+## Installation
+
+```bash
+# Clone the repository
+cd Photo_Metadata_App_By_Gledhill
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+python3 photo_meta_editor.py
+```
+
+## Command Line Quick Start
+
+```bash
+# View the application's internal tests
+python3 test_app.py
+
+# Check Python setup
+python3 -c "import photo_meta_editor; print('✓ Ready!')"
+```
+
+## System Requirements
+
+- **Python**: 3.10 or later
+- **OS**: Windows, macOS, or Linux
+- **Optional**: `exiftool` (recommended for faster metadata processing)
+
+## Get Started
+
+1. **Run the application** - `python3 photo_meta_editor.py`
+2. **Select a photo** - Drag and drop or use "Open Files"
+3. **Choose a template** - Use pre-made or create your own
+4. **Pick a naming pattern** - Define how files should be renamed
+5. **Apply and enjoy!** - Click the green "APPLY" button
+
+## Project Structure
+
+```
+Photo_Metadata_App_By_Gledhill/
+├── photo_meta_editor.py      # Main application
+├── requirements.txt           # Python dependencies
+├── test_app.py               # Validation tests
+├── Info.qmd                  # Full documentation
+├── _quarto.yml               # Quarto configuration
+└── .github/workflows/        # GitHub Actions
+    └── quarto-gh-pages.yml   # Auto-deploy docs
+```
+
+## Documentation
+
+- **[Info.qmd](Info.html)** - Comprehensive feature documentation
+- **[README.md](README.md)** - Extended README
+- **[QUICK_START.md](QUICK_START.md)** - Fast getting started guide
+- **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Detailed setup instructions
+- **[ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md)** - Feature completeness
+
+## Support
+
+For help:
+
+1. Check the **[QUICK_START.md](QUICK_START.md)** for common issues
+2. Review **[SETUP_GUIDE.md](SETUP_GUIDE.md)** for installation problems
+3. Run **`python3 test_app.py`** to validate your setup
+4. Check application logs for error details
+
+## License
+
+This application is provided for personal and professional use.
+
+---
+
+**Ready to organize your photos?** [Start now →](Info.html)

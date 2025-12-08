@@ -8,8 +8,15 @@ A professional PySide6 desktop application for editing EXIF and XMP metadata in 
 
 Use the cross-platform installer script for easy setup:
 
+**One-line (curl + python3):**
+
 ```bash
-# Download and run the installer
+curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install.py | python3 -
+```
+
+If you prefer to download the script first:
+
+```bash
 curl -O https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install.py
 python3 install.py
 ```

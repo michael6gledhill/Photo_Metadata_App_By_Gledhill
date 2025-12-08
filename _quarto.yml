@@ -18,8 +18,12 @@ website:
     left:
       - href: index.qmd
         text: "Home"
-      - href: Info.qmd
-        text: "Documentation"
+      - href: Usage.qmd
+        text: "How to Use"
+      - href: Templates.qmd
+        text: "Templates & Metadata"
+      - href: Reference.qmd
+        text: "Reference"
     right:
       - href: https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill
         text: "GitHub"
@@ -28,17 +32,12 @@ website:
   sidebar:
     - id: docs
       contents:
-        - text: "Getting Started"
+        - text: "Documentation"
           section: "docs"
           contents:
-            - href: QUICK_START.md
-              text: "Quick Start"
-            - href: SETUP_GUIDE.md
-              text: "Setup Guide"
-        - text: "Reference"
-          section: "reference"
-          contents:
-            - href: Info.qmd
-              text: "Full Documentation"
-            - href: ACCEPTANCE_CRITERIA.md
-              text: "Features"
+            - href: Usage.qmd
+              text: "How to Use"
+            - href: Templates.qmd
+              text: "Templates & Metadata"
+            - href: Reference.qmd
+              text: "Technical Reference"

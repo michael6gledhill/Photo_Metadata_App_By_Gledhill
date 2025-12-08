@@ -30,8 +30,8 @@ Understanding these fields helps you properly document, organize, and protect yo
 
 | Field | Purpose | Example |
 |-------|---------|---------|
-| `Artist` | Photographer/creator name | "John Doe" |
-| `Copyright` | Copyright notice | "© 2025 John Doe" |
+| `Artist` | Photographer/creator name | "Alex Smith" |
+| `Copyright` | Copyright notice | "© 2025 Example Media" |
 | `ImageDescription` | Brief description | "Sunset over mountains" |
 | `DateTime` | Date/time photo taken | "2025:12:08 14:30:25" |
 
@@ -39,12 +39,12 @@ Understanding these fields helps you properly document, organize, and protect yo
 
 | Field | Purpose | Example |
 |-------|---------|---------|
-| `title` | Photo title | "Board of Governors Meeting" |
-| `description` | Full description | "The Board met in Atlanta..." |
-| `creator` | Creator name | "Jane Smith" |
-| `subject` | Keywords (array) | ["event", "2025", "Atlanta"] |
-| `rights` | Copyright info | "Civil Air Patrol" |
-| `Headline` | Headline/caption | "CAP Board Meeting - Aug 2025" |
+| `title` | Photo title | "Annual Tech Summit 2025" |
+| `description` | Full description | "Keynote sessions in Metropolis..." |
+| `creator` | Creator name | "Alex Smith" |
+| `subject` | Keywords (array) | ["conference", "2025", "Metropolis"] |
+| `rights` | Copyright info | "Example Media" |
+| `Headline` | Headline/caption | "Annual Tech Summit 2025 - Opening Day" |
 
 ---
 
@@ -67,7 +67,7 @@ EXIF metadata is the original standard, primarily used for camera settings and b
 
 **Example:**
 ```json
-"Artist": "1st Lt Roxanne Schorbach"
+"Artist": "Alex Smith"
 ```
 
 **Best practices:**
@@ -90,7 +90,7 @@ EXIF metadata is the original standard, primarily used for camera settings and b
 
 **Example:**
 ```json
-"Copyright": "© 2025 Civil Air Patrol"
+"Copyright": "© 2025 Example Media"
 ```
 
 **Best practices:**
@@ -98,8 +98,8 @@ EXIF metadata is the original standard, primarily used for camera settings and b
 - Include year
 - State rights holder name
 - Example formats:
-  - `© 2025 John Doe. All rights reserved.`
-  - `Copyright 2025 Acme Photography`
+  - `© 2025 Example Media. All rights reserved.`
+  - `© 2025 Sample Studio`
   - `© 2025 Organization Name`
 
 ---
@@ -117,7 +117,7 @@ EXIF metadata is the original standard, primarily used for camera settings and b
 
 **Example:**
 ```json
-"ImageDescription": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering."
+"ImageDescription": "Keynote sessions at the Annual Tech Summit 2025 in Metropolis."
 ```
 
 **Best practices:**
@@ -371,7 +371,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example:**
 ```json
-"title": "Board of Governors Meet in Atlanta"
+"title": "Annual Tech Summit 2025 Keynote"
 ```
 
 **Best practices:**
@@ -396,7 +396,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example:**
 ```json
-"description": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives."
+"description": "Keynotes and panels from the Annual Tech Summit 2025 in Metropolis, covering product launches, industry trends, and strategy."
 ```
 
 **Best practices:**
@@ -422,12 +422,12 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example (single creator):**
 ```json
-"creator": "1st Lt Roxanne Schorbach"
+"creator": "Alex Smith"
 ```
 
 **Example (multiple creators):**
 ```json
-"creator": ["John Doe", "Jane Smith"]
+"creator": ["Alex Smith", "Taylor Lee"]
 ```
 
 **Best practices:**
@@ -452,11 +452,11 @@ The Dublin Core namespace contains the most important descriptive metadata field
 **Example:**
 ```json
 "subject": [
-  "2025 Summer Command Council",
-  "Atlanta",
+  "tech summit",
+  "conference",
   "2025",
-  "Command Council",
-  "BOG"
+  "Metropolis",
+  "keynote"
 ]
 ```
 
@@ -488,14 +488,14 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example:**
 ```json
-"rights": "© 2025 Civil Air Patrol. All rights reserved."
+"rights": "© 2025 Example Media. All rights reserved."
 ```
 
 **Best practices:**
 - Include copyright symbol and year
 - State rights holder
 - Can include license type:
-  - `© 2025 John Doe. All rights reserved.`
+  - `© 2025 Example Media. All rights reserved.`
   - `© 2025 Organization Name. Licensed under CC BY 4.0.`
   - `Public Domain`
 
@@ -520,7 +520,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example:**
 ```json
-"identifier": "CAP-2025-08-BOG-001"
+"identifier": "DOC-2025-08-001"
 ```
 
 **Use case:** Asset tracking, database integration
@@ -544,7 +544,7 @@ Adobe Photoshop-specific metadata fields.
 
 **Example:**
 ```json
-"Headline": "CAP Board of Governors Meeting in Atlanta - August 2025"
+"Headline": "Annual Tech Summit 2025 - Opening Day"
 ```
 
 **Best practices:**
@@ -563,7 +563,7 @@ Adobe Photoshop-specific metadata fields.
 
 **Example:**
 ```json
-"Credit": "Civil Air Patrol National Headquarters"
+"Credit": "Example Media"
 ```
 
 **Use case:** Photo credit line, agency attribution
@@ -576,7 +576,7 @@ Adobe Photoshop-specific metadata fields.
 
 **Example:**
 ```json
-"Source": "CAP Public Affairs Office"
+"Source": "Example Media Desk"
 ```
 
 ---
@@ -587,7 +587,7 @@ Adobe Photoshop-specific metadata fields.
 
 **Example:**
 ```json
-"City": "Atlanta"
+"City": "Metropolis"
 ```
 
 ---
@@ -598,7 +598,7 @@ Adobe Photoshop-specific metadata fields.
 
 **Example:**
 ```json
-"State": "Georgia"
+"State": "Fictional State"
 ```
 
 ---
@@ -631,7 +631,7 @@ Adobe Photoshop-specific metadata fields.
 
 **Example:**
 ```json
-"CaptionWriter": "John Smith"
+"CaptionWriter": "Taylor Lee"
 ```
 
 ---
@@ -735,7 +735,7 @@ Additional professional metadata fields.
 
 **Example:**
 ```json
-"Iptc4xmpCore:Location": "Georgia World Congress Center"
+"Iptc4xmpCore:Location": "Metropolis Convention Center"
 ```
 
 ---
@@ -802,9 +802,9 @@ Additional professional metadata fields.
 **Example:**
 ```json
 "weightedFlatSubject": [
-  "Atlanta 2025 BOG-CCM ALL",
-  "BOG",
-  "BOG Facilitator Brainstorming"
+  "Tech Summit 2025",
+  "Keynotes",
+  "Industry Panels"
 ]
 ```
 
@@ -812,8 +812,8 @@ Additional professional metadata fields.
 - Use consistent hierarchy patterns
 - Can include parent|child structures
 - Example patterns:
-  - `"Events|2025|Summer|Command Council"`
-  - `"Locations|USA|Georgia|Atlanta"`
+  - `"Events|2025|Conference|Tech Summit"`
+  - `"Locations|USA|Fictional State|Metropolis"`
   - `"Projects|Marketing|Campaign 2025"`
 
 ---
@@ -825,9 +825,9 @@ Here's a complete metadata example for documenting an official event:
 ```json
 {
   "exif": {
-    "Artist": "1st Lt Roxanne Schorbach",
-    "Copyright": "© 2025 Civil Air Patrol",
-    "ImageDescription": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives.",
+    "Artist": "Alex Smith",
+    "Copyright": "© 2025 Example Media",
+    "ImageDescription": "Keynote and breakout sessions during Annual Tech Summit 2025 in Metropolis.",
     "DateTime": "2025:08:25 16:34:58",
     "Make": "Canon",
     "Model": "Canon EOS R5",
@@ -838,32 +838,30 @@ Here's a complete metadata example for documenting an official event:
     "ISOSpeedRatings": "800"
   },
   "xmp": {
-    "title": "Board of Governors Meet in Atlanta",
-    "description": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives.",
-    "creator": "1st Lt Roxanne Schorbach",
-    "rights": "© 2025 Civil Air Patrol. All rights reserved.",
+    "title": "Annual Tech Summit 2025 Keynote",
+    "description": "Highlights from the Annual Tech Summit 2025 in Metropolis, including product launches and industry panels.",
+    "creator": "Alex Smith",
+    "rights": "© 2025 Example Media. All rights reserved.",
     "subject": [
-      "2025 Summer Command Council",
-      "Atlanta",
+      "tech summit",
+      "conference",
       "2025",
-      "Command Council",
-      "BOG",
-      "Board of Governors",
-      "Meeting",
-      "Georgia"
+      "Metropolis",
+      "innovation",
+      "keynote"
     ],
-    "Headline": "CAP Board of Governors Meeting in Atlanta - August 2025",
-    "Credit": "Civil Air Patrol",
-    "City": "Atlanta",
-    "State": "Georgia",
+    "Headline": "Annual Tech Summit 2025 - Opening Day",
+    "Credit": "Example Media",
+    "City": "Metropolis",
+    "State": "Fictional State",
     "Country": "United States",
-    "AuthorsPosition": "Public Affairs Officer",
+    "AuthorsPosition": "Event Photographer",
     "Rating": "5",
-    "CreatorTool": "Adobe Photoshop Lightroom Classic",
+    "CreatorTool": "Example Editor",
     "weightedFlatSubject": [
-      "Atlanta 2025 BOG-CCM ALL",
-      "BOG",
-      "BOG Facilitator Brainstorming"
+      "Tech Summit 2025",
+      "Keynotes",
+      "Industry Panels"
     ]
   }
 }
@@ -878,15 +876,15 @@ Here's a complete metadata example for documenting an official event:
 ```json
 {
   "exif": {
-    "Artist": "Jane Smith Photography",
-    "Copyright": "© 2025 Jane Smith. All rights reserved.",
+    "Artist": "Studio Portraits",
+    "Copyright": "© 2025 Studio Portraits. All rights reserved.",
     "ImageDescription": "Professional headshot for corporate use"
   },
   "xmp": {
-    "title": "John Doe - Corporate Headshot",
-    "creator": "Jane Smith",
+    "title": "Corporate Headshot",
+    "creator": "Studio Portraits",
     "subject": ["portrait", "headshot", "business", "corporate"],
-    "Credit": "Jane Smith Photography",
+    "Credit": "Studio Portraits",
     "Rating": "5"
   }
 }
@@ -897,17 +895,17 @@ Here's a complete metadata example for documenting an official event:
 ```json
 {
   "exif": {
-    "Artist": "Bob Johnson",
-    "Copyright": "© 2025 Bob Johnson",
-    "ImageDescription": "Sunrise over Rocky Mountain National Park"
+    "Artist": "Nature Works",
+    "Copyright": "© 2025 Nature Works",
+    "ImageDescription": "Sunrise over alpine peaks and valley"
   },
   "xmp": {
-    "title": "Rocky Mountain Sunrise",
-    "description": "Golden hour light illuminates the peaks of Rocky Mountain National Park on a clear autumn morning.",
-    "creator": "Bob Johnson",
-    "subject": ["landscape", "mountains", "sunrise", "Colorado", "nature"],
-    "City": "Estes Park",
-    "State": "Colorado",
+    "title": "Alpine Sunrise",
+    "description": "Golden hour light illuminates the alpine peaks on a clear autumn morning.",
+    "creator": "Nature Works",
+    "subject": ["landscape", "mountains", "sunrise", "alpine", "nature"],
+    "City": "Summit Ridge",
+    "State": "Highlands",
     "Country": "United States",
     "Rating": "4"
   }
@@ -919,18 +917,18 @@ Here's a complete metadata example for documenting an official event:
 ```json
 {
   "exif": {
-    "Artist": "Sarah Williams",
-    "Copyright": "© 2025 Associated Press",
-    "ImageDescription": "Mayor signs new climate initiative bill"
+    "Artist": "News Desk",
+    "Copyright": "© 2025 News Desk",
+    "ImageDescription": "City council approves sustainability initiative"
   },
   "xmp": {
-    "title": "Climate Bill Signing Ceremony",
-    "description": "Mayor Jane Doe signs the city's new climate initiative bill into law at City Hall, surrounded by environmental advocates and city council members.",
-    "creator": "Sarah Williams",
-    "subject": ["news", "politics", "environment", "climate", "government"],
-    "Headline": "Mayor Signs Climate Initiative Into Law",
-    "Credit": "Associated Press",
-    "Source": "City Hall Press Office",
+    "title": "Sustainability Plan Approved",
+    "description": "City council approves a new sustainability initiative during a public session, with community representatives in attendance.",
+    "creator": "News Desk",
+    "subject": ["news", "policy", "environment", "sustainability", "government"],
+    "Headline": "Council Approves Sustainability Plan",
+    "Credit": "News Desk",
+    "Source": "City Communications Office",
     "TransmissionReference": "NEWS-2025-12-08-001",
     "Iptc4xmpCore:IntellectualGenre": "News"
   }
@@ -979,8 +977,8 @@ Create metadata templates for recurring scenarios:
 
 **Example keyword set:**
 ```json
-["2025", "Atlanta", "Georgia", "meeting", "Board of Governors", 
- "CAP", "Command Council", "government", "leadership"]
+["2025", "Metropolis", "conference", "tech summit", "keynote", 
+ "innovation", "industry panels", "networking"]
 ```
 
 ## 5. Copyright Protection
@@ -992,7 +990,7 @@ Always include:
 - Usage terms (if needed)
 
 **Examples:**
-- `© 2025 John Doe. All rights reserved.`
+- `© 2025 Example Media. All rights reserved.`
 - `© 2025 Company Name. Licensed under CC BY-SA 4.0.`
 - `© 2025 Photographer. For editorial use only.`
 

@@ -1,0 +1,73 @@
+📚 NEW DOCUMENTATION STRUCTURE
+================================
+
+The documentation has been reorganized into focused, separate pages accessible via tabs:
+
+📑 DOCUMENTATION PAGES:
+
+1. index.qmd (Home)
+   └─ Overview, quick start, features, troubleshooting
+
+2. Usage.qmd (How to Use) - ⭐ SIMPLIFIED GUIDE
+   └─ Installation, keyboard shortcuts, quick features summary
+
+3. Templates.qmd (Templates & Metadata) - ⭐ DEDICATED TAB FOR METADATA
+   └─ How to add metadata to templates
+   └─ EXIF fields reference table
+   └─ XMP fields reference table
+   └─ 6 template examples (Portrait, Travel, Landscape, Event, Stock, Product)
+   └─ Naming conventions with tokens
+   └─ Best practices
+
+4. Reference.qmd (Technical Reference)
+   └─ Supported file formats
+   └─ Configuration & storage locations
+   └─ Default templates and naming conventions
+   └─ Metadata handling strategy
+   └─ Safety mechanisms
+   └─ Troubleshooting
+   └─ Dependencies & performance
+
+📊 NAVIGATION:
+
+Navbar (Top):
+  • Home → index.qmd
+  • How to Use → Usage.qmd
+  • Templates & Metadata → Templates.qmd
+  • Reference → Reference.qmd
+  • GitHub (link)
+
+Sidebar (Left):
+  Documentation
+  ├── How to Use
+  ├── Templates & Metadata
+  └── Technical Reference
+
+🎯 KEY IMPROVEMENTS:
+
+✅ Simplified: Usage.qmd is a quick, focused 2-minute guide
+✅ Dedicated Metadata Tab: Templates.qmd is entirely about metadata fields
+✅ Clear Organization: Each tab has a specific purpose
+✅ Better Navigation: Top navbar + sidebar for easy access
+✅ All metadata examples: Consolidated in Templates.qmd
+✅ Technical details: Moved to Reference.qmd for those who need it
+
+📖 WHAT EACH USER NEEDS:
+
+Beginners:
+  1. Read index.qmd (Home) - Overview
+  2. Read Usage.qmd - How to use the app
+  3. Refer to Templates.qmd for metadata examples
+
+Advanced Users:
+  1. Use Templates.qmd for detailed metadata field reference
+  2. Check Reference.qmd for technical details
+  3. Create custom templates based on examples
+
+Old Info.qmd:
+  The comprehensive Info.qmd file is still in the repository but no longer 
+  featured in the main navigation. Its content has been distributed across:
+  - Usage.qmd (installation, quick start, shortcuts)
+  - Templates.qmd (templates, metadata fields, naming)
+  - Reference.qmd (technical details, config, troubleshooting)
+

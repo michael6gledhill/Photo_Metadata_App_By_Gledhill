@@ -1,3 +1,5 @@
+GitHub Pages site: https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/
+
 # Photo Metadata Editor
 
 A professional macOS application for editing photo metadata (EXIF and XMP) and batch renaming files.

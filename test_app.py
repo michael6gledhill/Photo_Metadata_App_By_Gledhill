@@ -25,7 +25,7 @@ print("=" * 70)
 print("\n[TEST 1] Module Imports")
 print("-" * 70)
 try:
-    from photo_meta_editor import (
+    from main import (
         MetadataManager, TemplateManager, NamingEngine,
         PhotoMetadataEditor
     )

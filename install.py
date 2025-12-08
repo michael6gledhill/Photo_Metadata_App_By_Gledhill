@@ -14,9 +14,9 @@ What it does:
 5. (macOS only) Optionally builds a .app bundle with py2app
 
 Usage:
-    python3 install.py              # Standard installation
-    python3 install.py --build-app  # macOS: Also build .app bundle
-    python3 install.py --help       # Show help message
+    python3 install.py                    # Standard installation (builds .app on macOS)
+    python3 install.py --no-build-app     # Skip .app build on macOS
+    python3 install.py --help             # Show help message
 
 Requirements:
 - Python 3.8 or higher
@@ -482,7 +482,7 @@ def install_requirements(repo_path: Path) -> bool:
 
 def create_setup_py(repo_path: Path) -> bool:
     """
-    Create a setup.py file for py2app.
+    Create a setup.py file for py2app with all components.
     
     Args:
         repo_path: Path to the repository
@@ -494,25 +494,25 @@ def create_setup_py(repo_path: Path) -> bool:
 Setup script for creating macOS .app bundle using py2app
 """
 from setuptools import setup
+from pathlib import Path
+import glob
 
 APP = ['photo_meta_editor.py']
+
+# Collect all example templates dynamically
+example_templates = glob.glob('example_templates/*.json') + ['example_templates/README.md']
+
 DATA_FILES = [
-    ('example_templates', ['example_templates/portrait_professional.json',
-                          'example_templates/travel_photography.json',
-                          'example_templates/wedding_photography.json',
-                          'example_templates/event_photography.json',
-                          'example_templates/stock_photography.json',
-                          'example_templates/date_sequence.json',
-                          'example_templates/timestamp_camera.json',
-                          'example_templates/user_date_title.json',
-                          'example_templates/original_sequence.json',
-                          'example_templates/yearmonth_title_seq.json',
-                          'example_templates/README.md']),
+    ('example_templates', example_templates),
+    ('storage', ['storage/.keep']),
+    ('assets', ['assets/icon.icns'] if Path('assets/icon.icns').exists() else []),
+    # Include the other Python modules as resources
+    ('', ['gui.py', 'metadata_handler.py', 'requirements.txt']),
 ]
 
 OPTIONS = {
     'argv_emulation': False,  # Don't emulate command line arguments
-    'iconfile': None,  # Add your .icns file path here if you have one
+    'iconfile': 'assets/icon.icns' if Path('assets/icon.icns').exists() else None,
     'plist': {
         'CFBundleName': 'Photo Metadata Editor',
         'CFBundleDisplayName': 'Photo Metadata Editor',
@@ -523,9 +523,10 @@ OPTIONS = {
         'LSMinimumSystemVersion': '10.13.0',  # macOS 10.13 or higher
         'NSHighResolutionCapable': True,
     },
-    'packages': ['PySide6', 'piexif', 'PIL'],
-    'includes': [],
-    'excludes': ['tkinter', 'matplotlib', 'numpy', 'scipy'],  # Reduce app size
+    'packages': ['PySide6', 'piexif', 'PIL', 'xml.etree.ElementTree', 'pathlib', 'json'],
+    'includes': ['gui', 'metadata_handler'],
+    'excludes': ['tkinter', 'matplotlib', 'numpy', 'scipy', 'pandas', 'pytest', 'unittest'],
+    'resources': ['assets/', 'storage/'],
 }
 
 setup(
@@ -630,9 +631,14 @@ def main():
         epilog=__doc__
     )
     parser.add_argument(
+        '--no-build-app',
+        action='store_true',
+        help='Skip building macOS .app bundle (default is to build on macOS)'
+    )
+    parser.add_argument(
         '--build-app',
         action='store_true',
-        help='Build macOS .app bundle (macOS only, requires py2app)'
+        help='Force build .app bundle (deprecated: now default on macOS)'
     )
     parser.add_argument(
         '--target-dir',
@@ -646,6 +652,9 @@ def main():
     # Disable colors on Windows if not supported
     if platform.system() == "Windows" and not os.environ.get('ANSICON'):
         Colors.disable()
+    
+    # Determine if we should build the app
+    should_build_app = platform.system() == 'Darwin' and not args.no_build_app
     
     # Print welcome message
     print_header("Photo Metadata Editor - Installer")
@@ -703,10 +712,13 @@ def main():
         print_error("Failed to install required packages")
         return 1
     
-    # Step 7: Build macOS app (optional)
-    if args.build_app:
+    # Step 7: Build macOS app (default on macOS)
+    if should_build_app:
         print_header("Step 7: Building macOS App Bundle")
+        print_info("Building .app with all components, assets, and storage...")
         build_macos_app(repo_path)
+    elif platform.system() == "Darwin":
+        print_info("\nSkipped .app build (use without --no-build-app to build)")
     
     # Success!
     print_header("Installation Complete!")
@@ -719,11 +731,13 @@ def main():
     print(f"  cd {repo_path}")
     print(f"  python3 {MAIN_SCRIPT}\n")
     
-    if args.build_app and platform.system() == "Darwin":
+    if should_build_app and platform.system() == "Darwin":
         app_path = repo_path / 'dist' / 'Photo Metadata Editor.app'
         if app_path.exists():
-            print(f"{Colors.BOLD}macOS App Bundle:{Colors.ENDC}")
+            print(f"{Colors.BOLD}macOS App Bundle Created:{Colors.ENDC}")
             print(f"  {app_path}")
+            print(f"  Includes: photo_meta_editor.py, gui.py, metadata_handler.py")
+            print(f"  Includes: assets/, storage/, example_templates/")
             print(f"  (Drag to Applications folder to install)\n")
     
     print(f"{Colors.BOLD}Documentation:{Colors.ENDC}")

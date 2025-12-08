@@ -14,6 +14,26 @@ Use the cross-platform installer script for easy setup:
 curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install.py | python3 -
 ```
 
+This single command will:
+- ✓ Check for required tools (Git, Python, pip)
+- ✓ Clone or update the repository  
+- ✓ Install all Python dependencies
+- ✓ Verify all files are present
+- ✓ **(macOS) Build a complete .app bundle with all components**
+
+**What gets included in the .app:**
+- All three Python modules (photo_meta_editor.py, gui.py, metadata_handler.py)
+- Assets folder with icon
+- Storage folder for user templates/conventions
+- Example templates
+- All dependencies (PySide6, piexif, Pillow)
+
+**Skip .app build (macOS only):**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install.py | python3 - --no-build-app
+```
+
 If you prefer to download the script first:
 
 ```bash
@@ -32,14 +52,7 @@ python3 install.py
 - ✓ Clones or updates the repository
 - ✓ Installs all Python dependencies
 - ✓ Verifies all files are present
-- ✓ (macOS only) Optionally builds a .app bundle
-
-**Build macOS App (with icon):**
-```bash
-python3 install.py --build-app
-```
-
-This creates `dist/Photo Metadata Editor.app` with a generated "M" icon and includes a `storage/` folder for JSON templates.
+- ✓ (macOS) Builds a complete .app bundle with icon, assets, and storage
 
 The installer is safe for students and hobbyists:
 - Never requires sudo or administrator privileges

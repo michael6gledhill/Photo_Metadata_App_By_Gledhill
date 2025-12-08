@@ -7,11 +7,16 @@ It specifies which files to include, app metadata, and build options.
 Usage:
     python3 setup.py py2app
 
-The built .app will be placed in the dist/ folder.
+The built .app will be placed in the dist/ folder and includes:
+- All three Python modules (photo_meta_editor.py, gui.py, metadata_handler.py)
+- Assets folder with icon
+- Storage folder for user templates/naming conventions
+- Example templates
+- All dependencies
 
 Configuration:
 - APP: Main Python script to convert to .app
-- DATA_FILES: Additional files to include (templates, etc.)
+- DATA_FILES: Additional files to include (templates, assets, storage)
 - OPTIONS: py2app build settings including bundle info and optimization
 
 Requirements:
@@ -21,30 +26,23 @@ Requirements:
 
 from setuptools import setup
 from pathlib import Path
+import glob
 
 # Main application script
 APP = ['photo_meta_editor.py']
 
 # Data files to include in the app bundle
 # Format: (destination_folder, [source_files])
+
+# Collect all example templates dynamically
+example_templates = glob.glob('example_templates/*.json') + ['example_templates/README.md']
+
 DATA_FILES = [
-    ('example_templates', [
-        'example_templates/portrait_professional.json',
-        'example_templates/travel_photography.json',
-        'example_templates/wedding_photography.json',
-        'example_templates/event_photography.json',
-        'example_templates/stock_photography.json',
-        'example_templates/date_sequence.json',
-        'example_templates/timestamp_camera.json',
-        'example_templates/user_date_title.json',
-        'example_templates/original_sequence.json',
-        'example_templates/yearmonth_title_seq.json',
-        'example_templates/README.md'
-    ]),
-    # Storage folder inside app bundle for user JSON (metadata/naming) seeds
-    ('storage', [
-        'storage/.keep'
-    ]),
+    ('example_templates', example_templates),
+    ('storage', ['storage/.keep']),
+    ('assets', ['assets/icon.icns'] if Path('assets/icon.icns').exists() else []),
+    # Include the other Python modules as resources
+    ('', ['gui.py', 'metadata_handler.py', 'requirements.txt']),
 ]
 
 # py2app options
@@ -91,13 +89,15 @@ OPTIONS = {
         'PySide6',  # Qt GUI framework
         'piexif',   # EXIF metadata handling
         'PIL',      # Image processing (Pillow)
+        'xml.etree.ElementTree',  # XMP sidecar parsing
+        'pathlib',  # Path handling
+        'json',     # Template/config handling
     ],
     
     # Additional modules to include (if needed)
     'includes': [
-        'json',
-        'pathlib',
-        'datetime',
+        'gui',              # GUI module
+        'metadata_handler', # Metadata handler module
     ],
     
     # Modules to exclude (reduces app size)
@@ -112,7 +112,7 @@ OPTIONS = {
     ],
     
     # Resource files
-    'resources': [],
+    'resources': ['assets/', 'storage/'],
     
     # Framework options
     'frameworks': [],

@@ -39,12 +39,12 @@ Understanding these fields helps you properly document, organize, and protect yo
 
 | Field | Purpose | Example |
 |-------|---------|---------|
-| `dc:title` | Photo title | "Board of Governors Meeting" |
-| `dc:description` | Full description | "The Board met in Atlanta..." |
-| `dc:creator` | Creator name | "Jane Smith" |
-| `dc:subject` | Keywords (array) | ["event", "2025", "Atlanta"] |
-| `dc:rights` | Copyright info | "Civil Air Patrol" |
-| `photoshop:Headline` | Headline/caption | "CAP Board Meeting - Aug 2025" |
+| `title` | Photo title | "Board of Governors Meeting" |
+| `description` | Full description | "The Board met in Atlanta..." |
+| `creator` | Creator name | "Jane Smith" |
+| `subject` | Keywords (array) | ["event", "2025", "Atlanta"] |
+| `rights` | Copyright info | "Civil Air Patrol" |
+| `Headline` | Headline/caption | "CAP Board Meeting - Aug 2025" |
 
 ---
 
@@ -354,11 +354,11 @@ EXIF metadata is the original standard, primarily used for camera settings and b
 
 XMP is Adobe's extensible metadata standard, offering much richer descriptive capabilities than EXIF.
 
-## Dublin Core (dc:) Namespace
+## Dublin Core () Namespace
 
 The Dublin Core namespace contains the most important descriptive metadata fields.
 
-### `dc:title`
+### `title`
 
 **What it is:** The title or name of the image
 
@@ -371,7 +371,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example:**
 ```json
-"dc:title": "Board of Governors Meet in Atlanta"
+"title": "Board of Governors Meet in Atlanta"
 ```
 
 **Best practices:**
@@ -382,7 +382,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 ---
 
-### `dc:description`
+### `description`
 
 **What it is:** Full, detailed description of the image content
 
@@ -396,7 +396,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example:**
 ```json
-"dc:description": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives."
+"description": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives."
 ```
 
 **Best practices:**
@@ -409,7 +409,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 ---
 
-### `dc:creator`
+### `creator`
 
 **What it is:** Person(s) who created the image
 
@@ -422,12 +422,12 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example (single creator):**
 ```json
-"dc:creator": "1st Lt Roxanne Schorbach"
+"creator": "1st Lt Roxanne Schorbach"
 ```
 
 **Example (multiple creators):**
 ```json
-"dc:creator": ["John Doe", "Jane Smith"]
+"creator": ["John Doe", "Jane Smith"]
 ```
 
 **Best practices:**
@@ -437,7 +437,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 ---
 
-### `dc:subject`
+### `subject`
 
 **What it is:** Keywords or tags describing the content
 
@@ -451,7 +451,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example:**
 ```json
-"dc:subject": [
+"subject": [
   "2025 Summer Command Council",
   "Atlanta",
   "2025",
@@ -475,7 +475,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 ---
 
-### `dc:rights`
+### `rights`
 
 **What it is:** Copyright and usage rights statement
 
@@ -488,7 +488,7 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 **Example:**
 ```json
-"dc:rights": "© 2025 Civil Air Patrol. All rights reserved."
+"rights": "© 2025 Civil Air Patrol. All rights reserved."
 ```
 
 **Best practices:**
@@ -501,37 +501,37 @@ The Dublin Core namespace contains the most important descriptive metadata field
 
 ---
 
-### `dc:format`
+### `format`
 
 **What it is:** File format/MIME type
 
 **Example:**
 ```json
-"dc:format": "image/jpeg"
+"format": "image/jpeg"
 ```
 
 **Common values:** `image/jpeg`, `image/png`, `image/tiff`
 
 ---
 
-### `dc:identifier`
+### `identifier`
 
 **What it is:** Unique identifier for the image
 
 **Example:**
 ```json
-"dc:identifier": "CAP-2025-08-BOG-001"
+"identifier": "CAP-2025-08-BOG-001"
 ```
 
 **Use case:** Asset tracking, database integration
 
 ---
 
-## Photoshop (photoshop:) Namespace
+## Photoshop Namespace
 
 Adobe Photoshop-specific metadata fields.
 
-### `photoshop:Headline`
+### `Headline`
 
 **What it is:** Brief headline or caption
 
@@ -544,7 +544,7 @@ Adobe Photoshop-specific metadata fields.
 
 **Example:**
 ```json
-"photoshop:Headline": "CAP Board of Governors Meeting in Atlanta - August 2025"
+"Headline": "CAP Board of Governors Meeting in Atlanta - August 2025"
 ```
 
 **Best practices:**
@@ -555,7 +555,7 @@ Adobe Photoshop-specific metadata fields.
 
 ---
 
-### `photoshop:Credit`
+### `Credit`
 
 **What it is:** Credit line or provider
 
@@ -563,106 +563,106 @@ Adobe Photoshop-specific metadata fields.
 
 **Example:**
 ```json
-"photoshop:Credit": "Civil Air Patrol National Headquarters"
+"Credit": "Civil Air Patrol National Headquarters"
 ```
 
 **Use case:** Photo credit line, agency attribution
 
 ---
 
-### `photoshop:Source`
+### `Source`
 
 **What it is:** Source or provider of the image
 
 **Example:**
 ```json
-"photoshop:Source": "CAP Public Affairs Office"
+"Source": "CAP Public Affairs Office"
 ```
 
 ---
 
-### `photoshop:City`
+### `City`
 
 **What it is:** City where photo was taken
 
 **Example:**
 ```json
-"photoshop:City": "Atlanta"
+"City": "Atlanta"
 ```
 
 ---
 
-### `photoshop:State`
+### `State`
 
 **What it is:** State/province where photo was taken
 
 **Example:**
 ```json
-"photoshop:State": "Georgia"
+"State": "Georgia"
 ```
 
 ---
 
-### `photoshop:Country`
+### `Country`
 
 **What it is:** Country where photo was taken
 
 **Example:**
 ```json
-"photoshop:Country": "United States"
+"Country": "United States"
 ```
 
 ---
 
-### `photoshop:AuthorsPosition`
+### `AuthorsPosition`
 
 **What it is:** Job title or position of creator
 
 **Example:**
 ```json
-"photoshop:AuthorsPosition": "Chief Photographer"
+"AuthorsPosition": "Chief Photographer"
 ```
 
 ---
 
-### `photoshop:CaptionWriter`
+### `CaptionWriter`
 
 **What it is:** Person who wrote the caption/description
 
 **Example:**
 ```json
-"photoshop:CaptionWriter": "John Smith"
+"CaptionWriter": "John Smith"
 ```
 
 ---
 
-### `photoshop:Instructions`
+### `Instructions`
 
 **What it is:** Special instructions for handling
 
 **Example:**
 ```json
-"photoshop:Instructions": "For internal use only"
+"Instructions": "For internal use only"
 ```
 
 ---
 
-### `photoshop:TransmissionReference`
+### `TransmissionReference`
 
 **What it is:** Job identifier or reference number
 
 **Example:**
 ```json
-"photoshop:TransmissionReference": "JOB-2025-12345"
+"TransmissionReference": "JOB-2025-12345"
 ```
 
 ---
 
-## XMP Basic (xmp:) Namespace
+## XMP Basic Namespace
 
 Core XMP metadata fields.
 
-### `xmp:Rating`
+### `Rating`
 
 **What it is:** Star rating (0-5)
 
@@ -670,25 +670,25 @@ Core XMP metadata fields.
 
 **Example:**
 ```json
-"xmp:Rating": "5"
+"Rating": "5"
 ```
 
 **Use case:** Quality rating, photo selection, ranking
 
 ---
 
-### `xmp:CreatorTool`
+### `CreatorTool`
 
 **What it is:** Software used to create the image
 
 **Example:**
 ```json
-"xmp:CreatorTool": "Adobe Photoshop Lightroom Classic 13.0"
+"CreatorTool": "Adobe Photoshop Lightroom Classic 13.0"
 ```
 
 ---
 
-### `xmp:CreateDate`
+### `CreateDate`
 
 **What it is:** Date image was created
 
@@ -696,29 +696,29 @@ Core XMP metadata fields.
 
 **Example:**
 ```json
-"xmp:CreateDate": "2025-08-25T16:34:58-04:00"
+"CreateDate": "2025-08-25T16:34:58-04:00"
 ```
 
 ---
 
-### `xmp:ModifyDate`
+### `ModifyDate`
 
 **What it is:** Date image was last modified
 
 **Example:**
 ```json
-"xmp:ModifyDate": "2025-12-08T10:15:30-05:00"
+"ModifyDate": "2025-12-08T10:15:30-05:00"
 ```
 
 ---
 
-### `xmp:Label`
+### `Label`
 
 **What it is:** Color label or classification
 
 **Example:**
 ```json
-"xmp:Label": "Red"
+"Label": "Red"
 ```
 
 **Common values:** Red, Yellow, Green, Blue, Purple
@@ -838,11 +838,11 @@ Here's a complete metadata example for documenting an official event:
     "ISOSpeedRatings": "800"
   },
   "xmp": {
-    "dc:title": "Board of Governors Meet in Atlanta",
-    "dc:description": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives.",
-    "dc:creator": "1st Lt Roxanne Schorbach",
-    "dc:rights": "© 2025 Civil Air Patrol. All rights reserved.",
-    "dc:subject": [
+    "title": "Board of Governors Meet in Atlanta",
+    "description": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives.",
+    "creator": "1st Lt Roxanne Schorbach",
+    "rights": "© 2025 Civil Air Patrol. All rights reserved.",
+    "subject": [
       "2025 Summer Command Council",
       "Atlanta",
       "2025",
@@ -852,14 +852,14 @@ Here's a complete metadata example for documenting an official event:
       "Meeting",
       "Georgia"
     ],
-    "photoshop:Headline": "CAP Board of Governors Meeting in Atlanta - August 2025",
-    "photoshop:Credit": "Civil Air Patrol",
-    "photoshop:City": "Atlanta",
-    "photoshop:State": "Georgia",
-    "photoshop:Country": "United States",
-    "photoshop:AuthorsPosition": "Public Affairs Officer",
-    "xmp:Rating": "5",
-    "xmp:CreatorTool": "Adobe Photoshop Lightroom Classic",
+    "Headline": "CAP Board of Governors Meeting in Atlanta - August 2025",
+    "Credit": "Civil Air Patrol",
+    "City": "Atlanta",
+    "State": "Georgia",
+    "Country": "United States",
+    "AuthorsPosition": "Public Affairs Officer",
+    "Rating": "5",
+    "CreatorTool": "Adobe Photoshop Lightroom Classic",
     "weightedFlatSubject": [
       "Atlanta 2025 BOG-CCM ALL",
       "BOG",
@@ -883,11 +883,11 @@ Here's a complete metadata example for documenting an official event:
     "ImageDescription": "Professional headshot for corporate use"
   },
   "xmp": {
-    "dc:title": "John Doe - Corporate Headshot",
-    "dc:creator": "Jane Smith",
-    "dc:subject": ["portrait", "headshot", "business", "corporate"],
-    "photoshop:Credit": "Jane Smith Photography",
-    "xmp:Rating": "5"
+    "title": "John Doe - Corporate Headshot",
+    "creator": "Jane Smith",
+    "subject": ["portrait", "headshot", "business", "corporate"],
+    "Credit": "Jane Smith Photography",
+    "Rating": "5"
   }
 }
 ```
@@ -902,14 +902,14 @@ Here's a complete metadata example for documenting an official event:
     "ImageDescription": "Sunrise over Rocky Mountain National Park"
   },
   "xmp": {
-    "dc:title": "Rocky Mountain Sunrise",
-    "dc:description": "Golden hour light illuminates the peaks of Rocky Mountain National Park on a clear autumn morning.",
-    "dc:creator": "Bob Johnson",
-    "dc:subject": ["landscape", "mountains", "sunrise", "Colorado", "nature"],
-    "photoshop:City": "Estes Park",
-    "photoshop:State": "Colorado",
-    "photoshop:Country": "United States",
-    "xmp:Rating": "4"
+    "title": "Rocky Mountain Sunrise",
+    "description": "Golden hour light illuminates the peaks of Rocky Mountain National Park on a clear autumn morning.",
+    "creator": "Bob Johnson",
+    "subject": ["landscape", "mountains", "sunrise", "Colorado", "nature"],
+    "City": "Estes Park",
+    "State": "Colorado",
+    "Country": "United States",
+    "Rating": "4"
   }
 }
 ```
@@ -924,14 +924,14 @@ Here's a complete metadata example for documenting an official event:
     "ImageDescription": "Mayor signs new climate initiative bill"
   },
   "xmp": {
-    "dc:title": "Climate Bill Signing Ceremony",
-    "dc:description": "Mayor Jane Doe signs the city's new climate initiative bill into law at City Hall, surrounded by environmental advocates and city council members.",
-    "dc:creator": "Sarah Williams",
-    "dc:subject": ["news", "politics", "environment", "climate", "government"],
-    "photoshop:Headline": "Mayor Signs Climate Initiative Into Law",
-    "photoshop:Credit": "Associated Press",
-    "photoshop:Source": "City Hall Press Office",
-    "photoshop:TransmissionReference": "NEWS-2025-12-08-001",
+    "title": "Climate Bill Signing Ceremony",
+    "description": "Mayor Jane Doe signs the city's new climate initiative bill into law at City Hall, surrounded by environmental advocates and city council members.",
+    "creator": "Sarah Williams",
+    "subject": ["news", "politics", "environment", "climate", "government"],
+    "Headline": "Mayor Signs Climate Initiative Into Law",
+    "Credit": "Associated Press",
+    "Source": "City Hall Press Office",
+    "TransmissionReference": "NEWS-2025-12-08-001",
     "Iptc4xmpCore:IntellectualGenre": "News"
   }
 }
@@ -951,10 +951,10 @@ Use the same format and terminology across all images:
 ## 2. Be Thorough But Efficient
 
 **Essential fields to always fill:**
-- `Artist` / `dc:creator`
-- `Copyright` / `dc:rights`
-- `ImageDescription` / `dc:description`
-- `dc:subject` (keywords)
+- `Artist` / `creator`
+- `Copyright` / `rights`
+- `ImageDescription` / `description`
+- `subject` (keywords)
 
 **Fill when relevant:**
 - Location fields (if location matters)
@@ -1002,22 +1002,22 @@ Always include:
 
 ## Must Fill (Essential)
 
-1. `Artist` / `dc:creator` - Who created it
-2. `Copyright` / `dc:rights` - Legal protection
-3. `ImageDescription` / `dc:description` - What it shows
+1. `Artist` / `creator` - Who created it
+2. `Copyright` / `rights` - Legal protection
+3. `ImageDescription` / `description` - What it shows
 
 ## Should Fill (Important)
 
-4. `dc:title` - Name/headline
-5. `dc:subject` - Keywords for discovery
+4. `title` - Name/headline
+5. `subject` - Keywords for discovery
 6. `DateTime` - When it was taken
-7. `xmp:Rating` - Quality/importance rating
+7. `Rating` - Quality/importance rating
 
 ## Nice to Have (Optional)
 
 8. Location fields - Where it was taken
-9. `photoshop:Headline` - Brief caption
-10. `photoshop:Credit` - Organization/agency
+9. `Headline` - Brief caption
+10. `Credit` - Organization/agency
 11. Technical fields - Usually auto-filled by camera
 
 ---
@@ -1036,7 +1036,6 @@ Always include:
 
 **Check:**
 - Correct field names (case-sensitive)
-- Using proper XMP namespaces (`dc:`, `photoshop:`, `xmp:`)
 - File hasn't been stripped of metadata
 - Using compatible software
 
@@ -1064,8 +1063,8 @@ Always include:
     "Copyright": "© 2025 Your Name"
   },
   "xmp": {
-    "dc:creator": "Your Name",
-    "dc:rights": "© 2025 Your Name"
+    "creator": "Your Name",
+    "rights": "© 2025 Your Name"
   }
 }
 ```
@@ -1079,13 +1078,13 @@ Always include:
     "ImageDescription": "[Brief description]"
   },
   "xmp": {
-    "dc:title": "[Title]",
-    "dc:description": "[Full description]",
-    "dc:creator": "Your Name",
-    "dc:rights": "© 2025 Your Company",
-    "dc:subject": ["keyword1", "keyword2"],
-    "photoshop:Credit": "Your Company",
-    "xmp:Rating": "3"
+    "title": "[Title]",
+    "description": "[Full description]",
+    "creator": "Your Name",
+    "rights": "© 2025 Your Company",
+    "subject": ["keyword1", "keyword2"],
+    "Credit": "Your Company",
+    "Rating": "3"
   }
 }
 ```

@@ -1,0 +1,1107 @@
+---
+title: "Metadata Fields Reference"
+subtitle: "Photo Metadata Editor - EXIF and XMP Guide"
+author: "Michael Gledhill"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    theme: cosmo
+  pdf:
+    toc: true
+    number-sections: true
+---
+
+# Introduction
+
+Photo metadata is information embedded directly in your image files. This guide covers the two main metadata standards:
+
+- **EXIF** (Exchangeable Image File Format) - Technical camera data and basic descriptions
+- **XMP** (Extensible Metadata Platform) - Rich descriptive metadata by Adobe
+
+Understanding these fields helps you properly document, organize, and protect your photographs.
+
+---
+
+# Quick Reference: Common Fields
+
+## Most Used EXIF Fields
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `Artist` | Photographer/creator name | "John Doe" |
+| `Copyright` | Copyright notice | "© 2025 John Doe" |
+| `ImageDescription` | Brief description | "Sunset over mountains" |
+| `DateTime` | Date/time photo taken | "2025:12:08 14:30:25" |
+
+## Most Used XMP Fields
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `dc:title` | Photo title | "Board of Governors Meeting" |
+| `dc:description` | Full description | "The Board met in Atlanta..." |
+| `dc:creator` | Creator name | "Jane Smith" |
+| `dc:subject` | Keywords (array) | ["event", "2025", "Atlanta"] |
+| `dc:rights` | Copyright info | "Civil Air Patrol" |
+| `photoshop:Headline` | Headline/caption | "CAP Board Meeting - Aug 2025" |
+
+---
+
+# EXIF Metadata Fields
+
+EXIF metadata is the original standard, primarily used for camera settings and basic description.
+
+## Basic Description Fields
+
+### `Artist`
+
+**What it is:** The name of the photographer or creator
+
+**Data type:** Text string
+
+**Common uses:**
+- Copyright attribution
+- Photo credit
+- Creator identification
+
+**Example:**
+```json
+"Artist": "1st Lt Roxanne Schorbach"
+```
+
+**Best practices:**
+- Use full name or professional name
+- Be consistent across all images
+- Include rank/title if relevant for official photos
+
+---
+
+### `Copyright`
+
+**What it is:** Copyright notice and ownership statement
+
+**Data type:** Text string
+
+**Common uses:**
+- Legal copyright protection
+- Rights management
+- Ownership declaration
+
+**Example:**
+```json
+"Copyright": "© 2025 Civil Air Patrol"
+```
+
+**Best practices:**
+- Include © symbol or "Copyright"
+- Include year
+- State rights holder name
+- Example formats:
+  - `© 2025 John Doe. All rights reserved.`
+  - `Copyright 2025 Acme Photography`
+  - `© 2025 Organization Name`
+
+---
+
+### `ImageDescription`
+
+**What it is:** Brief description of the image content
+
+**Data type:** Text string
+
+**Common uses:**
+- Quick summary of photo
+- Context for what's shown
+- Searchable description
+
+**Example:**
+```json
+"ImageDescription": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering."
+```
+
+**Best practices:**
+- Keep it concise but descriptive
+- Include key details (who, what, where)
+- Use complete sentences
+- Typically 1-3 sentences
+
+---
+
+### `DateTime`
+
+**What it is:** Date and time the photo was taken
+
+**Data type:** Text string in format `YYYY:MM:DD HH:MM:SS`
+
+**Common uses:**
+- Chronological organization
+- Event documentation
+- Time-based sorting
+
+**Example:**
+```json
+"DateTime": "2025:08:25 16:34:58"
+```
+
+**Format breakdown:**
+- `2025` - Year (4 digits)
+- `08` - Month (01-12)
+- `25` - Day (01-31)
+- `16` - Hour (00-23, 24-hour format)
+- `34` - Minute (00-59)
+- `58` - Second (00-59)
+
+**Best practices:**
+- Use 24-hour format
+- Use colons as separators
+- Maintain format consistency
+
+---
+
+## Camera Technical Fields
+
+### `Make`
+
+**What it is:** Camera manufacturer
+
+**Data type:** Text string
+
+**Example:**
+```json
+"Make": "Canon"
+```
+
+**Common values:** Canon, Nikon, Sony, Fujifilm, Panasonic, Olympus
+
+---
+
+### `Model`
+
+**What it is:** Specific camera model
+
+**Data type:** Text string
+
+**Example:**
+```json
+"Model": "Canon EOS R5"
+```
+
+**Use case:** Equipment tracking, technical documentation
+
+---
+
+### `LensModel`
+
+**What it is:** Lens used to capture the image
+
+**Data type:** Text string
+
+**Example:**
+```json
+"LensModel": "RF24-70mm F2.8 L IS USM"
+```
+
+**Use case:** Lens testing, equipment documentation
+
+---
+
+### `FocalLength`
+
+**What it is:** Focal length in millimeters
+
+**Data type:** Rational number
+
+**Example:**
+```json
+"FocalLength": "50mm"
+```
+
+**Use case:** Technical analysis, composition study
+
+---
+
+### `FNumber`
+
+**What it is:** Aperture f-stop value
+
+**Data type:** Rational number
+
+**Example:**
+```json
+"FNumber": "f/2.8"
+```
+
+**Use case:** Exposure documentation, technique analysis
+
+---
+
+### `ExposureTime`
+
+**What it is:** Shutter speed/exposure time
+
+**Data type:** Rational number (fraction of second)
+
+**Example:**
+```json
+"ExposureTime": "1/250"
+```
+
+**Use case:** Motion analysis, exposure documentation
+
+---
+
+### `ISOSpeedRatings`
+
+**What it is:** ISO sensitivity setting
+
+**Data type:** Integer
+
+**Example:**
+```json
+"ISOSpeedRatings": "800"
+```
+
+**Use case:** Exposure analysis, low-light documentation
+
+---
+
+### `WhiteBalance`
+
+**What it is:** White balance setting used
+
+**Data type:** Integer code
+
+**Example:**
+```json
+"WhiteBalance": "Auto"
+```
+
+**Common values:** Auto, Daylight, Cloudy, Tungsten, Fluorescent, Flash, Custom
+
+---
+
+## Location Fields
+
+### `GPSLatitude`
+
+**What it is:** Geographic latitude coordinate
+
+**Data type:** Degrees, minutes, seconds
+
+**Example:**
+```json
+"GPSLatitude": "33.7490° N"
+```
+
+---
+
+### `GPSLongitude`
+
+**What it is:** Geographic longitude coordinate
+
+**Data type:** Degrees, minutes, seconds
+
+**Example:**
+```json
+"GPSLongitude": "84.3880° W"
+```
+
+---
+
+### `GPSAltitude`
+
+**What it is:** Elevation above sea level
+
+**Data type:** Rational number (meters or feet)
+
+**Example:**
+```json
+"GPSAltitude": "320m"
+```
+
+---
+
+## Other Common EXIF Fields
+
+### `Software`
+
+**What it is:** Software used to process/edit the image
+
+**Example:** `"Adobe Photoshop 2024"`, `"Lightroom Classic"`
+
+### `Orientation`
+
+**What it is:** Image rotation/orientation
+
+**Values:** 1 (Normal), 3 (180°), 6 (90° CW), 8 (90° CCW)
+
+### `XResolution` / `YResolution`
+
+**What it is:** Image resolution in DPI/PPI
+
+**Example:** `"72"` or `"300"`
+
+### `ColorSpace`
+
+**What it is:** Color space used
+
+**Common values:** sRGB, Adobe RGB, ProPhoto RGB
+
+---
+
+# XMP Metadata Fields
+
+XMP is Adobe's extensible metadata standard, offering much richer descriptive capabilities than EXIF.
+
+## Dublin Core (dc:) Namespace
+
+The Dublin Core namespace contains the most important descriptive metadata fields.
+
+### `dc:title`
+
+**What it is:** The title or name of the image
+
+**Data type:** Text string
+
+**Common uses:**
+- Primary identifier
+- Display name
+- Headlines
+
+**Example:**
+```json
+"dc:title": "Board of Governors Meet in Atlanta"
+```
+
+**Best practices:**
+- Use title case
+- Keep concise (under 100 characters)
+- Make it descriptive but not too long
+- Think of it as a headline
+
+---
+
+### `dc:description`
+
+**What it is:** Full, detailed description of the image content
+
+**Data type:** Text string (can be long)
+
+**Common uses:**
+- Complete context
+- Event documentation
+- Searchable content
+- Accessibility descriptions
+
+**Example:**
+```json
+"dc:description": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives."
+```
+
+**Best practices:**
+- Be thorough and specific
+- Include who, what, when, where, why
+- Use complete sentences
+- Include relevant context
+- Can be multiple paragraphs
+- Think of it as a caption or article
+
+---
+
+### `dc:creator`
+
+**What it is:** Person(s) who created the image
+
+**Data type:** Text string or array
+
+**Common uses:**
+- Photo credit
+- Copyright attribution
+- Creator identification
+
+**Example (single creator):**
+```json
+"dc:creator": "1st Lt Roxanne Schorbach"
+```
+
+**Example (multiple creators):**
+```json
+"dc:creator": ["John Doe", "Jane Smith"]
+```
+
+**Best practices:**
+- Use full, professional names
+- Include title/rank if applicable
+- Can list multiple creators for collaborative work
+
+---
+
+### `dc:subject`
+
+**What it is:** Keywords or tags describing the content
+
+**Data type:** Array of strings
+
+**Common uses:**
+- Searchability
+- Categorization
+- Organization
+- Discovery
+
+**Example:**
+```json
+"dc:subject": [
+  "2025 Summer Command Council",
+  "Atlanta",
+  "2025",
+  "Command Council",
+  "BOG"
+]
+```
+
+**Best practices:**
+- Use specific, relevant keywords
+- Include locations, events, people, topics
+- Use consistent terminology
+- Think about how you'd search for this
+- Can include:
+  - Event names
+  - Location names
+  - Year/date
+  - Organization names
+  - Topic areas
+  - People's names
+
+---
+
+### `dc:rights`
+
+**What it is:** Copyright and usage rights statement
+
+**Data type:** Text string
+
+**Common uses:**
+- Legal rights declaration
+- Usage permissions
+- License information
+
+**Example:**
+```json
+"dc:rights": "© 2025 Civil Air Patrol. All rights reserved."
+```
+
+**Best practices:**
+- Include copyright symbol and year
+- State rights holder
+- Can include license type:
+  - `© 2025 John Doe. All rights reserved.`
+  - `© 2025 Organization Name. Licensed under CC BY 4.0.`
+  - `Public Domain`
+
+---
+
+### `dc:format`
+
+**What it is:** File format/MIME type
+
+**Example:**
+```json
+"dc:format": "image/jpeg"
+```
+
+**Common values:** `image/jpeg`, `image/png`, `image/tiff`
+
+---
+
+### `dc:identifier`
+
+**What it is:** Unique identifier for the image
+
+**Example:**
+```json
+"dc:identifier": "CAP-2025-08-BOG-001"
+```
+
+**Use case:** Asset tracking, database integration
+
+---
+
+## Photoshop (photoshop:) Namespace
+
+Adobe Photoshop-specific metadata fields.
+
+### `photoshop:Headline`
+
+**What it is:** Brief headline or caption
+
+**Data type:** Text string
+
+**Common uses:**
+- News-style headline
+- Quick identifier
+- Gallery captions
+
+**Example:**
+```json
+"photoshop:Headline": "CAP Board of Governors Meeting in Atlanta - August 2025"
+```
+
+**Best practices:**
+- Keep it short (under 256 characters)
+- Newspaper headline style
+- Summarize the key point
+- More detailed than title, briefer than description
+
+---
+
+### `photoshop:Credit`
+
+**What it is:** Credit line or provider
+
+**Data type:** Text string
+
+**Example:**
+```json
+"photoshop:Credit": "Civil Air Patrol National Headquarters"
+```
+
+**Use case:** Photo credit line, agency attribution
+
+---
+
+### `photoshop:Source`
+
+**What it is:** Source or provider of the image
+
+**Example:**
+```json
+"photoshop:Source": "CAP Public Affairs Office"
+```
+
+---
+
+### `photoshop:City`
+
+**What it is:** City where photo was taken
+
+**Example:**
+```json
+"photoshop:City": "Atlanta"
+```
+
+---
+
+### `photoshop:State`
+
+**What it is:** State/province where photo was taken
+
+**Example:**
+```json
+"photoshop:State": "Georgia"
+```
+
+---
+
+### `photoshop:Country`
+
+**What it is:** Country where photo was taken
+
+**Example:**
+```json
+"photoshop:Country": "United States"
+```
+
+---
+
+### `photoshop:AuthorsPosition`
+
+**What it is:** Job title or position of creator
+
+**Example:**
+```json
+"photoshop:AuthorsPosition": "Chief Photographer"
+```
+
+---
+
+### `photoshop:CaptionWriter`
+
+**What it is:** Person who wrote the caption/description
+
+**Example:**
+```json
+"photoshop:CaptionWriter": "John Smith"
+```
+
+---
+
+### `photoshop:Instructions`
+
+**What it is:** Special instructions for handling
+
+**Example:**
+```json
+"photoshop:Instructions": "For internal use only"
+```
+
+---
+
+### `photoshop:TransmissionReference`
+
+**What it is:** Job identifier or reference number
+
+**Example:**
+```json
+"photoshop:TransmissionReference": "JOB-2025-12345"
+```
+
+---
+
+## XMP Basic (xmp:) Namespace
+
+Core XMP metadata fields.
+
+### `xmp:Rating`
+
+**What it is:** Star rating (0-5)
+
+**Data type:** Integer (0-5)
+
+**Example:**
+```json
+"xmp:Rating": "5"
+```
+
+**Use case:** Quality rating, photo selection, ranking
+
+---
+
+### `xmp:CreatorTool`
+
+**What it is:** Software used to create the image
+
+**Example:**
+```json
+"xmp:CreatorTool": "Adobe Photoshop Lightroom Classic 13.0"
+```
+
+---
+
+### `xmp:CreateDate`
+
+**What it is:** Date image was created
+
+**Data type:** ISO 8601 date/time
+
+**Example:**
+```json
+"xmp:CreateDate": "2025-08-25T16:34:58-04:00"
+```
+
+---
+
+### `xmp:ModifyDate`
+
+**What it is:** Date image was last modified
+
+**Example:**
+```json
+"xmp:ModifyDate": "2025-12-08T10:15:30-05:00"
+```
+
+---
+
+### `xmp:Label`
+
+**What it is:** Color label or classification
+
+**Example:**
+```json
+"xmp:Label": "Red"
+```
+
+**Common values:** Red, Yellow, Green, Blue, Purple
+
+---
+
+## IPTC Core Fields
+
+Additional professional metadata fields.
+
+### `Iptc4xmpCore:Location`
+
+**What it is:** Specific location name
+
+**Example:**
+```json
+"Iptc4xmpCore:Location": "Georgia World Congress Center"
+```
+
+---
+
+### `Iptc4xmpCore:CountryCode`
+
+**What it is:** ISO country code
+
+**Example:**
+```json
+"Iptc4xmpCore:CountryCode": "US"
+```
+
+---
+
+### `Iptc4xmpCore:IntellectualGenre`
+
+**What it is:** Type/genre of image
+
+**Example:**
+```json
+"Iptc4xmpCore:IntellectualGenre": "Documentary"
+```
+
+---
+
+### `Iptc4xmpCore:Scene`
+
+**What it is:** Scene codes describing content
+
+**Example:**
+```json
+"Iptc4xmpCore:Scene": ["Meeting", "Government"]
+```
+
+---
+
+## Microsoft Photo Metadata
+
+### `MicrosoftPhoto:Rating`
+
+**What it is:** Windows Photo Gallery rating (0-99)
+
+**Common mapping:**
+- 1 star = 1
+- 2 stars = 25
+- 3 stars = 50
+- 4 stars = 75
+- 5 stars = 99
+
+---
+
+### `weightedFlatSubject`
+
+**What it is:** Hierarchical keywords with structure
+
+**Data type:** Array of strings
+
+**Common uses:**
+- Organized keyword hierarchies
+- Category structures
+- Multi-level tagging
+
+**Example:**
+```json
+"weightedFlatSubject": [
+  "Atlanta 2025 BOG-CCM ALL",
+  "BOG",
+  "BOG Facilitator Brainstorming"
+]
+```
+
+**Best practices:**
+- Use consistent hierarchy patterns
+- Can include parent|child structures
+- Example patterns:
+  - `"Events|2025|Summer|Command Council"`
+  - `"Locations|USA|Georgia|Atlanta"`
+  - `"Projects|Marketing|Campaign 2025"`
+
+---
+
+# Complete Example: Event Photography
+
+Here's a complete metadata example for documenting an official event:
+
+```json
+{
+  "exif": {
+    "Artist": "1st Lt Roxanne Schorbach",
+    "Copyright": "© 2025 Civil Air Patrol",
+    "ImageDescription": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives.",
+    "DateTime": "2025:08:25 16:34:58",
+    "Make": "Canon",
+    "Model": "Canon EOS R5",
+    "LensModel": "RF24-70mm F2.8 L IS USM",
+    "FocalLength": "50mm",
+    "FNumber": "f/2.8",
+    "ExposureTime": "1/125",
+    "ISOSpeedRatings": "800"
+  },
+  "xmp": {
+    "dc:title": "Board of Governors Meet in Atlanta",
+    "dc:description": "The Board of Governors met in Atlanta, coinciding with the 2025 Summer Command Council gathering. This meeting included strategic discussions on governance, readiness, and forward-looking initiatives.",
+    "dc:creator": "1st Lt Roxanne Schorbach",
+    "dc:rights": "© 2025 Civil Air Patrol. All rights reserved.",
+    "dc:subject": [
+      "2025 Summer Command Council",
+      "Atlanta",
+      "2025",
+      "Command Council",
+      "BOG",
+      "Board of Governors",
+      "Meeting",
+      "Georgia"
+    ],
+    "photoshop:Headline": "CAP Board of Governors Meeting in Atlanta - August 2025",
+    "photoshop:Credit": "Civil Air Patrol",
+    "photoshop:City": "Atlanta",
+    "photoshop:State": "Georgia",
+    "photoshop:Country": "United States",
+    "photoshop:AuthorsPosition": "Public Affairs Officer",
+    "xmp:Rating": "5",
+    "xmp:CreatorTool": "Adobe Photoshop Lightroom Classic",
+    "weightedFlatSubject": [
+      "Atlanta 2025 BOG-CCM ALL",
+      "BOG",
+      "BOG Facilitator Brainstorming"
+    ]
+  }
+}
+```
+
+---
+
+# Workflow Examples
+
+## Portrait Photography
+
+```json
+{
+  "exif": {
+    "Artist": "Jane Smith Photography",
+    "Copyright": "© 2025 Jane Smith. All rights reserved.",
+    "ImageDescription": "Professional headshot for corporate use"
+  },
+  "xmp": {
+    "dc:title": "John Doe - Corporate Headshot",
+    "dc:creator": "Jane Smith",
+    "dc:subject": ["portrait", "headshot", "business", "corporate"],
+    "photoshop:Credit": "Jane Smith Photography",
+    "xmp:Rating": "5"
+  }
+}
+```
+
+## Landscape Photography
+
+```json
+{
+  "exif": {
+    "Artist": "Bob Johnson",
+    "Copyright": "© 2025 Bob Johnson",
+    "ImageDescription": "Sunrise over Rocky Mountain National Park"
+  },
+  "xmp": {
+    "dc:title": "Rocky Mountain Sunrise",
+    "dc:description": "Golden hour light illuminates the peaks of Rocky Mountain National Park on a clear autumn morning.",
+    "dc:creator": "Bob Johnson",
+    "dc:subject": ["landscape", "mountains", "sunrise", "Colorado", "nature"],
+    "photoshop:City": "Estes Park",
+    "photoshop:State": "Colorado",
+    "photoshop:Country": "United States",
+    "xmp:Rating": "4"
+  }
+}
+```
+
+## News/Documentary
+
+```json
+{
+  "exif": {
+    "Artist": "Sarah Williams",
+    "Copyright": "© 2025 Associated Press",
+    "ImageDescription": "Mayor signs new climate initiative bill"
+  },
+  "xmp": {
+    "dc:title": "Climate Bill Signing Ceremony",
+    "dc:description": "Mayor Jane Doe signs the city's new climate initiative bill into law at City Hall, surrounded by environmental advocates and city council members.",
+    "dc:creator": "Sarah Williams",
+    "dc:subject": ["news", "politics", "environment", "climate", "government"],
+    "photoshop:Headline": "Mayor Signs Climate Initiative Into Law",
+    "photoshop:Credit": "Associated Press",
+    "photoshop:Source": "City Hall Press Office",
+    "photoshop:TransmissionReference": "NEWS-2025-12-08-001",
+    "Iptc4xmpCore:IntellectualGenre": "News"
+  }
+}
+```
+
+---
+
+# Best Practices
+
+## 1. Be Consistent
+
+Use the same format and terminology across all images:
+- ✓ "New York City" (not "NYC", "New York, NY", "New York")
+- ✓ "© 2025 Company Name" (consistent copyright format)
+- ✓ Standardized keyword vocabulary
+
+## 2. Be Thorough But Efficient
+
+**Essential fields to always fill:**
+- `Artist` / `dc:creator`
+- `Copyright` / `dc:rights`
+- `ImageDescription` / `dc:description`
+- `dc:subject` (keywords)
+
+**Fill when relevant:**
+- Location fields (if location matters)
+- Technical fields (already captured by camera)
+- Headline/title (for important images)
+
+## 3. Use Templates
+
+Create metadata templates for recurring scenarios:
+- Event photography template
+- Product photography template
+- Portrait session template
+- Landscape template
+
+## 4. Keywords Strategy
+
+**Good keywords:**
+- Specific and relevant
+- Consistent terminology
+- Mix of general and specific
+- Include: location, event, people, subject matter
+
+**Example keyword set:**
+```json
+["2025", "Atlanta", "Georgia", "meeting", "Board of Governors", 
+ "CAP", "Command Council", "government", "leadership"]
+```
+
+## 5. Copyright Protection
+
+Always include:
+- Copyright symbol (©)
+- Year
+- Rights holder name
+- Usage terms (if needed)
+
+**Examples:**
+- `© 2025 John Doe. All rights reserved.`
+- `© 2025 Company Name. Licensed under CC BY-SA 4.0.`
+- `© 2025 Photographer. For editorial use only.`
+
+---
+
+# Field Priority Guide
+
+## Must Fill (Essential)
+
+1. `Artist` / `dc:creator` - Who created it
+2. `Copyright` / `dc:rights` - Legal protection
+3. `ImageDescription` / `dc:description` - What it shows
+
+## Should Fill (Important)
+
+4. `dc:title` - Name/headline
+5. `dc:subject` - Keywords for discovery
+6. `DateTime` - When it was taken
+7. `xmp:Rating` - Quality/importance rating
+
+## Nice to Have (Optional)
+
+8. Location fields - Where it was taken
+9. `photoshop:Headline` - Brief caption
+10. `photoshop:Credit` - Organization/agency
+11. Technical fields - Usually auto-filled by camera
+
+---
+
+# Troubleshooting
+
+## Metadata Not Saving
+
+**Check:**
+- File is not read-only
+- You have write permissions
+- File format supports metadata (JPEG, TIFF, PNG)
+- Not trying to edit RAW files directly
+
+## Metadata Not Displaying
+
+**Check:**
+- Correct field names (case-sensitive)
+- Using proper XMP namespaces (`dc:`, `photoshop:`, `xmp:`)
+- File hasn't been stripped of metadata
+- Using compatible software
+
+## Special Characters Issues
+
+**Avoid:**
+- Smart quotes (" ") - use straight quotes (" ")
+- Special Unicode characters in critical fields
+- Line breaks in single-line fields
+
+**Safe to use:**
+- Standard punctuation
+- © symbol
+- Accented characters (é, ñ, etc.)
+
+---
+
+# Quick Templates
+
+## Basic Template
+```json
+{
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Name"
+  },
+  "xmp": {
+    "dc:creator": "Your Name",
+    "dc:rights": "© 2025 Your Name"
+  }
+}
+```
+
+## Professional Template
+```json
+{
+  "exif": {
+    "Artist": "Your Name",
+    "Copyright": "© 2025 Your Company",
+    "ImageDescription": "[Brief description]"
+  },
+  "xmp": {
+    "dc:title": "[Title]",
+    "dc:description": "[Full description]",
+    "dc:creator": "Your Name",
+    "dc:rights": "© 2025 Your Company",
+    "dc:subject": ["keyword1", "keyword2"],
+    "photoshop:Credit": "Your Company",
+    "xmp:Rating": "3"
+  }
+}
+```
+
+---
+
+:::{.callout-tip}
+## Pro Tip
+Create and save metadata templates for your common use cases. This saves time and ensures consistency across your photo library!
+:::
+
+---
+
+# Additional Resources
+
+- [EXIF Specification](http://www.exif.org/)
+- [XMP Specification](https://www.adobe.com/products/xmp.html)
+- [IPTC Photo Metadata Standard](https://iptc.org/standards/photo-metadata/)
+- [Dublin Core Metadata Initiative](https://www.dublincore.org/)

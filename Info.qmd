@@ -1,0 +1,377 @@
+---
+title: "Photo Metadata Editor — Documentation"
+subtitle: "A PySide6 desktop app that reads, deletes, and writes EXIF + XMP metadata and renames photos using templates & naming conventions"
+author: "Photo Meta Editor Team"
+date: "`r Sys.Date()`"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    number-sections: false
+    code-copy: true
+    toc-depth: 3
+    css: styles.css
+execute: 
+  echo: false
+params:
+  app_name: "Photo Metadata Editor"
+---
+
+# Photo Metadata Editor
+
+A powerful, user-friendly PySide6 desktop application for viewing, editing, and managing EXIF and XMP metadata in photographs. Perfect for photographers, archivists, and content creators who need to batch-process image metadata and implement consistent naming conventions.
+
+## Features
+
+### Core Functionality
+- **Dual Metadata Support**: Edit both EXIF and XMP metadata in JPEG, TIFF, and PNG files
+- **Smart Tool Detection**: Automatically uses `exiftool` if available (faster), falls back to pure-Python libraries
+- **Template System**: Create, save, and apply metadata templates as JSON files
+- **Flexible Naming Conventions**: Define custom filename patterns with token replacement
+- **Batch Processing**: Apply templates to multiple files simultaneously with progress tracking
+- **Atomic Operations**: Safe file writes using temporary files to prevent corruption
+- **Undo Support**: Revert the last operation with a single click
+- **Dry-Run Mode**: Preview changes before committing them to disk
+
+### User Interface
+- **Clean, Modern Design**: Single-window layout with intuitive controls
+- **Drag-and-Drop**: Drop image files directly onto the window
+- **Multi-Select Support**: Select multiple files for batch operations
+- **Live Preview**: Preview metadata changes and new filenames before applying
+- **Status Logging**: Real-time feedback on all operations
+- **Visual Feedback**: Green "APPLY" button with clear action indication
+
+### Safety Features
+- **Confirmation Dialogs**: Confirm destructive actions (delete, overwrite)
+- **Collision Handling**: Automatically append sequence numbers for duplicate filenames
+- **Merge Mode**: Optionally merge template data into existing metadata rather than overwriting
+- **Atomic Writes**: Temporary file handling to prevent corruption on failure
+
+## Installation
+
+### Prerequisites
+- Python 3.10 or later
+- `exiftool` (optional but recommended) - install via:
+  - macOS: `brew install exiftool`
+  - Linux: `apt-get install exiftool` (Debian/Ubuntu)
+  - Windows: Download from [exiftool.org](https://exiftool.org)
+
+### Setup Instructions
+
+```bash
+# 1. Clone or download the repository
+cd Photo_Metadata_App_By_Gledhill
+
+# 2. Create a virtual environment
+python3 -m venv venv
+
+# 3. Activate the virtual environment
+# macOS/Linux:
+source venv/bin/activate
+# Windows:
+venv\Scripts\activate
+
+# 4. Install dependencies
+pip install -r requirements.txt
+
+# 5. Run the application
+python3 photo_meta_editor.py
+```
+
+## Usage Guide
+
+### Quick Start
+
+1. **Open the Application**
+   ```bash
+   python3 photo_meta_editor.py
+   ```
+   The application will auto-create default templates and naming conventions on first run.
+
+2. **Add Images**
+   - Click "Open Files" to select images, or
+   - Drag and drop image files directly onto the window
+
+3. **View Metadata**
+   - Select a file
+   - Click "View Metadata" to see EXIF and XMP tags in a tabular format
+
+4. **Create a Template** (or use the pre-made examples)
+   - Click "Create Template"
+   - Add EXIF tags and XMP properties
+   - Click "Save Template"
+
+5. **Create a Naming Convention** (or use the pre-made examples)
+   - Click "Create Naming Convention"
+   - Enter a pattern using supported tokens
+   - Click "Save Convention"
+
+6. **Apply Template and Rename**
+   - Select file(s), template, and naming convention
+   - Review the preview
+   - Click the green "APPLY TEMPLATE & RENAME" button
+   - Confirm the action
+
+7. **Undo if Needed**
+   - Click "Undo Last Operation" to revert changes
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Ctrl+O | Open file dialog |
+| Ctrl+S | Save current template |
+| Ctrl+Z | Undo last operation |
+
+### Naming Convention Tokens
+
+Use these tokens in your naming patterns:
+
+| Token | Example Output | Description |
+|-------|---|---|
+| `{date}` | `2025-01-15` | ISO format date (YYYY-MM-DD) |
+| `{datetime:%Y%m%d_%H%M%S}` | `20250115_143022` | Custom datetime format (strftime) |
+| `{title}` | `Sunset Portrait` | Image title/description from metadata |
+| `{camera_model}` | `Canon EOS 5D Mark IV` | Camera model from EXIF |
+| `{sequence:03d}` | `001`, `042` | Sequence number with zero-padding |
+| `{original_name}` | `IMG_1234` | Original filename without extension |
+| `{userid}` | `john_doe` | Current system username |
+
+**Pattern Examples:**
+- `{date}_{title}_{sequence:03d}` → `2025-01-15_Sunset_001.jpg`
+- `{datetime:%Y%m%d_%H%M%S}_{camera_model}` → `20250115_143022_Canon_EOS_5D.jpg`
+- `{original_name}_edited` → `IMG_1234_edited.jpg`
+
+### Template Format
+
+Templates are stored as JSON files in `~/.photo_meta_editor/templates/`. Here's the structure:
+
+```json
+{
+  "name": "Portrait Template",
+  "exif": {
+    "Artist": "Jane Photographer",
+    "Copyright": "© 2025 Jane Photographer",
+    "ImageDescription": "Professional portrait"
+  },
+  "xmp": {
+    "dc:creator": "Jane Photographer",
+    "dc:description": "Professional portrait shoot",
+    "photoshop:Headline": "Portrait Session"
+  }
+}
+```
+
+### Options
+
+**Merge Metadata**: Check this to merge template fields into existing metadata. Uncheck to completely replace all metadata.
+
+**Dry Run**: Check this to preview all changes without actually modifying any files. Useful for testing naming patterns.
+
+## Configuration
+
+### Default Storage Locations
+
+All templates and configuration are stored in user-specific directories:
+
+```
+~/.photo_meta_editor/
+├── templates/       # Saved metadata templates
+├── naming/          # Saved naming conventions
+└── undo/            # Undo operation history
+```
+
+### Default Templates (Auto-Created)
+
+1. **Portrait Template** - Professional portrait photography metadata
+2. **Travel Log** - Travel documentation metadata
+
+### Default Naming Conventions (Auto-Created)
+
+1. **Date + Title** - Pattern: `{date}_{title}_{sequence:03d}`
+2. **Timestamp + Camera** - Pattern: `{datetime:%Y%m%d_%H%M%S}_{camera_model}`
+
+## Supported File Formats
+
+| Format | EXIF | XMP | Notes |
+|--------|------|-----|-------|
+| JPEG (.jpg, .jpeg) | ✓ | ✓ | Full support |
+| TIFF (.tiff, .tif) | ✓ | ✓ | Full support |
+| PNG (.png) | Limited | ✓ | XMP support via libxmp |
+
+## Technical Details
+
+### Metadata Handling Strategy
+
+The application implements a two-tier approach for metadata handling:
+
+1. **Primary**: `exiftool` (if available)
+   - Advantages: Fast, supports many formats, well-tested
+   - Detection: Automatically checks if `exiftool` is in PATH
+
+2. **Fallback**: Pure Python libraries
+   - `piexif`: EXIF reading/writing
+   - `python-xmp-toolkit`: XMP handling
+   - `Pillow`: Image format detection
+
+The chosen method is displayed in the status bar on startup.
+
+### Safety Mechanisms
+
+- **Atomic Writes**: Files are written to temporary locations first, then moved
+- **Backup**: Original metadata is preserved in undo history
+- **Collision Handling**: Filename collisions are resolved by appending `_N` before the extension
+- **Error Recovery**: Failed operations don't corrupt the original file
+
+## Troubleshooting
+
+### Issue: "exiftool not found" warning
+
+**Solution**: Install exiftool:
+- macOS: `brew install exiftool`
+- Linux: `apt-get install exiftool`
+- Windows: Download from [exiftool.org](https://exiftool.org)
+
+The app will continue to work with Python libraries if exiftool is unavailable.
+
+### Issue: "Failed to delete metadata"
+
+**Possible Causes**:
+- File is read-only (check file permissions)
+- Unsupported file format
+- Corrupted metadata in file
+
+**Solution**: 
+- Ensure file is writable: `chmod +x filename`
+- Try viewing metadata first to ensure the file is readable
+- Consider re-exporting the image from the original application
+
+### Issue: Templates or naming conventions not appearing
+
+**Solution**: 
+- Ensure the application has read/write permissions to `~/.photo_meta_editor/`
+- Try deleting `~/.photo_meta_editor/` to reset (will regenerate defaults)
+- Check application logs for error messages
+
+### Issue: Filenames contain special characters after applying
+
+**Cause**: Metadata tokens may contain characters invalid for filenames
+
+**Solution**: Special characters (`:`, `/`, `\`, `?`) are automatically replaced with underscores
+
+## Testing
+
+### Manual Test Cases
+
+```bash
+# Test 1: View metadata
+1. Open a JPEG file
+2. Click "View Metadata"
+3. Verify EXIF and XMP tabs show data
+
+# Test 2: Create and apply template
+1. Click "Create Template"
+2. Add EXIF tags: Artist="Test", Copyright="© 2025"
+3. Add XMP property: dc:creator="Test"
+4. Save template
+5. Select file and template
+6. Click "APPLY TEMPLATE & RENAME"
+7. Verify metadata was applied
+
+# Test 3: Delete metadata
+1. Open file, click "View Metadata" to see initial data
+2. Click "Delete Metadata", confirm
+3. Open file again, view metadata - should be mostly empty
+
+# Test 4: Undo operation
+1. Perform any operation
+2. Click "Undo Last Operation"
+3. Verify file is restored to previous state
+```
+
+### Running Unit Tests
+
+The application includes validation code throughout. To test specific functions:
+
+```python
+python3 -c "
+from photo_meta_editor import NamingEngine, MetadataManager
+from pathlib import Path
+from datetime import datetime
+
+# Test naming engine
+engine = NamingEngine()
+metadata = {'exif': {'DateTime': '2025:01:15 14:30:22', 'Model': 'Canon EOS'}}
+result = engine.generate_filename('{date}_{camera_model}_{sequence:03d}', '/tmp/test.jpg', metadata, 5)
+print(f'Naming test: {result}')
+assert '2025-01-15' in result
+assert 'Canon' in result
+assert '005' in result
+print('✓ All naming tests passed')
+"
+```
+
+## Requirements
+
+See `requirements.txt` for Python package dependencies:
+
+- **PySide6** >= 6.7.0 - GUI framework
+- **piexif** >= 1.1.3 - EXIF handling (fallback)
+- **python-xmp-toolkit** >= 2.0.1 - XMP handling (fallback)
+- **Pillow** >= 10.0.0 - Image processing
+
+## License
+
+This application is provided as-is for personal and professional use. Modify and distribute freely with attribution.
+
+## Contributing & Support
+
+For issues, feature requests, or improvements, please refer to the main repository.
+
+## Changelog
+
+### v1.0.0 (Initial Release)
+- Full EXIF and XMP metadata editing
+- Template system with JSON storage
+- Flexible naming conventions with token support
+- Batch processing with progress tracking
+- Undo functionality
+- Drag-and-drop support
+- Automatic exiftool detection with fallback
+- Comprehensive error handling and logging
+
+## Advanced Usage
+
+### Custom Datetime Formats
+
+Use Python's `strftime` format codes with the `datetime` token:
+
+```
+Pattern: {datetime:%A, %B %d, %Y}
+Result:  Monday, January 15, 2025
+```
+
+Common codes:
+- `%Y` - 4-digit year
+- `%m` - 2-digit month
+- `%d` - 2-digit day
+- `%H` - Hour (00-23)
+- `%M` - Minute (00-59)
+- `%S` - Second (00-59)
+
+### Batch Merging with Dry Run
+
+1. Check "Merge metadata" to preserve existing values
+2. Check "Dry run" to preview without changing files
+3. Apply to see what would be changed
+4. Uncheck "Dry run" and apply again to commit changes
+
+### Keyboard Navigation
+
+- **Tab** - Move between fields in dialogs
+- **Enter** - Confirm dialogs or press focused button
+- **Escape** - Cancel dialogs
+
+---
+
+**Questions?** Check the application's status bar and log output for detailed information about operations and errors.

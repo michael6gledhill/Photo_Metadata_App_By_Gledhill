@@ -28,6 +28,8 @@ OPTIONS = {
     'includes': ['metadata_handler', 'gui'],
     'excludes': ['tkinter', 'matplotlib', 'numpy', 'scipy'],
     'optimize': 2,
+    # Bundle Qt platform/image plugins so the app launches on macOS (Intel & Apple Silicon)
+    'qt_plugins': ['platforms', 'styles', 'imageformats', 'iconengines', 'platformthemes'],
 }
 
 setup(

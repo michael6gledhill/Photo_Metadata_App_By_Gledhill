@@ -24,6 +24,66 @@ Understanding these fields helps you properly document, organize, and protect yo
 
 ---
 
+# Dynamic Field Values (DateTime Formatting)
+
+Many metadata fields support **dynamic values** that update based on the current date/time. This is useful for timestamps and auto-generated descriptions.
+
+## DateTime Format Codes
+
+You can use Python's strftime format codes in the `DateTime` field and other timestamp fields:
+
+| Code | Meaning | Example |
+|------|---------|---------|
+| `%Y` | 4-digit year | 2025 |
+| `%y` | 2-digit year | 25 |
+| `%m` | Month (01-12) | 08 |
+| `%B` | Full month name | August |
+| `%b` | Abbreviated month | Aug |
+| `%d` | Day of month (01-31) | 25 |
+| `%A` | Full weekday | Saturday |
+| `%a` | Abbreviated weekday | Sat |
+| `%H` | Hour (00-23) | 16 |
+| `%I` | Hour (01-12) | 04 |
+| `%M` | Minutes (00-59) | 34 |
+| `%S` | Seconds (00-59) | 58 |
+| `%p` | AM/PM | PM |
+
+## Common DateTime Patterns
+
+### ISO 8601 Format (Sortable)
+```
+%Y-%m-%d %H:%M:%S
+```
+Output: `2025-08-25 16:34:58`
+
+Use this when you want chronologically sortable dates.
+
+### Compact Format (Filename Friendly)
+```
+%Y%m%d_%H%M%S
+```
+Output: `20250825_163458`
+
+Use this for timestamped files or archives.
+
+### Human-Readable Format
+```
+%B %d, %Y
+```
+Output: `August 25, 2025`
+
+Use this for descriptions and captions.
+
+### Military Time
+```
+%A, %B %d, %Y at %H:%M
+```
+Output: `Saturday, August 25, 2025 at 16:34`
+
+Use this for formal documentation.
+
+---
+
 # Quick Reference: Common Fields
 
 ## Most Used EXIF Fields

@@ -63,6 +63,7 @@ echo ""
 if [ -d "$INSTALL_DIR" ]; then
     echo "Updating existing installation..."
     cd "$INSTALL_DIR"
+    git pull --rebase --autostash origin main >/dev/null 2>&1 || true
     MODE="update"
 else
     echo "Downloading installation files..."
@@ -73,6 +74,15 @@ else
     }
     cd "$INSTALL_DIR"
     MODE="install"
+fi
+
+# Ensure gui_installer.py exists (for older clones)
+if [ ! -f "gui_installer.py" ]; then
+    echo "Fetching GUI installer..."
+    curl -fsSL "https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/gui_installer.py" -o gui_installer.py || {
+        echo "❌ Could not download gui_installer.py"
+        exit 1
+    }
 fi
 
 echo ""

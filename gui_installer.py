@@ -58,8 +58,12 @@ class PhotoMetadataInstaller:
             ("Install dependencies", self._step_install_dependencies),
         ]
         if sys.platform == "darwin":
-            steps.append(("Build macOS app", self._step_build_app))
-            steps.append(("Install to Applications", self._step_install_app))
+            if self._supports_py2app():
+                steps.append(("Build macOS app", self._step_build_app))
+                steps.append(("Install to Applications", self._step_install_app))
+            else:
+                # Fallback: create a launcher script when py2app is unsupported
+                steps.append(("Create launcher", self._step_create_launcher))
         else:
             steps.append(("Create launcher", self._step_create_launcher))
         return steps
@@ -99,6 +103,9 @@ class PhotoMetadataInstaller:
             self.signals.log.emit("❌ Python 3 not found. Please install Python 3.")
             return False
         self.signals.log.emit("✓ Python 3 found")
+
+        if sys.platform == "darwin" and not self._supports_py2app():
+            self.signals.log.emit("⚠️ py2app is not supported on this Python version. Will skip app bundle and create a launcher instead.")
         return True
 
     def _step_clone_or_pull(self, mode: str) -> bool:
@@ -136,7 +143,7 @@ class PhotoMetadataInstaller:
                 [sys.executable, "-m", "pip", "install", "-q", "--upgrade", "pip"],
                 [sys.executable, "-m", "pip", "install", "-q", "-r", "requirements.txt"],
             ]
-            if sys.platform == "darwin":
+            if sys.platform == "darwin" and self._supports_py2app():
                 cmds.append([sys.executable, "-m", "pip", "install", "-q", "py2app"])
             for cmd in cmds:
                 result = subprocess.run(
@@ -158,6 +165,8 @@ class PhotoMetadataInstaller:
     def _step_build_app(self, mode: str) -> bool:
         if sys.platform != "darwin":
             return True
+        if not self._supports_py2app():
+            return True
         try:
             self.signals.log.emit("Building macOS app (py2app)...")
             result = subprocess.run(
@@ -178,6 +187,8 @@ class PhotoMetadataInstaller:
 
     def _step_install_app(self, mode: str) -> bool:
         if sys.platform != "darwin":
+            return True
+        if not self._supports_py2app():
             return True
         try:
             dist_app = self.install_dir / "dist" / self.app_name
@@ -240,6 +251,11 @@ class PhotoMetadataInstaller:
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
+
+    def _supports_py2app(self) -> bool:
+        """Return True if current Python is a version py2app supports (<=3.12 best-effort)."""
+        # py2app support for 3.13+/3.14 is unreliable; skip to avoid build crashes
+        return sys.version_info < (3, 13)
 
 
 class InstallerWindow(QMainWindow):

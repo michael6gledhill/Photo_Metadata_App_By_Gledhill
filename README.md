@@ -6,13 +6,15 @@ A professional application for editing photo metadata (EXIF and XMP) and batch r
 
 ## ⚡ Quick Install
 
-### macOS (Intel & M1)
+### macOS (Intel & M1) - GUI Installer (Recommended)
 
 ```bash
-sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh | bash
 ```
 
-### Windows
+This launches a graphical installer that handles everything for you.
+
+### Windows - GUI Installer
 
 **Option 1: PowerShell (Recommended)**
 1. Right-click PowerShell and select "Run as administrator"

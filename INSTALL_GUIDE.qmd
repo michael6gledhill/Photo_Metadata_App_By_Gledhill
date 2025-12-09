@@ -14,115 +14,116 @@ format:
 
 # Introduction
 
-This guide will walk you through installing the Photo Metadata Editor application on your Mac. We'll cover two methods:
+This guide will walk you through installing the Photo Metadata Editor application. We'll cover multiple methods:
 
-1. **Automatic Installation** (Recommended) - One command does everything
-2. **Manual Installation** - For those who want more control
+1. **GUI Installer** (Recommended) - Graphical installer with progress tracking
+2. **Command Line** - One command for advanced users
+3. **Manual Installation** - For those who want more control
 
 Choose the method that works best for you!
 
 ---
 
-# Method 1: Automatic Installation (Recommended)
+# Method 1: GUI Installer (Recommended)
 
-This is the easiest way to install the app. One command handles everything automatically.
+The GUI installer provides a friendly graphical interface for installation and updates.
 
-## Step 1: Open Terminal
+## macOS, Linux, and Unix Systems
+
+### Step 1: Open Terminal
 
 :::{.callout-note}
-The Terminal is a program that lets you type commands to your Mac.
+The Terminal is a program that lets you type commands to your system.
 :::
 
+**macOS:**
 1. Press **Command (⌘) + Space** on your keyboard
-2. This opens Spotlight Search (the search bar at the top of your screen)
+2. This opens Spotlight Search
 3. Type: `terminal`
 4. Press **Enter** when you see the Terminal app highlighted
 
-![Opening Terminal with Spotlight](assets/terminal-spotlight.png){fig-alt="Spotlight search showing Terminal"}
+**Linux:**
+Open any terminal emulator (Ctrl+Alt+T on most systems)
 
-You should now see a window with white or black text on a dark or light background. This is the Terminal!
+### Step 2: Copy and Run the GUI Installer
+
+Copy this command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh | bash
+```
+
+Paste it into your terminal and press **Enter**.
+
+:::{.callout-tip}
+## What happens next?
+- The script checks for requirements (Git, Python 3)
+- Downloads the application
+- Launches a **graphical installer window**
+- Shows progress as it installs
+- Displays logs and status updates in real-time
+:::
+
+A graphical installer window will appear showing the installation progress. Just watch as it completes!
+
+---
+
+# Method 2: Automatic Terminal Installation
+
+For users who prefer the command line without a GUI.
+
+## Step 1: Open Terminal
+
+**macOS:**
+1. Press **Command (⌘) + Space**
+2. Type: `terminal`
+3. Press **Enter**
+
+**Linux:**
+Open any terminal emulator
 
 ## Step 2: Copy the Install Command
 
-Copy this entire command (click the copy button in the top-right corner):
+Copy this command:
 
 ```bash
 sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
 ```
 
-:::{.callout-tip}
-## What does this command do?
-- `curl` downloads the installation script from GitHub
-- The script then installs everything automatically
-:::
-
 ## Step 3: Paste and Run
 
 1. Click in the Terminal window
-2. Press **Command (⌘) + V** to paste the command
-3. Press **Enter** to run it
+2. Paste the command (right-click → Paste, or Command+V on macOS)
+3. Press **Enter**
 
-## Step 4: Wait for Installation
+## Step 4: Watch Installation Progress
 
-You'll see messages like:
+You'll see messages showing each step:
+
 ```
 ========================================
 Photo Metadata Editor - Installation
 ========================================
 
-Creating installation directory...
 ✓ Homebrew already installed
 ✓ Git already installed
 ✓ Python 3 already installed
 Cloning repository...
 Installing Python dependencies...
-Building macOS application...
 ```
 
-:::{.callout-important}
-## First Time Installation
-If this is your first time, the script may need to install:
-- **Homebrew** (Mac's package manager) - You may need to enter your password
-- **Git** (version control tool)
-- **Python 3** (programming language)
-
-This is normal and safe! Just follow any prompts that appear.
-:::
-
-## Step 5: Installation Complete!
+## Step 5: Installation Complete
 
 When you see:
 ```
-========================================
 ✓ Installation Complete!
-========================================
-
-You can now find 'Photo Metadata Editor' in your Applications folder.
 ```
 
-The app is installed! You can now:
-
-1. Close Terminal (press **Command (⌘) + Q**)
-2. Open **Finder**
-3. Go to **Applications**
-4. Find **Photo Metadata Editor**
-5. Double-click to open it!
-
-:::{.callout-warning}
-## First Launch Security Warning
-The first time you open the app, macOS might say it's from an "unidentified developer."
-
-**To fix this:**
-1. Right-click (or Control-click) on the app
-2. Click **Open**
-3. Click **Open** again in the dialog that appears
-
-You only need to do this once!
-:::
+The app is ready to use!
 
 ---
 
-# Method 2: Manual Installation
+# Method 3: Manual Installation
 
 This method gives you more control over each step of the installation process.
 

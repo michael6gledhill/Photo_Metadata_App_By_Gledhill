@@ -1142,21 +1142,28 @@ class PhotoMetadataEditor(QMainWindow):
     def check_for_updates_background(self):
         """Check for updates in background and update UI if available."""
         def callback(result):
-            update_available, latest_version = result
-            if update_available:
-                self.update_available = True
-                self.update_btn.setText("✨")
-                self.update_btn.setToolTip(f"Update Available ({latest_version})")
-                self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
-                self.update_status_label.setText(f"✨ v{latest_version}")
-            elif latest_version:
-                self.update_status_label.setText(f"✓ v{latest_version}")
-            else:
-                self.update_status_label.setText("⚠️ Offline")
-                if self.update_checker.last_error:
-                    logger.warning(f"Update check (background) failed: {self.update_checker.last_error}")
+            try:
+                update_available, latest_version = result
+                if update_available:
+                    self.update_available = True
+                    self.update_btn.setText("✨")
+                    self.update_btn.setToolTip(f"Update Available ({latest_version})")
+                    self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
+                    self.update_status_label.setText(f"✨ v{latest_version}")
+                elif latest_version:
+                    self.update_status_label.setText(f"✓ v{latest_version}")
+                else:
+                    self.update_status_label.setText("⚠️ Offline")
+                    if self.update_checker.last_error:
+                        logger.warning(f"Update check (background) failed: {self.update_checker.last_error}")
+            except Exception as e:
+                logger.error(f"Update check callback crashed: {e}")
+                self.update_status_label.setText("⚠️ Error")
         
-        self.update_checker.check_for_updates_async(callback)
+        try:
+            self.update_checker.check_for_updates_async(callback)
+        except Exception as e:
+            logger.error(f"Failed to start update check: {e}")
     
     def open_documentation(self):
         """Open GitHub Pages homepage in browser."""
@@ -1173,25 +1180,35 @@ class PhotoMetadataEditor(QMainWindow):
             self.update_btn.setEnabled(False)
             
             def callback(result):
-                update_available, latest_version = result
-                self.update_btn.setEnabled(True)
-                
-                if update_available:
-                    self.update_available = True
-                    self.update_btn.setText("✨")
-                    self.update_btn.setToolTip(f"Update Available ({latest_version})")
-                    self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
-                    self.log_status(f"✨ Update {latest_version} available! Click the ✨ button to install.")
-                    self.update_status_label.setText(f"✨ v{latest_version}")
-                elif latest_version:
-                    self.log_status(f"✓ Online latest is v{latest_version}; you have v{self.update_checker.current_version}")
-                    self.update_status_label.setText(f"✓ v{latest_version}")
-                else:
-                    err = self.update_checker.last_error or "no response"
-                    self.log_status(f"⚠️ Update check failed: {err}")
-                    self.update_status_label.setText("⚠️ Offline")
+                try:
+                    update_available, latest_version = result
+                    self.update_btn.setEnabled(True)
+                    
+                    if update_available:
+                        self.update_available = True
+                        self.update_btn.setText("✨")
+                        self.update_btn.setToolTip(f"Update Available ({latest_version})")
+                        self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
+                        self.log_status(f"✨ Update {latest_version} available! Click the ✨ button to install.")
+                        self.update_status_label.setText(f"✨ v{latest_version}")
+                    elif latest_version:
+                        self.log_status(f"✓ Online latest is v{latest_version}; you have v{self.update_checker.current_version}")
+                        self.update_status_label.setText(f"✓ v{latest_version}")
+                    else:
+                        err = self.update_checker.last_error or "no response"
+                        self.log_status(f"⚠️ Update check failed: {err}")
+                        self.update_status_label.setText("⚠️ Offline")
+                except Exception as e:
+                    logger.error(f"Manual update check callback crashed: {e}")
+                    self.update_btn.setEnabled(True)
+                    self.log_status(f"⚠️ Update check error: {e}")
             
-            self.update_checker.check_for_updates_async(callback)
+            try:
+                self.update_checker.check_for_updates_async(callback)
+            except Exception as e:
+                logger.error(f"Failed to start manual update check: {e}")
+                self.update_btn.setEnabled(True)
+                self.log_status(f"⚠️ Could not check for updates: {e}")
         else:
             # Perform update
             reply = QMessageBox.question(
@@ -1207,7 +1224,7 @@ class PhotoMetadataEditor(QMainWindow):
                 self.perform_update()
     
     def perform_update(self):
-        """Perform the actual update."""
+        """Perform the actual update by pulling latest code from GitHub."""
         progress = QProgressDialog(
             "Updating application...",
             None,
@@ -1220,7 +1237,31 @@ class PhotoMetadataEditor(QMainWindow):
         progress.show()
         QApplication.processEvents()
         
-        success = self.update_checker.perform_update()
+        try:
+            # Get the repo path (parent of this file)
+            repo_path = Path(__file__).parent
+            
+            # Pull latest code from GitHub
+            result = subprocess.run(
+                ["git", "pull", "origin", "main"],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            
+            if result.returncode != 0:
+                raise RuntimeError(f"Git pull failed: {result.stderr}")
+            
+            # Update version.txt with the latest version
+            if self.update_checker.latest_version:
+                self.update_checker.save_current_version(self.update_checker.latest_version)
+            
+            success = True
+        except Exception as e:
+            logger.error(f"Update failed: {e}")
+            success = False
+        
         progress.close()
         
         if success:
@@ -1233,18 +1274,18 @@ class PhotoMetadataEditor(QMainWindow):
             )
             
             # Close and reopen
-            import os
             import time
-            # Save current state if needed
             QApplication.closeAllWindows()
             time.sleep(1)
             
             # Reopen the application
-            import subprocess
             if sys.platform == "darwin":
-                # macOS - reopen the .app bundle
-                app_path = Path(sys.executable).parents[2]  # Navigate up to .app directory
-                subprocess.Popen(["open", "-a", str(app_path)])
+                # macOS - reopen the .app bundle if running from one, else restart script
+                if getattr(sys, 'frozen', False):
+                    app_path = Path(sys.executable).parents[2]
+                    subprocess.Popen(["open", "-a", str(app_path)])
+                else:
+                    subprocess.Popen([sys.executable] + sys.argv)
             else:
                 # Windows/Linux - restart the script
                 subprocess.Popen([sys.executable] + sys.argv)

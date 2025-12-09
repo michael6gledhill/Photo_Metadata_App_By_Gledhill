@@ -6,7 +6,7 @@ A professional application for editing photo metadata (EXIF and XMP) and batch r
 
 ## ⚡ Quick Install
 
-### macOS (Intel & M1) - GUI Installer (Recommended)
+### macOS (Intel) - GUI Installer (Recommended)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh | bash
@@ -19,18 +19,9 @@ cd ~/App/Photo_Metadata_App_By_Gledhill && python3 main.py
 ```
 That runs the app directly without the bundled .app wrapper.
 
-### macOS (M1/M2/M3) - PyInstaller Build
+### macOS (M1/M2/M3) - Single-Command Installer
 
-If the py2app bundle fails on Apple Silicon, build/run with PyInstaller instead:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/setupm1.py -o setupm1.py \
-	&& python3 -m pip install --upgrade pip PyInstaller PySide6 Pillow piexif \
-	&& python3 setupm1.py \
-	&& open "dist/Photo Metadata Editor.app"
-```
-
-Single-command installer for Apple Silicon (builds with PyInstaller, replaces the .app in /Applications, and launches):
+For Apple Silicon, use this PyInstaller-based installer:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py | python3

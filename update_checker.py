@@ -232,8 +232,12 @@ class UpdateChecker:
     def check_for_updates_async(self, callback) -> None:
         """Check for updates in a separate thread."""
         def check():
-            result = self.check_for_updates()
-            callback(result)
+            try:
+                result = self.check_for_updates()
+                callback(result)
+            except Exception as e:
+                logger.error(f"Async update check failed: {e}")
+                callback((False, None))
         
         thread = threading.Thread(target=check, daemon=True)
         thread.start()

@@ -1,0 +1,89 @@
+---
+title: "Photo Metadata Editor"
+format:
+  html:
+    toc: false
+    theme: cosmo
+    css: styles.css
+---
+
+# Photo Metadata Editor
+
+Professional metadata editing for photographers.
+
+---
+
+## ✨ Features
+
+- **Edit EXIF Metadata** - Camera, lens, copyright, and more
+- **Embedded XMP Support** - Read and write XMP directly in JPEG files
+- **Templates** - Create and reuse metadata configurations
+- **Batch Rename** - Rename multiple files with custom patterns
+- **Cross-Platform** - Works on macOS (Intel & M1), Windows, and Linux
+
+---
+
+## 📚 Documentation
+
+Find what you need:
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-6}
+### 🚀 Getting Started
+[Installation Guide](INSTALL_GUIDE.html)
+
+Complete setup instructions for all platforms, including the one-command install.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### 📋 Naming Conventions
+[Naming Guide](NAMING_CONVENTIONS.html)
+
+Learn about tokens and patterns for batch renaming files.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### 📸 Metadata Fields
+[Metadata Guide](METADATA_GUIDE.html)
+
+Complete reference of all supported EXIF and XMP fields, including datetime formatting.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### 💬 Support
+[GitHub Issues](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues)
+
+Report bugs or request features on GitHub.
+:::
+
+::::
+
+---
+
+## ⚡ Quick Install
+
+**macOS (Intel & M1):**
+```bash
+sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
+```
+
+**Windows:** See the [Installation Guide](INSTALL_GUIDE.html)
+
+**Linux:** See the [Installation Guide](INSTALL_GUIDE.html)
+
+---
+
+## 🔄 Updates
+
+The app checks for updates automatically. When an update is available, click the **✨** button in the toolbar to install it.
+
+---
+
+## 📄 License
+
+© 2025 Michael Gledhill
+
+---
+
+**[View on GitHub](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill)** • **[Report an Issue](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues)**

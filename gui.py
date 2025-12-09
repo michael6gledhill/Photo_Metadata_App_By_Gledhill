@@ -17,12 +17,13 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QFileDialog, QListWidget, QListWidgetItem, QTextEdit, QDialog, QSplitter,
     QProgressDialog, QMessageBox, QAbstractItemView, QLineEdit, QTableWidget, 
-    QTableWidgetItem, QCheckBox, QGroupBox, QFormLayout, QTabWidget
+    QTableWidgetItem, QCheckBox, QGroupBox, QFormLayout, QTabWidget, QToolBar, QSizePolicy
 )
-from PySide6.QtCore import Qt, QSize, QMimeData, QPoint, QItemSelectionModel
+from PySide6.QtCore import Qt, QSize, QMimeData, QPoint, QItemSelectionModel, Signal, QObject
 from PySide6.QtGui import QIcon, QColor, QDragEnterEvent, QDropEvent, QFont, QPixmap
 
 from metadata_handler import MetadataManager, TemplateManager, NamingEngine
+from update_checker import UpdateChecker
 
 logger = logging.getLogger(__name__)
 
@@ -522,21 +523,60 @@ class PhotoMetadataEditor(QMainWindow):
         self.metadata_manager = MetadataManager()
         self.template_manager = TemplateManager()
         self.naming_engine = NamingEngine()
+        self.update_checker = UpdateChecker()
         
         self.selected_files = []
         self.selected_template = None
         self.selected_naming = None
         self.last_operation = None
         self.preview_index = 0
+        self.update_available = False
         
         self.init_ui()
         self.setAcceptDrops(True)
+        
+        # Check for updates in background
+        self.check_for_updates_background()
         
         logger.info("Photo Metadata Editor started")
     
     def init_ui(self):
         central = QWidget()
         self.setCentralWidget(central)
+        
+        # Create toolbar
+        toolbar = QToolBar()
+        toolbar.setMovable(False)
+        toolbar.setIconSize(QSize(16, 16))
+        self.addToolBar(toolbar)
+        
+        # Info button (links to GitHub Pages homepage)
+        info_btn = QPushButton("ℹ️")
+        info_btn.setToolTip("Help & Documentation")
+        info_btn.setMaximumWidth(40)
+        info_btn.setMaximumHeight(30)
+        info_btn.setStyleSheet("padding: 2px; font-size: 14px;")
+        info_btn.clicked.connect(self.open_documentation)
+        toolbar.addWidget(info_btn)
+        
+        # Update button
+        self.update_btn = QPushButton("🔄")
+        self.update_btn.setToolTip("Check for Updates")
+        self.update_btn.setMaximumWidth(40)
+        self.update_btn.setMaximumHeight(30)
+        self.update_btn.setStyleSheet("padding: 2px; font-size: 14px;")
+        self.update_btn.clicked.connect(self.handle_update)
+        toolbar.addWidget(self.update_btn)
+        
+        # Update status label
+        self.update_status_label = QLabel("")
+        self.update_status_label.setStyleSheet("font-size: 11px; margin-left: 5px;")
+        toolbar.addWidget(self.update_status_label)
+        
+        # Add stretch spacer
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        toolbar.addWidget(spacer)
         
         main_layout = QHBoxLayout()
         
@@ -1098,6 +1138,115 @@ class PhotoMetadataEditor(QMainWindow):
         timestamp = datetime.now().strftime("%H:%M:%S")
         self.status_text.append(f"[{timestamp}] {message}")
         logger.info(message)
+    
+    def check_for_updates_background(self):
+        """Check for updates in background and update UI if available."""
+        def callback(result):
+            update_available, latest_version = result
+            if update_available:
+                self.update_available = True
+                self.update_btn.setText("✨")
+                self.update_btn.setToolTip(f"Update Available ({latest_version})")
+                self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
+                self.update_status_label.setText(f"✨ v{latest_version}")
+        
+        self.update_checker.check_for_updates_async(callback)
+    
+    def open_documentation(self):
+        """Open GitHub Pages homepage in browser."""
+        import webbrowser
+        # Point to index.html which will be the homepage
+        url = self.update_checker.get_github_pages_url()
+        webbrowser.open(url)
+    
+    def handle_update(self):
+        """Handle update button click."""
+        if not self.update_available:
+            # Just check for updates
+            self.log_status("Checking for updates...")
+            self.update_btn.setEnabled(False)
+            
+            def callback(result):
+                update_available, latest_version = result
+                self.update_btn.setEnabled(True)
+                
+                if update_available:
+                    self.update_available = True
+                    self.update_btn.setText("✨")
+                    self.update_btn.setToolTip(f"Update Available ({latest_version})")
+                    self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
+                    self.log_status(f"✨ Update {latest_version} available! Click the ✨ button to install.")
+                    self.update_status_label.setText(f"✨ v{latest_version}")
+                else:
+                    self.log_status("✓ You are on the latest version")
+                    self.update_status_label.setText("✓ Latest")
+            
+            self.update_checker.check_for_updates_async(callback)
+        else:
+            # Perform update
+            reply = QMessageBox.question(
+                self,
+                "Install Update?",
+                f"An update to version {self.update_checker.latest_version} is available.\n\n"
+                "The app will close after the update completes and restart automatically.\n\n"
+                "Continue?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            
+            if reply == QMessageBox.StandardButton.Yes:
+                self.perform_update()
+    
+    def perform_update(self):
+        """Perform the actual update."""
+        progress = QProgressDialog(
+            "Updating application...",
+            None,
+            0, 0,
+            self
+        )
+        progress.setWindowModality(Qt.WindowModality.WindowModal)
+        progress.setWindowTitle("Installing Update")
+        progress.setCancelButton(None)
+        progress.show()
+        QApplication.processEvents()
+        
+        success = self.update_checker.perform_update()
+        progress.close()
+        
+        if success:
+            self.log_status("✓ Update installed successfully!")
+            QMessageBox.information(
+                self,
+                "Update Complete",
+                "The update has been installed successfully.\n\n"
+                "The application will now close and reopen with the latest version."
+            )
+            
+            # Close and reopen
+            import os
+            import time
+            # Save current state if needed
+            QApplication.closeAllWindows()
+            time.sleep(1)
+            
+            # Reopen the application
+            import subprocess
+            if sys.platform == "darwin":
+                # macOS - reopen the .app bundle
+                app_path = Path(sys.executable).parents[2]  # Navigate up to .app directory
+                subprocess.Popen(["open", "-a", str(app_path)])
+            else:
+                # Windows/Linux - restart the script
+                subprocess.Popen([sys.executable] + sys.argv)
+        else:
+            QMessageBox.critical(
+                self,
+                "Update Failed",
+                "Failed to install the update. Please check your internet connection "
+                "and try again.\n\nYou can also visit the GitHub repository manually."
+            )
+            self.log_status("✗ Update failed")
+
 
 
 def main():

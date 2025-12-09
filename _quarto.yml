@@ -16,6 +16,8 @@ website:
   
   navbar:
     left:
+      - href: index.qmd
+        text: "Home"
       - href: INSTALL_GUIDE.qmd
         text: "Install"
       - href: METADATA_GUIDE.qmd

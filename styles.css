@@ -1,9 +1,10 @@
 /* Photo Metadata Editor - Documentation Styles */
 
 :root {
-  --primary-color: #28a745;
-  --secondary-color: #17a2b8;
-  --danger-color: #dc3545;
+  --primary-color: #0066cc;
+  --primary-dark: #004499;
+  --accent-color: #ff9800;
+  --success-color: #28a745;
   --light-bg: #f8f9fa;
   --dark-text: #212529;
 }

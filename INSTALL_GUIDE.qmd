@@ -395,6 +395,37 @@ cp -R "dist/Photo Metadata Editor.app" /Applications/
 
 ---
 
+# Updating the App
+
+The Photo Metadata Editor includes built-in update checking!
+
+## Automatic Updates
+
+When you launch the app, it automatically checks for updates in the background. If an update is available:
+
+1. A button in the toolbar will show **✨ Update Available (version)**
+2. Click the button to install the update
+3. The app will close and restart automatically with the latest version
+
+## Manual Update Check
+
+You can also manually check for updates:
+
+1. Click the **🔄 Check for Updates** button in the toolbar
+2. The app will check for the latest version
+3. If an update is available, it will appear in the toolbar
+
+## Update Process
+
+When you click to install an update:
+
+1. The latest code is downloaded from GitHub
+2. Dependencies are updated
+3. The app closes
+4. A new instance with the latest version starts automatically
+
+---
+
 # Uninstalling
 
 To remove the app:

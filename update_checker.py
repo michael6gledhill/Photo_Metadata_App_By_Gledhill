@@ -57,7 +57,10 @@ class UpdateChecker:
         Check GitHub for the latest version.
         Returns: (update_available, latest_version)
         """
+        # Reset state before each check so stale flags don't persist
         self.last_error = None
+        self.update_available = False
+        self.latest_version = None
         candidates = []
 
         release_version = self._fetch_latest_release_version()

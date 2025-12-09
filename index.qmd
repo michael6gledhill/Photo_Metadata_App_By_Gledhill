@@ -23,54 +23,70 @@ Professional metadata editing for photographers.
 
 ---
 
-## 📚 Documentation
-
-Find what you need:
+## 📌 Fast Links
 
 :::: {.grid}
 
 ::: {.g-col-12 .g-col-md-6}
 ### 🚀 Getting Started
-[Installation Guide](INSTALL_GUIDE.html)
-
-Complete setup instructions for all platforms, including the one-command install.
+- [Homepage (you are here)](index.html)
+- [Installation Guide](INSTALL_GUIDE.html)
+- [Release Notes](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/releases)
 :::
 
 ::: {.g-col-12 .g-col-md-6}
-### 📋 Naming Conventions
-[Naming Guide](NAMING_CONVENTIONS.html)
-
-Learn about tokens and patterns for batch renaming files.
+### 📸 Metadata & Tables
+- [Metadata Guide](METADATA_GUIDE.html)
+- [Quick Metadata Reference](METADATA_GUIDE.html#quick-reference-common-fields)
+- [EXIF Table](METADATA_GUIDE.html#exif-metadata-fields) (a.k.a. IXIF)
+- [XMP Table](METADATA_GUIDE.html#xmp-metadata-fields)
+- [Datetime Formatting](METADATA_GUIDE.html#dynamic-field-values-datetime-formatting)
 :::
 
 ::: {.g-col-12 .g-col-md-6}
-### 📸 Metadata Fields
-[Metadata Guide](METADATA_GUIDE.html)
-
-Complete reference of all supported EXIF and XMP fields, including datetime formatting.
+### 🧩 Naming Conventions
+- [Naming Guide](NAMING_CONVENTIONS.html)
+- [Date/Time Tokens](NAMING_CONVENTIONS.html#date-and-time-tokens)
+- [Metadata Tokens](NAMING_CONVENTIONS.html#metadata-tokens)
+- [Camera Tokens](NAMING_CONVENTIONS.html#camera-information-tokens)
+- [Sequence/File Tokens](NAMING_CONVENTIONS.html#sequential-and-file-tokens)
+- [Operator Examples](NAMING_CONVENTIONS.html#combining-multiple-tokens)
 :::
 
 ::: {.g-col-12 .g-col-md-6}
-### 💬 Support
-[GitHub Issues](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues)
-
-Report bugs or request features on GitHub.
+### 💬 Help & Support
+- [GitHub Issues](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues)
+- [Submit a Bug](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues/new/choose)
+- [View Source](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill)
 :::
 
 ::::
 
 ---
 
-## ⚡ Quick Install
+## ⚡ Quick Install (GUI-first)
 
-**macOS (Intel & M1):**
-```bash
-sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
-```
+- **macOS (Intel & M1)** — GUI installer (recommended):
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh | bash
+  ```
+- **macOS (Terminal)** — CLI installer: `sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash`
+- **Windows** — PowerShell (Run as Administrator):
+  ```powershell
+  Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))
+  ```
+- **Linux** — See the [Installation Guide](INSTALL_GUIDE.html#method-2-automatic-terminal-installation) for distro-specific steps. Typical prerequisites:
+  ```bash
+  sudo apt-get install -y git python3 python3-pip python3-venv
+  ```
+  then run the macOS CLI installer command (it also works on Linux).
 
-**Windows:** See the [Installation Guide](INSTALL_GUIDE.html)
-
-**Linux:** See the [Installation Guide](INSTALL_GUIDE.html)
+:::{.callout-warning}
+### Apple Silicon (M1/M2) Tips
+- Ensure Homebrew path is on your shell: `export PATH="/opt/homebrew/bin:$PATH"`
+- Use the Homebrew Python: `python3 -m pip install --upgrade pip`
+- If UI libs fail to load, reinstall: `python3 -m pip install --force-reinstall PySide6`
+:::
 
 ---
 

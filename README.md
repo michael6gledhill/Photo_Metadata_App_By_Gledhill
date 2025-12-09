@@ -19,6 +19,18 @@ cd ~/App/Photo_Metadata_App_By_Gledhill && python3 main.py
 ```
 That runs the app directly without the bundled .app wrapper.
 
+### macOS (M1/M2/M3) - PyInstaller Build
+
+If the py2app bundle fails on Apple Silicon, build/run with PyInstaller instead:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/setupm1.py -o setupm1.py \
+	&& python3 -m pip install --upgrade pip PyInstaller PySide6 Pillow piexif \
+	&& python3 setupm1.py \
+	&& open "dist/Photo Metadata Editor.app"
+```
+
+
 ### Windows - GUI Installer
 
 **Option 1: PowerShell (Recommended)**
@@ -56,3 +68,5 @@ For detailed information, visit the **[GitHub Pages documentation](https://micha
 ## License
 
 © 2025 Michael Gledhill
+
+

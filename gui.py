@@ -544,39 +544,39 @@ class PhotoMetadataEditor(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         
-        # Create toolbar
+        # Create toolbar (align controls to the right/top area)
         toolbar = QToolBar()
         toolbar.setMovable(False)
         toolbar.setIconSize(QSize(16, 16))
         self.addToolBar(toolbar)
-        
-        # Info button (links to GitHub Pages homepage)
-        info_btn = QPushButton("ℹ️")
-        info_btn.setToolTip("Help & Documentation")
-        info_btn.setMaximumWidth(40)
-        info_btn.setMaximumHeight(30)
-        info_btn.setStyleSheet("padding: 2px; font-size: 14px;")
-        info_btn.clicked.connect(self.open_documentation)
-        toolbar.addWidget(info_btn)
-        
-        # Update button
-        self.update_btn = QPushButton("🔄")
-        self.update_btn.setToolTip("Check for Updates")
-        self.update_btn.setMaximumWidth(40)
-        self.update_btn.setMaximumHeight(30)
-        self.update_btn.setStyleSheet("padding: 2px; font-size: 14px;")
-        self.update_btn.clicked.connect(self.handle_update)
-        toolbar.addWidget(self.update_btn)
-        
-        # Update status label
-        self.update_status_label = QLabel("")
-        self.update_status_label.setStyleSheet("font-size: 11px; margin-left: 5px;")
-        toolbar.addWidget(self.update_status_label)
-        
-        # Add stretch spacer
+
+        # Add stretch spacer first so following widgets sit on the right
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         toolbar.addWidget(spacer)
+
+        # Update status label (compact)
+        self.update_status_label = QLabel("")
+        self.update_status_label.setStyleSheet("font-size: 11px; margin-right: 4px;")
+        toolbar.addWidget(self.update_status_label)
+
+        # Info button (links to GitHub Pages homepage)
+        info_btn = QPushButton("ℹ️")
+        info_btn.setToolTip("Help & Documentation")
+        info_btn.setMaximumWidth(32)
+        info_btn.setMaximumHeight(24)
+        info_btn.setStyleSheet("padding: 2px; font-size: 13px;")
+        info_btn.clicked.connect(self.open_documentation)
+        toolbar.addWidget(info_btn)
+
+        # Update button
+        self.update_btn = QPushButton("🔄")
+        self.update_btn.setToolTip("Check for Updates")
+        self.update_btn.setMaximumWidth(32)
+        self.update_btn.setMaximumHeight(24)
+        self.update_btn.setStyleSheet("padding: 2px; font-size: 13px;")
+        self.update_btn.clicked.connect(self.handle_update)
+        toolbar.addWidget(self.update_btn)
         
         main_layout = QHBoxLayout()
         

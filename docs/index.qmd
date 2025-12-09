@@ -5,9 +5,6 @@ format:
     toc: false
     theme: cosmo
     css: styles.css
----
-
-# Photo Metadata Editor
 
 Professional metadata editing for photographers.
 

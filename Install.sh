@@ -7,6 +7,21 @@ echo "Photo Metadata Editor - Installation"
 echo "========================================"
 echo ""
 
+# Detect OS and architecture
+OS_TYPE=$(uname -s)
+ARCH=$(uname -m)
+
+echo "Detected OS: $OS_TYPE"
+echo "Detected Architecture: $ARCH"
+echo ""
+
+if [ "$OS_TYPE" != "Darwin" ]; then
+    echo "❌ Error: This script is for macOS only."
+    echo "For Linux or Windows, please visit the installation guide:"
+    echo "https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/INSTALL_GUIDE.html"
+    exit 1
+fi
+
 # Detect username
 USERNAME=$(whoami)
 INSTALL_DIR="$HOME/App"
@@ -21,7 +36,18 @@ cd "$INSTALL_DIR"
 # Check and install Homebrew if not present
 if ! command -v brew &> /dev/null; then
     echo "Homebrew not found. Installing Homebrew..."
+    # Handle M1 Macs differently
+    if [ "$ARCH" = "arm64" ]; then
+        # M1 Mac: Homebrew is installed at /opt/homebrew/bin
+        export PATH="/opt/homebrew/bin:$PATH"
+    fi
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # Add Homebrew to PATH for this session
+    if [ "$ARCH" = "arm64" ]; then
+        export PATH="/opt/homebrew/bin:$PATH"
+    else
+        export PATH="/usr/local/bin:$PATH"
+    fi
 else
     echo "✓ Homebrew already installed"
 fi

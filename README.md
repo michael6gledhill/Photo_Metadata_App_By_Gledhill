@@ -2,15 +2,33 @@
 
 # Photo Metadata Editor
 
-A professional macOS application for editing photo metadata (EXIF and XMP) and batch renaming files.
+A professional application for editing photo metadata (EXIF and XMP) and batch renaming files. Works on macOS (Intel & M1), Windows, and Linux.
 
-## ⚡ Quick Install (macOS)
+## ⚡ Quick Install
 
-Install with a single command:
+### macOS (Intel & M1)
 
 ```bash
 sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
 ```
+
+### Windows
+
+**Option 1: PowerShell (Recommended)**
+1. Right-click PowerShell and select "Run as administrator"
+2. Run:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))
+```
+
+**Option 2: Command Prompt**
+1. Right-click cmd.exe and select "Run as administrator"
+2. Download and run: `Install.bat` from the [GitHub repository](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill)
+
+### Linux
+
+For detailed Linux installation, see the **[Installation Guide](https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/INSTALL_GUIDE.html)**
 
 ## What It Does
 
@@ -24,7 +42,7 @@ sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadat
 
 For detailed information, visit the **[GitHub Pages documentation](https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/)**:
 
-- **[Installation Guide](https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/INSTALL_GUIDE.html)** – Complete setup instructions
+- **[Installation Guide](https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/INSTALL_GUIDE.html)** – Complete setup instructions for all platforms
 - **[Naming Conventions Guide](https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/NAMING_CONVENTIONS.html)** – Token reference and patterns
 - **[Metadata Fields Guide](https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/METADATA_GUIDE.html)** – Supported EXIF and XMP fields
 

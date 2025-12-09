@@ -5,10 +5,10 @@ format:
     toc: false
     theme: cosmo
     css: styles.css
+---
 
 Professional metadata editing for photographers.
 
----
 
 ## ✨ Features
 

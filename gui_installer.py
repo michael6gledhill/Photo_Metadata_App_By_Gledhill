@@ -18,7 +18,7 @@ from PySide6.QtWidgets import (
     QLabel, QPushButton, QProgressBar, QTextEdit, QMessageBox,
     QGroupBox
 )
-from PySide6.QtCore import Qt, Signal, QObject
+from PySide6.QtCore import Qt, Signal, QObject, QTimer
 from PySide6.QtGui import QFont
 
 logger = logging.getLogger(__name__)
@@ -253,6 +253,10 @@ class InstallerWindow(QMainWindow):
         self.is_running = False
         self.step_labels = []
         self.steps = self.installer.get_steps(self.mode)
+        self.progress_target = 0
+        self.progress_timer = QTimer(self)
+        self.progress_timer.setInterval(50)  # 20 FPS smoothness
+        self.progress_timer.timeout.connect(self._progress_tick)
         
         self.init_ui()
         self.setup_signals()
@@ -368,6 +372,7 @@ class InstallerWindow(QMainWindow):
         layout.addLayout(button_layout)
         
         central.setLayout(layout)
+        self.progress_timer.start()
     
     def setup_signals(self):
         """Connect signals"""
@@ -385,7 +390,9 @@ class InstallerWindow(QMainWindow):
         self.is_running = True
         self.start_btn.setEnabled(False)
         self.log_text.clear()
+        self.progress.setRange(0, 100)
         self.progress.setValue(0)
+        self.progress_target = 0
         self.status_label.setText("Starting...")
         for lbl in self.step_labels:
             lbl.setText(lbl.text().replace("✅", "⏺").replace("❌", "⏺").replace("⏳", "⏺"))
@@ -399,8 +406,10 @@ class InstallerWindow(QMainWindow):
         thread.start()
     
     def update_progress(self, value: int):
-        """Update progress bar"""
-        self.progress.setValue(value)
+        """Update progress target (smooth animation handled by timer)"""
+        if self.progress.maximum() == 0:
+            self.progress.setRange(0, 100)
+        self.progress_target = max(0, min(100, value))
     
     def update_status(self, status: str):
         """Update status label"""
@@ -415,12 +424,15 @@ class InstallerWindow(QMainWindow):
         if state == "running":
             lbl.setText(f"⏳ {title}")
             lbl.setStyleSheet("color: #007bff;")
+            self.progress.setRange(0, 0)  # indeterminate during long step
         elif state == "ok":
             lbl.setText(f"✅ {title}")
             lbl.setStyleSheet("color: #2e7d32; font-weight: 600;")
+            self.progress.setRange(0, 100)
         elif state == "fail":
             lbl.setText(f"❌ {title}")
             lbl.setStyleSheet("color: #c62828; font-weight: 600;")
+            self.progress.setRange(0, 100)
         else:
             lbl.setText(f"⏺ {title}")
             lbl.setStyleSheet("color: #666;")
@@ -448,6 +460,14 @@ class InstallerWindow(QMainWindow):
         else:
             self.status_label.setText("✗ Failed")
             QMessageBox.critical(self, "Error", message)
+
+    def _progress_tick(self):
+        # If indeterminate, do nothing (marquee handled by QProgressBar)
+        if self.progress.maximum() == 0:
+            return
+        current = self.progress.value()
+        if current < self.progress_target:
+            self.progress.setValue(min(current + 1, self.progress_target))
 
 
 def main():

@@ -16,10 +16,10 @@ import threading
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QProgressBar, QTextEdit, QMessageBox,
-    QGroupBox, QFileDialog, QCheckBox
+    QGroupBox
 )
-from PySide6.QtCore import Qt, Signal, QObject, QSize
-from PySide6.QtGui import QFont, QPixmap
+from PySide6.QtCore import Qt, Signal, QObject
+from PySide6.QtGui import QFont
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,7 @@ class InstallerSignals(QObject):
     status = Signal(str)
     finished = Signal(bool, str)  # success, message
     log = Signal(str)
+    step_state = Signal(int, str)  # step index, state: pending|running|ok|fail
 
 
 class PhotoMetadataInstaller:
@@ -39,93 +40,50 @@ class PhotoMetadataInstaller:
         self.signals = signals
         self.repo_url = "https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git"
         self.install_dir = Path.home() / "App" / "Photo_Metadata_App_By_Gledhill"
-        
+        self.app_name = "Photo Metadata Editor.app"
+    
     def install(self) -> bool:
         """Perform installation"""
-        try:
-            self.signals.status.emit("Checking prerequisites...")
-            self.signals.log.emit("Checking for Git, Python 3...")
-            
-            if not self._check_git():
-                self.signals.log.emit("❌ Git not found. Please install Git first.")
-                return False
-            self.signals.log.emit("✓ Git found")
-            
-            if not self._check_python():
-                self.signals.log.emit("❌ Python 3 not found. Please install Python 3.")
-                return False
-            self.signals.log.emit("✓ Python 3 found")
-            
-            self.signals.progress.emit(20)
-            self.signals.status.emit("Cloning repository...")
-            self.signals.log.emit(f"Cloning to {self.install_dir}...")
-            
-            if not self._clone_repo():
-                return False
-            
-            self.signals.progress.emit(50)
-            self.signals.status.emit("Installing dependencies...")
-            self.signals.log.emit("Installing Python packages...")
-            
-            if not self._install_dependencies():
-                return False
-            
-            self.signals.progress.emit(80)
-            self.signals.status.emit("Setting up application...")
-            self.signals.log.emit("Creating shortcuts and configuration...")
-            
-            if not self._setup_app():
-                return False
-            
-            self.signals.progress.emit(100)
-            self.signals.log.emit("✓ Installation complete!")
-            self.signals.finished.emit(True, f"Installation successful!\n\nApp location: {self.install_dir}")
-            return True
-            
-        except Exception as e:
-            self.signals.log.emit(f"❌ Error: {str(e)}")
-            self.signals.finished.emit(False, f"Installation failed: {str(e)}")
-            return False
+        return self._run_steps(mode="install")
     
     def update(self) -> bool:
         """Perform update"""
+        return self._run_steps(mode="update")
+    
+    # --- Step pipeline ---
+    def get_steps(self, mode: str):
+        steps = [
+            ("Check prerequisites", self._step_prereqs),
+            ("Fetch latest code", self._step_clone_or_pull),
+            ("Install dependencies", self._step_install_dependencies),
+        ]
+        if sys.platform == "darwin":
+            steps.append(("Build macOS app", self._step_build_app))
+            steps.append(("Install to Applications", self._step_install_app))
+        else:
+            steps.append(("Create launcher", self._step_create_launcher))
+        return steps
+    
+    def _run_steps(self, mode: str) -> bool:
+        steps = self.get_steps(mode)
+        total = len(steps)
         try:
-            self.signals.status.emit("Updating application...")
-            self.signals.log.emit("Pulling latest code...")
-            
-            if not self.install_dir.exists():
-                self.signals.log.emit("❌ Installation not found")
-                return False
-            
-            result = subprocess.run(
-                ["git", "pull", "origin", "main"],
-                cwd=self.install_dir,
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            
-            if result.returncode != 0:
-                self.signals.log.emit(f"❌ Git pull failed: {result.stderr}")
-                return False
-            
-            self.signals.log.emit("✓ Code updated")
-            self.signals.progress.emit(50)
-            
-            self.signals.status.emit("Installing dependencies...")
-            self.signals.log.emit("Updating Python packages...")
-            
-            if not self._install_dependencies():
-                return False
-            
-            self.signals.progress.emit(100)
-            self.signals.log.emit("✓ Update complete!")
-            self.signals.finished.emit(True, "Update successful!\n\nThe app will restart with the latest version.")
+            for idx, (title, fn) in enumerate(steps):
+                self.signals.status.emit(title)
+                self.signals.step_state.emit(idx, "running")
+                ok = fn(mode)
+                if not ok:
+                    self.signals.step_state.emit(idx, "fail")
+                    self.signals.finished.emit(False, f"Failed: {title}")
+                    return False
+                self.signals.step_state.emit(idx, "ok")
+                progress = int(((idx + 1) / total) * 100)
+                self.signals.progress.emit(progress)
+            self.signals.finished.emit(True, "All steps completed successfully.")
             return True
-            
         except Exception as e:
-            self.signals.log.emit(f"❌ Error: {str(e)}")
-            self.signals.finished.emit(False, f"Update failed: {str(e)}")
+            self.signals.log.emit(f"❌ Error: {e}")
+            self.signals.finished.emit(False, f"Error: {e}")
             return False
     
     def _check_git(self) -> bool:

@@ -10,14 +10,15 @@ import sys
 import logging
 from pathlib import Path
 from typing import Optional, Tuple
-from urllib.request import urlopen
-from urllib.error import URLError
+from urllib.request import urlopen, Request
+from urllib.error import URLError, HTTPError
 import threading
 
 logger = logging.getLogger(__name__)
 
 GITHUB_REPO = "michael6gledhill/Photo_Metadata_App_By_Gledhill"
 RELEASES_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+RAW_VERSION_URL = "https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/version.txt"
 GITHUB_PAGES_URL = "https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/"
 
 
@@ -49,22 +50,41 @@ class UpdateChecker:
         Check GitHub for the latest version.
         Returns: (update_available, latest_version)
         """
-        try:
-            with urlopen(RELEASES_API_URL, timeout=5) as response:
-                data = json.loads(response.read().decode('utf-8'))
-                self.latest_version = data['tag_name'].lstrip('v')
-                
-                # Compare versions (simple comparison)
-                if self._compare_versions(self.latest_version, self.current_version) > 0:
-                    self.update_available = True
-                    logger.info(f"Update available: {self.latest_version}")
-                    return True, self.latest_version
-                else:
-                    logger.info(f"No update available. Current: {self.current_version}")
-                    return False, None
-        except (URLError, json.JSONDecodeError, KeyError, Exception) as e:
-            logger.warning(f"Failed to check for updates: {e}")
+        # Try releases API first, then fallback to raw version.txt
+        latest = self._fetch_latest_release_version()
+        if not latest:
+            latest = self._fetch_latest_raw_version()
+        if not latest:
             return False, None
+
+        self.latest_version = latest
+        if self._compare_versions(self.latest_version, self.current_version) > 0:
+            self.update_available = True
+            logger.info(f"Update available: {self.latest_version}")
+            return True, self.latest_version
+
+        logger.info(f"No update available. Current: {self.current_version}")
+        return False, None
+
+    def _fetch_latest_release_version(self) -> Optional[str]:
+        try:
+            req = Request(RELEASES_API_URL, headers={"User-Agent": "PhotoMetadataEditor-Updater"})
+            with urlopen(req, timeout=6) as response:
+                data = json.loads(response.read().decode('utf-8'))
+                return data.get('tag_name', '').lstrip('v') or None
+        except (HTTPError, URLError, json.JSONDecodeError, KeyError) as e:
+            logger.warning(f"Releases API failed: {e}")
+            return None
+
+    def _fetch_latest_raw_version(self) -> Optional[str]:
+        try:
+            req = Request(RAW_VERSION_URL, headers={"User-Agent": "PhotoMetadataEditor-Updater"})
+            with urlopen(req, timeout=6) as response:
+                text = response.read().decode('utf-8').strip()
+                return text or None
+        except (HTTPError, URLError, Exception) as e:
+            logger.warning(f"Raw version fetch failed: {e}")
+            return None
     
     @staticmethod
     def _compare_versions(version1: str, version2: str) -> int:

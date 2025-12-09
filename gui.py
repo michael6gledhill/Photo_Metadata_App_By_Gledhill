@@ -1224,7 +1224,7 @@ class PhotoMetadataEditor(QMainWindow):
                 self.perform_update()
     
     def perform_update(self):
-        """Perform the actual update by pulling latest code from GitHub."""
+        """Perform the actual update by re-running the installer."""
         progress = QProgressDialog(
             "Updating application...",
             None,
@@ -1238,24 +1238,42 @@ class PhotoMetadataEditor(QMainWindow):
         QApplication.processEvents()
         
         try:
-            # Get the repo path (parent of this file)
-            repo_path = Path(__file__).parent
-            
-            # Pull latest code from GitHub
-            result = subprocess.run(
-                ["git", "pull", "origin", "main"],
-                cwd=repo_path,
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
-            
-            if result.returncode != 0:
-                raise RuntimeError(f"Git pull failed: {result.stderr}")
-            
-            # Update version.txt with the latest version
-            if self.update_checker.latest_version:
-                self.update_checker.save_current_version(self.update_checker.latest_version)
+            # Determine which installer to run based on platform/architecture
+            if sys.platform == "darwin":
+                import platform
+                if platform.machine().lower() in {"arm64", "aarch64"}:
+                    # Apple Silicon: run install_m1.py
+                    installer_url = "https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py"
+                    subprocess.run(
+                        ["curl", "-fsSL", installer_url],
+                        stdout=subprocess.PIPE,
+                        check=True,
+                        timeout=30
+                    )
+                    # Run the installer in the background (it will rebuild and relaunch)
+                    subprocess.Popen(
+                        ["bash", "-c", f"curl -fsSL {installer_url} | python3"],
+                        start_new_session=True
+                    )
+                else:
+                    # Intel Mac: run install_gui.sh
+                    installer_url = "https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh"
+                    subprocess.Popen(
+                        ["bash", "-c", f"curl -fsSL {installer_url} | bash"],
+                        start_new_session=True
+                    )
+            else:
+                # Windows/Linux: pull and restart
+                repo_path = Path(__file__).parent
+                result = subprocess.run(
+                    ["git", "pull", "origin", "main"],
+                    cwd=repo_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
+                if result.returncode != 0:
+                    raise RuntimeError(f"Git pull failed: {result.stderr}")
             
             success = True
         except Exception as e:
@@ -1265,30 +1283,16 @@ class PhotoMetadataEditor(QMainWindow):
         progress.close()
         
         if success:
-            self.log_status("✓ Update installed successfully!")
+            self.log_status("✓ Update started successfully!")
             QMessageBox.information(
                 self,
-                "Update Complete",
-                "The update has been installed successfully.\n\n"
-                "The application will now close and reopen with the latest version."
+                "Update In Progress",
+                "The update installer is running in the background.\n\n"
+                "This app will now close. The updated version will launch automatically when ready."
             )
             
-            # Close and reopen
-            import time
-            QApplication.closeAllWindows()
-            time.sleep(1)
-            
-            # Reopen the application
-            if sys.platform == "darwin":
-                # macOS - reopen the .app bundle if running from one, else restart script
-                if getattr(sys, 'frozen', False):
-                    app_path = Path(sys.executable).parents[2]
-                    subprocess.Popen(["open", "-a", str(app_path)])
-                else:
-                    subprocess.Popen([sys.executable] + sys.argv)
-            else:
-                # Windows/Linux - restart the script
-                subprocess.Popen([sys.executable] + sys.argv)
+            # Close the app; the installer will relaunch the new version
+            QApplication.quit()
         else:
             QMessageBox.critical(
                 self,

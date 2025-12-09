@@ -30,6 +30,12 @@ curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App
 	&& open "dist/Photo Metadata Editor.app"
 ```
 
+Single-command installer for Apple Silicon (builds with PyInstaller, replaces the .app in /Applications, and launches):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py | python3
+```
+
 
 ### Windows - GUI Installer
 

@@ -11,7 +11,6 @@ import PyInstaller.__main__
 
 ROOT = Path(__file__).resolve().parent
 APP_NAME = "Photo Metadata Editor"
-ICON = ROOT / "icon.icns"
 ENTRY = ROOT / "main.py"
 ASSETS = ROOT / "assets"
 STORAGE = ROOT / "storage"
@@ -36,7 +35,7 @@ def main():
     if VERSION_FILE.exists():
         data_args += [f"{VERSION_FILE}:."]
 
-    args = [
+    PyInstaller.__main__.run([
         str(ENTRY),
         "--name", APP_NAME,
         "--windowed",
@@ -46,16 +45,7 @@ def main():
         "--hidden-import", "gui",
         "--hidden-import", "update_checker",
         *[arg for data in data_args for arg in ("--add-data", data)],
-    ]
-
-    # If the icon file cannot be converted on this platform, skip it to avoid ValueError
-    if ICON.exists():
-        try:
-            args.extend(["--icon", str(ICON)])
-        except Exception:
-            pass
-
-    PyInstaller.__main__.run(args)
+    ])
 
 if __name__ == "__main__":
     main()

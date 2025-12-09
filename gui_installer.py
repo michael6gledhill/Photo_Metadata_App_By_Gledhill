@@ -86,87 +86,159 @@ class PhotoMetadataInstaller:
             self.signals.finished.emit(False, f"Error: {e}")
             return False
     
-    def _check_git(self) -> bool:
-        """Check if Git is installed"""
-        try:
-            subprocess.run(["git", "--version"], capture_output=True, timeout=5, check=True)
-            return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
+    # --- Individual steps ---
+    def _step_prereqs(self, mode: str) -> bool:
+        self.signals.log.emit("Checking for Git...")
+        if not self._check_git():
+            self.signals.log.emit("❌ Git not found. Please install Git first.")
             return False
-    
-    def _check_python(self) -> bool:
-        """Check if Python 3 is available"""
-        try:
-            subprocess.run([sys.executable, "--version"], capture_output=True, timeout=5, check=True)
-            return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        self.signals.log.emit("✓ Git found")
+
+        self.signals.log.emit("Checking for Python 3...")
+        if not self._check_python():
+            self.signals.log.emit("❌ Python 3 not found. Please install Python 3.")
             return False
-    
-    def _clone_repo(self) -> bool:
-        """Clone the repository"""
+        self.signals.log.emit("✓ Python 3 found")
+        return True
+
+    def _step_clone_or_pull(self, mode: str) -> bool:
         try:
             self.install_dir.parent.mkdir(parents=True, exist_ok=True)
-            
             if self.install_dir.exists():
-                self.signals.log.emit("Repository already exists, updating...")
+                self.signals.log.emit("Updating existing repository...")
                 result = subprocess.run(
-                    ["git", "pull"],
+                    ["git", "pull", "origin", "main"],
                     cwd=self.install_dir,
                     capture_output=True,
                     text=True,
                     timeout=60
                 )
             else:
+                self.signals.log.emit("Cloning repository...")
                 result = subprocess.run(
                     ["git", "clone", self.repo_url, str(self.install_dir)],
                     capture_output=True,
                     text=True,
-                    timeout=60
+                    timeout=120
                 )
-            
-            return result.returncode == 0
+            if result.returncode != 0:
+                self.signals.log.emit(f"❌ Git error: {result.stderr}")
+                return False
+            self.signals.log.emit("✓ Repository ready")
+            return True
         except Exception as e:
             self.signals.log.emit(f"Clone error: {str(e)}")
             return False
-    
-    def _install_dependencies(self) -> bool:
-        """Install Python dependencies"""
+
+    def _step_install_dependencies(self, mode: str) -> bool:
         try:
-            result = subprocess.run(
+            cmds = [
+                [sys.executable, "-m", "pip", "install", "-q", "--upgrade", "pip"],
                 [sys.executable, "-m", "pip", "install", "-q", "-r", "requirements.txt"],
-                cwd=self.install_dir,
-                capture_output=True,
-                text=True,
-                timeout=120
-            )
-            
-            if result.returncode != 0:
-                self.signals.log.emit(f"Pip install failed: {result.stderr}")
-                return False
-            
+            ]
+            if sys.platform == "darwin":
+                cmds.append([sys.executable, "-m", "pip", "install", "-q", "py2app"])
+            for cmd in cmds:
+                result = subprocess.run(
+                    cmd,
+                    cwd=self.install_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=180
+                )
+                if result.returncode != 0:
+                    self.signals.log.emit(f"❌ Command failed: {' '.join(cmd)}\n{result.stderr}")
+                    return False
             self.signals.log.emit("✓ Dependencies installed")
             return True
         except Exception as e:
             self.signals.log.emit(f"Dependency error: {str(e)}")
             return False
-    
-    def _setup_app(self) -> bool:
-        """Set up the application (shortcuts, etc.)"""
+
+    def _step_build_app(self, mode: str) -> bool:
+        if sys.platform != "darwin":
+            return True
         try:
-            # Create launcher script for easy access
-            if sys.platform == "darwin":
-                # macOS specific setup
-                self.signals.log.emit("Configuring for macOS...")
-            elif sys.platform == "win32":
-                # Windows specific setup
-                self.signals.log.emit("Configuring for Windows...")
-            else:
-                # Linux
-                self.signals.log.emit("Configuring for Linux...")
-            
+            self.signals.log.emit("Building macOS app (py2app)...")
+            result = subprocess.run(
+                [sys.executable, "setup.py", "py2app"],
+                cwd=self.install_dir,
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
+            if result.returncode != 0:
+                self.signals.log.emit(f"❌ Build failed: {result.stderr}")
+                return False
+            self.signals.log.emit("✓ Build complete")
             return True
         except Exception as e:
-            self.signals.log.emit(f"Setup error: {str(e)}")
+            self.signals.log.emit(f"Build error: {str(e)}")
+            return False
+
+    def _step_install_app(self, mode: str) -> bool:
+        if sys.platform != "darwin":
+            return True
+        try:
+            dist_app = self.install_dir / "dist" / self.app_name
+            target_app = Path("/Applications") / self.app_name
+            if not dist_app.exists():
+                self.signals.log.emit("❌ Built app not found. Build may have failed.")
+                return False
+            if target_app.exists():
+                self.signals.log.emit("Removing existing app...")
+                subprocess.run(["rm", "-rf", str(target_app)], check=False)
+            self.signals.log.emit("Copying to /Applications (may prompt for permission)...")
+            result = subprocess.run(["cp", "-R", str(dist_app), str(target_app)], capture_output=True, text=True)
+            if result.returncode != 0:
+                self.signals.log.emit("⚠️ Could not copy to /Applications. You may need to run manually:\n"
+                                      f"sudo cp -R '{dist_app}' '{target_app}'")
+                return False
+            self.signals.log.emit("✓ Installed to /Applications")
+            return True
+        except Exception as e:
+            self.signals.log.emit(f"Install error: {str(e)}")
+            return False
+
+    def _step_create_launcher(self, mode: str) -> bool:
+        try:
+            if sys.platform == "win32":
+                script = self.install_dir / "run_app.bat"
+                content = (
+                    "@echo off\n"
+                    "cd /d \"%~dp0\"\n"
+                    "python main.py\n"
+                )
+                script.write_text(content, encoding="utf-8")
+                self.signals.log.emit(f"✓ Launcher created: {script}")
+            else:
+                script = self.install_dir / "run_app.sh"
+                content = (
+                    "#!/usr/bin/env bash\n"
+                    "cd \"$(dirname \"$0\")\"\n"
+                    "python3 main.py\n"
+                )
+                script.write_text(content, encoding="utf-8")
+                script.chmod(0o755)
+                self.signals.log.emit(f"✓ Launcher created: {script}")
+            return True
+        except Exception as e:
+            self.signals.log.emit(f"Launcher error: {str(e)}")
+            return False
+
+    # --- Helpers ---
+    def _check_git(self) -> bool:
+        try:
+            subprocess.run(["git", "--version"], capture_output=True, timeout=5, check=True)
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
+
+    def _check_python(self) -> bool:
+        try:
+            subprocess.run([sys.executable, "--version"], capture_output=True, timeout=5, check=True)
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
             return False
 
 
@@ -179,6 +251,8 @@ class InstallerWindow(QMainWindow):
         self.signals = InstallerSignals()
         self.installer = PhotoMetadataInstaller(self.signals)
         self.is_running = False
+        self.step_labels = []
+        self.steps = self.installer.get_steps(self.mode)
         
         self.init_ui()
         self.setup_signals()
@@ -230,6 +304,17 @@ class InstallerWindow(QMainWindow):
         
         layout.addWidget(desc)
         layout.addSpacing(10)
+
+        # Step list
+        steps_group = QGroupBox("Steps")
+        steps_layout = QVBoxLayout()
+        for title, _fn in self.steps:
+            lbl = QLabel(f"⏺ {title}")
+            lbl.setStyleSheet("color: #666;")
+            steps_layout.addWidget(lbl)
+            self.step_labels.append(lbl)
+        steps_group.setLayout(steps_layout)
+        layout.addWidget(steps_group)
         
         # Progress bar
         self.progress = QProgressBar()
@@ -290,6 +375,7 @@ class InstallerWindow(QMainWindow):
         self.signals.status.connect(self.update_status)
         self.signals.log.connect(self.log_message)
         self.signals.finished.connect(self.installation_finished)
+        self.signals.step_state.connect(self.update_step_state)
     
     def start_installation(self):
         """Start the installation/update process"""
@@ -300,6 +386,10 @@ class InstallerWindow(QMainWindow):
         self.start_btn.setEnabled(False)
         self.log_text.clear()
         self.progress.setValue(0)
+        self.status_label.setText("Starting...")
+        for lbl in self.step_labels:
+            lbl.setText(lbl.text().replace("✅", "⏺").replace("❌", "⏺").replace("⏳", "⏺"))
+            lbl.setStyleSheet("color: #666;")
         
         # Run installation in separate thread
         thread = threading.Thread(
@@ -315,6 +405,25 @@ class InstallerWindow(QMainWindow):
     def update_status(self, status: str):
         """Update status label"""
         self.status_label.setText(status)
+
+    def update_step_state(self, idx: int, state: str):
+        if idx < 0 or idx >= len(self.step_labels):
+            return
+        lbl = self.step_labels[idx]
+        base_text = lbl.text()
+        title = base_text.split(' ', 1)[-1]
+        if state == "running":
+            lbl.setText(f"⏳ {title}")
+            lbl.setStyleSheet("color: #007bff;")
+        elif state == "ok":
+            lbl.setText(f"✅ {title}")
+            lbl.setStyleSheet("color: #2e7d32; font-weight: 600;")
+        elif state == "fail":
+            lbl.setText(f"❌ {title}")
+            lbl.setStyleSheet("color: #c62828; font-weight: 600;")
+        else:
+            lbl.setText(f"⏺ {title}")
+            lbl.setStyleSheet("color: #666;")
     
     def log_message(self, message: str):
         """Add message to log"""

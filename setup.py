@@ -4,7 +4,7 @@ Setup script for building Photo Metadata Editor as a macOS .app
 
 from setuptools import setup
 
-APP = ['main.py']
+APP = ['main.py', 'gui.py', 'metadata_handler.py']
 DATA_FILES = [
     ('', ['icon.icns']),
     ('assets', ['assets/icon.icns']),

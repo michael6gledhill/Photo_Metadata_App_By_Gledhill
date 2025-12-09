@@ -536,7 +536,10 @@ class PhotoMetadataEditor(QMainWindow):
         self.setAcceptDrops(True)
         
         # Check for updates in background
-        self.check_for_updates_background()
+        try:
+            self.check_for_updates_background()
+        except Exception as e:
+            logger.error(f"Failed to start background update check: {e}")
         
         logger.info("Photo Metadata Editor started")
     
@@ -664,6 +667,7 @@ class PhotoMetadataEditor(QMainWindow):
         template_btns = QHBoxLayout()
         template_btns.addWidget(QPushButton("Import", clicked=self.import_template))
         template_btns.addWidget(QPushButton("Edit", clicked=self.edit_template))
+        template_btns.addWidget(QPushButton("Duplicate", clicked=self.duplicate_template))
         template_btns.addWidget(QPushButton("Export", clicked=self.export_template_main))
         template_btns.addWidget(QPushButton("Remove", clicked=self.delete_template))
         templates_layout.addLayout(template_btns)
@@ -902,6 +906,44 @@ class PhotoMetadataEditor(QMainWindow):
             if self.template_manager.delete_template(current_item.text()):
                 self.refresh_templates()
                 self.log_status("Template deleted")
+    
+    def duplicate_template(self):
+        current_item = self.template_list.currentItem()
+        if not current_item:
+            QMessageBox.warning(self, "Warning", "Please select a template to duplicate.")
+            return
+        
+        original_name = current_item.text()
+        templates = self.template_manager.get_templates()
+        
+        if original_name not in templates:
+            QMessageBox.warning(self, "Error", f"Template '{original_name}' not found.")
+            return
+        
+        # Get original template data
+        original_template = templates[original_name]
+        
+        # Open dialog pre-filled with original data, but allow renaming
+        dialog = TemplateDialog(self, self.template_manager)
+        dialog.setWindowTitle(f"Duplicate Template: {original_name}")
+        dialog.name_input.setText(f"{original_name} Copy")
+        
+        # Load original data into the dialog
+        for tag, value in original_template.get('exif', {}).items():
+            row = dialog.exif_table.rowCount()
+            dialog.exif_table.insertRow(row)
+            dialog.exif_table.setItem(row, 0, QTableWidgetItem(tag))
+            dialog.exif_table.setItem(row, 1, QTableWidgetItem(str(value)))
+        
+        for prop, value in original_template.get('xmp', {}).items():
+            row = dialog.xmp_table.rowCount()
+            dialog.xmp_table.insertRow(row)
+            dialog.xmp_table.setItem(row, 0, QTableWidgetItem(prop))
+            dialog.xmp_table.setItem(row, 1, QTableWidgetItem(str(value)))
+        
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.refresh_templates()
+            self.log_status(f"Template duplicated as '{dialog.name_input.text()}'")
     
     def delete_naming(self):
         current_item = self.naming_list.currentItem()
@@ -1242,26 +1284,21 @@ class PhotoMetadataEditor(QMainWindow):
             if sys.platform == "darwin":
                 import platform
                 if platform.machine().lower() in {"arm64", "aarch64"}:
-                    # Apple Silicon: run install_m1.py
+                    # Apple Silicon: run install_m1.py via osascript to open Terminal
                     installer_url = "https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py"
-                    subprocess.run(
-                        ["curl", "-fsSL", installer_url],
-                        stdout=subprocess.PIPE,
-                        check=True,
-                        timeout=30
-                    )
-                    # Run the installer in the background (it will rebuild and relaunch)
-                    subprocess.Popen(
-                        ["bash", "-c", f"curl -fsSL {installer_url} | python3"],
-                        start_new_session=True
-                    )
+                    cmd = f"curl -fsSL {installer_url} | python3"
+                    subprocess.Popen([
+                        "osascript", "-e",
+                        f'tell application "Terminal" to do script "{cmd}"'
+                    ])
                 else:
-                    # Intel Mac: run install_gui.sh
+                    # Intel Mac: run install_gui.sh via osascript
                     installer_url = "https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh"
-                    subprocess.Popen(
-                        ["bash", "-c", f"curl -fsSL {installer_url} | bash"],
-                        start_new_session=True
-                    )
+                    cmd = f"curl -fsSL {installer_url} | bash"
+                    subprocess.Popen([
+                        "osascript", "-e",
+                        f'tell application "Terminal" to do script "{cmd}"'
+                    ])
             else:
                 # Windows/Linux: pull and restart
                 repo_path = Path(__file__).parent

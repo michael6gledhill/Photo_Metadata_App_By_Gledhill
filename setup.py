@@ -25,7 +25,8 @@ OPTIONS = {
         'NSHighResolutionCapable': True,
     },
     'packages': ['PySide6', 'PIL', 'piexif'],
-    'includes': ['metadata_handler', 'gui'],
+    'includes': ['metadata_handler', 'gui', 'update_checker'],
+    'resources': ['assets', 'storage', 'version.txt'],
     'excludes': ['tkinter', 'matplotlib', 'numpy', 'scipy'],
     'optimize': 2,
     # Bundle Qt platform/image plugins so the app launches on macOS (Intel & Apple Silicon)

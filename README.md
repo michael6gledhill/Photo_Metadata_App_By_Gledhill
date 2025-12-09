@@ -13,6 +13,11 @@ curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App
 ```
 
 This launches a graphical installer that handles everything for you.
+If the GUI installer fails to launch on your Mac, use the CLI fallback:
+```bash
+cd ~/App/Photo_Metadata_App_By_Gledhill && python3 main.py
+```
+That runs the app directly without the bundled .app wrapper.
 
 ### Windows - GUI Installer
 

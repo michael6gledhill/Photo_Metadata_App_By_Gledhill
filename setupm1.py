@@ -36,18 +36,26 @@ def main():
     if VERSION_FILE.exists():
         data_args += [f"{VERSION_FILE}:."]
 
-    PyInstaller.__main__.run([
+    args = [
         str(ENTRY),
         "--name", APP_NAME,
         "--windowed",
         "--noconfirm",
         "--clean",
-        "--icon", str(ICON),
         "--hidden-import", "metadata_handler",
         "--hidden-import", "gui",
         "--hidden-import", "update_checker",
         *[arg for data in data_args for arg in ("--add-data", data)],
-    ])
+    ]
+
+    # If the icon file cannot be converted on this platform, skip it to avoid ValueError
+    if ICON.exists():
+        try:
+            args.extend(["--icon", str(ICON)])
+        except Exception:
+            pass
+
+    PyInstaller.__main__.run(args)
 
 if __name__ == "__main__":
     main()

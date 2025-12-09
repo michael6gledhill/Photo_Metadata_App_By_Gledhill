@@ -8,11 +8,17 @@ import json
 import subprocess
 import sys
 import logging
+import ssl
 from pathlib import Path
 from typing import Optional, Tuple
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 import threading
+
+try:
+    import certifi  # type: ignore
+except ImportError:  # certifi is optional; we fall back to system certs
+    certifi = None
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +35,7 @@ class UpdateChecker:
         self.current_version = self.get_current_version()
         self.latest_version = None
         self.update_available = False
+        self.last_error: Optional[str] = None
         
     @staticmethod
     def get_current_version() -> str:
@@ -50,41 +57,105 @@ class UpdateChecker:
         Check GitHub for the latest version.
         Returns: (update_available, latest_version)
         """
-        # Try releases API first, then fallback to raw version.txt
-        latest = self._fetch_latest_release_version()
-        if not latest:
-            latest = self._fetch_latest_raw_version()
-        if not latest:
+        self.last_error = None
+        candidates = []
+
+        release_version = self._fetch_latest_release_version()
+        if release_version:
+            candidates.append(("release", release_version))
+
+        raw_version = self._fetch_latest_raw_version()
+        if raw_version:
+            candidates.append(("raw", raw_version))
+
+        if not candidates:
+            if not self.last_error:
+                self.last_error = "No version sources returned a value"
             return False, None
 
-        self.latest_version = latest
+        latest_source, latest_version = candidates[0]
+        for source, version in candidates[1:]:
+            if self._compare_versions(version, latest_version) > 0:
+                latest_source, latest_version = source, version
+
+        self.latest_version = latest_version
+
         if self._compare_versions(self.latest_version, self.current_version) > 0:
             self.update_available = True
-            logger.info(f"Update available: {self.latest_version}")
+            logger.info(f"Update available from {latest_source}: {self.latest_version}")
             return True, self.latest_version
 
-        logger.info(f"No update available. Current: {self.current_version}")
-        return False, None
+        logger.info(f"No update available. Current: {self.current_version}, Latest: {self.latest_version}")
+        return False, self.latest_version
 
     def _fetch_latest_release_version(self) -> Optional[str]:
+        req = Request(RELEASES_API_URL, headers={"User-Agent": "PhotoMetadataEditor-Updater"})
         try:
-            req = Request(RELEASES_API_URL, headers={"User-Agent": "PhotoMetadataEditor-Updater"})
-            with urlopen(req, timeout=6) as response:
+            with urlopen(req, timeout=6, context=self._get_ssl_context()) as response:
                 data = json.loads(response.read().decode('utf-8'))
                 return data.get('tag_name', '').lstrip('v') or None
-        except (HTTPError, URLError, json.JSONDecodeError, KeyError) as e:
-            logger.warning(f"Releases API failed: {e}")
+        except URLError as e:
+            # Retry once with insecure SSL if certs are broken locally
+            if isinstance(getattr(e, "reason", None), ssl.SSLError):
+                self.last_error = f"Releases API SSL failed: {e}"  # keep the real cause
+                logger.warning(self.last_error)
+                try:
+                    with urlopen(req, timeout=6, context=self._get_ssl_context(insecure=True)) as response:
+                        data = json.loads(response.read().decode('utf-8'))
+                        logger.warning("Releases API succeeded with insecure SSL fallback; please fix system certificates.")
+                        return data.get('tag_name', '').lstrip('v') or None
+                except Exception as inner:
+                    self.last_error = f"Releases API insecure fallback failed: {inner}"
+                    logger.warning(self.last_error)
+                    return None
+            self.last_error = f"Releases API failed: {e}"
+            logger.warning(self.last_error)
+            return None
+        except (HTTPError, json.JSONDecodeError, KeyError) as e:
+            self.last_error = f"Releases API failed: {e}"
+            logger.warning(self.last_error)
             return None
 
     def _fetch_latest_raw_version(self) -> Optional[str]:
+        req = Request(RAW_VERSION_URL, headers={"User-Agent": "PhotoMetadataEditor-Updater"})
         try:
-            req = Request(RAW_VERSION_URL, headers={"User-Agent": "PhotoMetadataEditor-Updater"})
-            with urlopen(req, timeout=6) as response:
+            with urlopen(req, timeout=6, context=self._get_ssl_context()) as response:
                 text = response.read().decode('utf-8').strip()
                 return text or None
-        except (HTTPError, URLError, Exception) as e:
-            logger.warning(f"Raw version fetch failed: {e}")
+        except URLError as e:
+            if isinstance(getattr(e, "reason", None), ssl.SSLError):
+                self.last_error = f"Raw version SSL failed: {e}"
+                logger.warning(self.last_error)
+                try:
+                    with urlopen(req, timeout=6, context=self._get_ssl_context(insecure=True)) as response:
+                        text = response.read().decode('utf-8').strip()
+                        logger.warning("Raw version fetch succeeded with insecure SSL fallback; please fix system certificates.")
+                        return text or None
+                except Exception as inner:
+                    self.last_error = f"Raw version insecure fallback failed: {inner}"
+                    logger.warning(self.last_error)
+                    return None
+            self.last_error = f"Raw version fetch failed: {e}"
+            logger.warning(self.last_error)
             return None
+        except Exception as e:
+            self.last_error = f"Raw version fetch failed: {e}"
+            logger.warning(self.last_error)
+            return None
+
+    @staticmethod
+    def _get_ssl_context(insecure: bool = False):
+        """Return an SSL context that trusts certifi if available, or optionally disable verification."""
+        if insecure:
+            return ssl._create_unverified_context()
+        ctx = ssl.create_default_context()
+        if certifi:
+            try:
+                ctx.load_verify_locations(certifi.where())
+            except Exception:
+                # If loading certifi fails, continue with default context
+                pass
+        return ctx
     
     @staticmethod
     def _compare_versions(version1: str, version2: str) -> int:

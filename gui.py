@@ -1149,6 +1149,12 @@ class PhotoMetadataEditor(QMainWindow):
                 self.update_btn.setToolTip(f"Update Available ({latest_version})")
                 self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
                 self.update_status_label.setText(f"✨ v{latest_version}")
+            elif latest_version:
+                self.update_status_label.setText(f"✓ v{latest_version}")
+            else:
+                self.update_status_label.setText("⚠️ Offline")
+                if self.update_checker.last_error:
+                    logger.warning(f"Update check (background) failed: {self.update_checker.last_error}")
         
         self.update_checker.check_for_updates_async(callback)
     
@@ -1177,9 +1183,13 @@ class PhotoMetadataEditor(QMainWindow):
                     self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
                     self.log_status(f"✨ Update {latest_version} available! Click the ✨ button to install.")
                     self.update_status_label.setText(f"✨ v{latest_version}")
+                elif latest_version:
+                    self.log_status(f"✓ Online latest is v{latest_version}; you have v{self.update_checker.current_version}")
+                    self.update_status_label.setText(f"✓ v{latest_version}")
                 else:
-                    self.log_status("✓ You are on the latest version")
-                    self.update_status_label.setText("✓ Latest")
+                    err = self.update_checker.last_error or "no response"
+                    self.log_status(f"⚠️ Update check failed: {err}")
+                    self.update_status_label.setText("⚠️ Offline")
             
             self.update_checker.check_for_updates_async(callback)
         else:

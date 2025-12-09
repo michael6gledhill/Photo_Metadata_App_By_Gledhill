@@ -6,14 +6,14 @@ from setuptools import setup
 
 APP = ['main.py']  # single entry-point; gui.py and metadata_handler.py are bundled as modules
 DATA_FILES = [
-    ('', ['icon.icns']),
+    ('', ['ApplicationStub.icns']),
     ('assets', ['assets/icon.icns']),
     ('storage', []),
 ]
 
 OPTIONS = {
     'argv_emulation': False,
-    'iconfile': 'icon.icns',
+    'iconfile': 'ApplicationStub.icns',
     'plist': {
         'CFBundleName': 'Photo Metadata Editor',
         'CFBundleDisplayName': 'Photo Metadata Editor',

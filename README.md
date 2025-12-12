@@ -2,6 +2,10 @@
 
 Edit photo metadata (EXIF and XMP), create reusable templates, and batch rename files. Works on macOS, Windows, and Linux.
 
+📖 **[View Full Documentation](https://michael6gledhill.github.io/Photo_Metadata_App_By_Gledhill/)** — Complete guides, reference tables, and examples
+
+---
+
 ## ⚡ Quick Install
 
 ### macOS (M1/M2/M3 — Apple Silicon)

@@ -26,35 +26,36 @@ Professional metadata editing for photographers.
 
 ::: {.g-col-12 .g-col-md-6}
 ### 🚀 Getting Started
-- [Homepage (you are here)](index.html)
-- [Installation Guide](INSTALL_GUIDE.html)
-- [Release Notes](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/releases)
+
+- **[Installation Guide](INSTALL_GUIDE.html)** — Step-by-step setup for macOS, Windows, and Linux
+- **[Release Notes](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/releases)** — Latest updates and version history
 :::
 
 ::: {.g-col-12 .g-col-md-6}
 ### 📸 Metadata & Tables
-- [Metadata Guide](METADATA_GUIDE.html)
-- [Quick Metadata Reference](METADATA_GUIDE.html#quick-reference-common-fields)
-- [EXIF Table](METADATA_GUIDE.html#exif-metadata-fields) (a.k.a. IXIF)
-- [XMP Table](METADATA_GUIDE.html#xmp-metadata-fields)
-- [Datetime Formatting](METADATA_GUIDE.html#dynamic-field-values-datetime-formatting)
+
+- **[Metadata Guide](METADATA_GUIDE.html)** — Complete reference for EXIF and XMP fields
+- **[EXIF Table](METADATA_GUIDE.html#exif-metadata-fields)** — All supported EXIF tags and formats
+- **[XMP Table](METADATA_GUIDE.html#xmp-metadata-fields)** — XMP properties you can read and write
+- **[Dynamic Fields](METADATA_GUIDE.html#dynamic-field-values-datetime-formatting)** — Auto-populate dates, times, and metadata
 :::
 
 ::: {.g-col-12 .g-col-md-6}
 ### 🧩 Naming Conventions
-- [Naming Guide](NAMING_CONVENTIONS.html)
-- [Date/Time Tokens](NAMING_CONVENTIONS.html#date-and-time-tokens)
-- [Metadata Tokens](NAMING_CONVENTIONS.html#metadata-tokens)
-- [Camera Tokens](NAMING_CONVENTIONS.html#camera-information-tokens)
-- [Sequence/File Tokens](NAMING_CONVENTIONS.html#sequential-and-file-tokens)
-- [Operator Examples](NAMING_CONVENTIONS.html#combining-multiple-tokens)
+
+- **[Naming Guide](NAMING_CONVENTIONS.html)** — Batch rename with custom patterns and tokens
+- **[Date/Time Tokens](NAMING_CONVENTIONS.html#date-and-time-tokens)** — Format dates and times in filenames
+- **[Metadata Tokens](NAMING_CONVENTIONS.html#metadata-tokens)** — Use EXIF/XMP data in filenames
+- **[Camera Tokens](NAMING_CONVENTIONS.html#camera-information-tokens)** — Insert camera model, lens, and settings
+- **[Examples](NAMING_CONVENTIONS.html#combining-multiple-tokens)** — Real-world naming pattern samples
 :::
 
 ::: {.g-col-12 .g-col-md-6}
 ### 💬 Help & Support
-- [GitHub Issues](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues)
-- [Submit a Bug](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues/new/choose)
-- [View Source](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill)
+
+- **[GitHub Issues](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues)** — Report bugs and request features
+- **[Submit a Bug](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/issues/new/choose)** — File a new issue with details
+- **[View Source](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill)** — Browse the code on GitHub
 :::
 
 ::::
@@ -63,11 +64,14 @@ Professional metadata editing for photographers.
 
 ## ⚡ Quick Install (GUI-first)
 
-- **macOS (Intel & M1)** — GUI installer (recommended):
+- **macOS (M1/M2/M3 — Apple Silicon)**:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py | python3
+  ```
+- **macOS (Intel)** — GUI installer:
   ```bash
   curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh | bash
   ```
-- **macOS (Terminal)** — CLI installer: `sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash`
 - **Windows** — PowerShell (Run as Administrator):
   ```powershell
   Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))

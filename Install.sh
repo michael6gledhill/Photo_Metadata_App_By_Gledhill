@@ -72,7 +72,14 @@ fi
 if [ -d "Photo_Metadata_App_By_Gledhill" ]; then
     echo "Repository already exists. Updating..."
     cd Photo_Metadata_App_By_Gledhill
-    git pull
+    echo "Cleaning local build artifacts..."
+    find . -name "__pycache__" -type d -prune -exec rm -rf {} + || true
+    echo "Fetching latest changes..."
+    git fetch --all || true
+    echo "Resetting local changes to match origin/main..."
+    git reset --hard origin/main || git reset --hard
+    echo "Removing untracked files..."
+    git clean -fd || true
 else
     echo "Cloning repository..."
     git clone "$REPO_URL"

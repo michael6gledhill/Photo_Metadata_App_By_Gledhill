@@ -520,6 +520,27 @@ The Dublin Core namespace contains the most important descriptive metadata field
 ]
 ```
 
+::: {.callout-tip}
+- Quick entry: you can type one line like `subject, fun, cap, test, etc...` and the app will write it as an XMP subject array when applied (templates on disk stay unchanged):
+  ```json
+  "subject": [
+    "Subject",
+    "fun",
+    "cap",
+    "test",
+    "etc..."
+  ]
+  ```
+- Use `|` to keep commas inside a keyword: `fun, at the park | Love | I have a cat, where` becomes:
+  ```json
+  "subject": [
+    "fun, at the park",
+    "Love",
+    "I have a cat, where"
+  ]
+  ```
+:::
+
 **Best practices:**
 - Use specific, relevant keywords
 - Include locations, events, people, topics

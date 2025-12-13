@@ -11,7 +11,7 @@ import logging
 import traceback
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
@@ -593,7 +593,7 @@ class PhotoMetadataEditor(QMainWindow):
         self.file_list_widget = QListWidget()
         self.file_list_widget.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
         self.file_list_widget.setMaximumHeight(100)
-        self.file_list_widget.itemSelectionChanged.connect(self.update_preview)
+        self.file_list_widget.itemSelectionChanged.connect(self.on_file_selected)
         file_layout.addWidget(self.file_list_widget)
         
         open_btn = QPushButton("Open Files")
@@ -646,6 +646,7 @@ class PhotoMetadataEditor(QMainWindow):
         nav_layout = QHBoxLayout()
         nav_layout.addWidget(QPushButton("Prev", clicked=self.preview_prev))
         nav_layout.addWidget(QPushButton("Next", clicked=self.preview_next))
+        nav_layout.addStretch()  # Add stretch to push buttons to the left
         preview_layout.addLayout(nav_layout)
         preview_group.setLayout(preview_layout)
         left_layout.addWidget(preview_group)
@@ -662,6 +663,7 @@ class PhotoMetadataEditor(QMainWindow):
         templates_layout = QVBoxLayout()
         self.template_list = QListWidget()
         self.template_list.itemSelectionChanged.connect(self.on_template_selected)
+        self.template_list.itemDoubleClicked.connect(self.edit_template)
         templates_layout.addWidget(self.template_list)
         
         template_btns = QHBoxLayout()
@@ -679,6 +681,7 @@ class PhotoMetadataEditor(QMainWindow):
         naming_layout = QVBoxLayout()
         self.naming_list = QListWidget()
         self.naming_list.itemSelectionChanged.connect(self.on_naming_selected)
+        self.naming_list.itemDoubleClicked.connect(self.edit_naming)
         naming_layout.addWidget(self.naming_list)
         
         naming_btns = QHBoxLayout()
@@ -957,11 +960,18 @@ class PhotoMetadataEditor(QMainWindow):
                 self.log_status("Naming convention deleted")
     
     def view_metadata(self):
-        if not self.selected_files:
-            QMessageBox.warning(self, "Warning", "Please select a file.")
+        # Get the currently selected item from the file list widget
+        current_item = self.file_list_widget.currentItem()
+        if not current_item:
+            QMessageBox.warning(self, "Warning", "Please select a photo from the list.")
             return
         
-        file_path = self.selected_files[0]
+        # Get the file path from the item's user data
+        file_path = current_item.data(Qt.ItemDataRole.UserRole)
+        if not file_path or not Path(file_path).exists():
+            QMessageBox.warning(self, "Error", "Selected file not found.")
+            return
+        
         metadata = self.metadata_manager.get_metadata(file_path)
         dialog = MetadataViewDialog(self, file_path, metadata)
         dialog.exec()
@@ -1060,6 +1070,25 @@ class PhotoMetadataEditor(QMainWindow):
             self.preview_index = (self.preview_index - 1) % len(self.selected_files)
             self.update_preview()
     
+    def on_file_selected(self):
+        """Called when user clicks on a file in the file list. Updates preview to show that file."""
+        current_item = self.file_list_widget.currentItem()
+        if current_item:
+            selected_path = current_item.data(Qt.ItemDataRole.UserRole)
+            if selected_path and selected_path in self.selected_files:
+                self.preview_index = self.selected_files.index(selected_path)
+                self.update_preview()
+    
+    def on_file_selected(self):
+        """Called when user clicks on a file in the file list."""
+        current_item = self.file_list_widget.currentItem()
+        if current_item:
+            # Get the selected file and find its index
+            selected_path = current_item.data(Qt.ItemDataRole.UserRole)
+            if selected_path in self.selected_files:
+                self.preview_index = self.selected_files.index(selected_path)
+        self.update_preview()
+    
     def update_preview(self):
         preview = []
         self._update_image_preview()
@@ -1127,8 +1156,8 @@ class PhotoMetadataEditor(QMainWindow):
                         counter += 1
                 
                 if not dry_run:
-                    exif = template.get('exif', {})
-                    xmp = template.get('xmp', {})
+                    exif = self._prepare_metadata_values(template.get('exif', {}), is_xmp=False)
+                    xmp = self._prepare_metadata_values(template.get('xmp', {}), is_xmp=True)
                     
                     if self.metadata_manager.set_metadata(file_path, exif, xmp, merge):
                         if str(new_path) != file_path:
@@ -1180,6 +1209,34 @@ class PhotoMetadataEditor(QMainWindow):
         timestamp = datetime.now().strftime("%H:%M:%S")
         self.status_text.append(f"[{timestamp}] {message}")
         logger.info(message)
+
+    def _parse_subject_value(self, value: Any) -> Any:
+        """Convert pipe- or comma-delimited strings into lists for XMP subject only."""
+        if not isinstance(value, str):
+            return value
+
+        if '|' in value:
+            return [part.strip() for part in value.split('|') if part.strip()]
+
+        if ',' in value:
+            items = [part.strip() for part in value.split(',') if part.strip()]
+            if items and items[0]:
+                items[0] = items[0].capitalize()
+            return items
+
+        return value
+
+    def _prepare_metadata_values(self, data: Dict[str, Any], is_xmp: bool) -> Dict[str, Any]:
+        """Parse only XMP subject at apply-time; leave other fields untouched."""
+        if not is_xmp:
+            return dict(data)
+        result = {}
+        for k, v in data.items():
+            if k.lower() == 'subject':
+                result[k] = self._parse_subject_value(v)
+            else:
+                result[k] = v
+        return result
     
     def check_for_updates_background(self):
         """Check for updates in background and update UI if available."""
@@ -1280,25 +1337,18 @@ class PhotoMetadataEditor(QMainWindow):
         QApplication.processEvents()
         
         try:
-            # Determine which installer to run based on platform/architecture
+            # macOS: choose installer per architecture
             if sys.platform == "darwin":
                 import platform
-                if platform.machine().lower() in {"arm64", "aarch64"}:
-                    # Apple Silicon: run install_m1.py via osascript to open Terminal
-                    installer_url = "https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py"
-                    cmd = f"curl -fsSL {installer_url} | python3"
-                    subprocess.Popen([
-                        "osascript", "-e",
-                        f'tell application "Terminal" to do script "{cmd}"'
-                    ])
+                machine = platform.machine().lower()
+                if machine in {"arm64", "aarch64"}:
+                    cmd = "curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py | python3"
                 else:
-                    # Intel Mac: run install_gui.sh via osascript
-                    installer_url = "https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh"
-                    cmd = f"curl -fsSL {installer_url} | bash"
-                    subprocess.Popen([
-                        "osascript", "-e",
-                        f'tell application "Terminal" to do script "{cmd}"'
-                    ])
+                    cmd = "sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash"
+                subprocess.Popen([
+                    "osascript", "-e",
+                    f'tell application "Terminal" to do script "{cmd}"'
+                ])
             else:
                 # Windows/Linux: pull and restart
                 repo_path = Path(__file__).parent

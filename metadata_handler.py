@@ -590,6 +590,31 @@ class MetadataManager:
             'exif': template.get('exif', {}),
             'xmp': normalized_xmp,
         }
+    
+    def _parse_field_value(self, value: Any) -> Any:
+        """
+        Parse field values with pipe (|) as array separator.
+        E.g., "subject, fun, cap, test" -> ["Subject", "fun", "cap", "test"]
+        E.g., "fun, at the park | Love | I have a cat" -> ["fun, at the park", "Love", "I have a cat"]
+        """
+        if not isinstance(value, str):
+            return value
+        
+        # Check if pipe separator is used
+        if '|' in value:
+            # Split by pipe and strip whitespace, capitalize first element
+            items = [item.strip() for item in value.split('|')]
+            return items
+        
+        # Otherwise, assume comma-separated and split by commas
+        if ',' in value:
+            items = [item.strip() for item in value.split(',')]
+            # Capitalize the first item
+            if items and items[0]:
+                items[0] = items[0].capitalize()
+            return items
+        
+        return value
 
 
 class NamingEngine:
@@ -724,7 +749,8 @@ class TemplateManager:
                 try:
                     with open(file, 'r') as f:
                         data = json.load(f)
-                        templates[data.get('name', file.stem)] = self._normalize_template_data(data)
+                        normalized = self._normalize_template_data(data)
+                        templates[normalized.get('name', file.stem)] = normalized
                 except Exception as e:
                     logger.warning(f"Error loading template {file}: {e}")
         except Exception as e:

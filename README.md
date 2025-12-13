@@ -70,6 +70,7 @@ python3 main.py
 - Edit EXIF metadata (camera, lens, copyright, etc.)
 - Read and write XMP metadata in JPEG files
 - Create reusable metadata templates
+- XMP subject helper: type one-line comma/pipe keywords; they are split into an array when applied (templates remain unchanged)
 - Batch rename files with custom patterns
 - Import/export templates as JSON
 

@@ -14,61 +14,16 @@ format:
 
 # Introduction
 
-This guide will walk you through installing the Photo Metadata Editor application. We'll cover multiple methods:
+This guide will walk you through installing the Photo Metadata Editor application with simple, non-GUI methods:
 
-1. **GUI Installer** (Recommended) - Graphical installer with progress tracking
-2. **Command Line** - One command for advanced users
-3. **Manual Installation** - For those who want more control
-
-Choose the method that works best for you!
-
----
-
-# Method 1: GUI Installer (Recommended)
-
-The GUI installer provides a friendly graphical interface for installation and updates.
-
-## macOS, Linux, and Unix Systems
-
-### Step 1: Open Terminal
-
-:::{.callout-note}
-The Terminal is a program that lets you type commands to your system.
-:::
-
-**macOS:**
-1. Press **Command (⌘) + Space** on your keyboard
-2. This opens Spotlight Search
-3. Type: `terminal`
-4. Press **Enter** when you see the Terminal app highlighted
-
-**Linux:**
-Open any terminal emulator (Ctrl+Alt+T on most systems)
-
-### Step 2: Copy and Run the GUI Installer
-
-Copy this command:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh | bash
-```
-
-Paste it into your terminal and press **Enter**.
-
-:::{.callout-tip}
-## What happens next?
-- The script checks for requirements (Git, Python 3)
-- Downloads the application
-- Launches a **graphical installer window**
-- Shows progress as it installs
-- Displays logs and status updates in real-time
-:::
-
-A graphical installer window will appear showing the installation progress. Just watch as it completes!
+1. **Command Line (macOS)** — One-line installers for Apple Silicon and Intel
+2. **Windows (PowerShell)** — One command to install and run
+3. **Linux** — Prerequisites + clone + run
+4. **Manual Installation (advanced)** — Step-by-step for custom setups
 
 ---
 
-# Method 2: Automatic Terminal Installation
+# Method 1: Automatic Terminal Installation (macOS)
 
 For users who prefer the command line without a GUI.
 
@@ -82,10 +37,14 @@ For users who prefer the command line without a GUI.
 **Linux:**
 Open any terminal emulator
 
-## Step 2: Copy the Install Command
+## Step 2: Choose the Right Command
 
-Copy this command:
+**Apple Silicon (M1/M2/M3):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py | python3
+```
 
+**Intel macOS:**
 ```bash
 sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
 ```
@@ -121,9 +80,41 @@ When you see:
 
 The app is ready to use!
 
+# Method 2: Windows (PowerShell)
+
+### Step 1: Open PowerShell (Administrator)
+1. Right-click PowerShell
+2. Select "Run as administrator"
+
+### Step 2: Run the Installer
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))
+```
+
+:::{.callout-note}
+Installs dependencies and launches the app.
+:::
+
 ---
 
-# Method 3: Manual Installation
+# Method 3: Linux (Ubuntu/Debian)
+
+### Step 1: Install Prerequisites
+```bash
+sudo apt-get install -y git python3 python3-pip
+```
+
+### Step 2: Clone and Run
+```bash
+git clone https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git
+cd Photo_Metadata_App_By_Gledhill
+python3 -m pip install -r requirements.txt
+python3 main.py
+```
+
+---
+
+# Method 4: Manual Installation (Advanced)
 
 This method gives you more control over each step of the installation process.
 
@@ -234,64 +225,8 @@ This installs:
 - **Pillow** - Image processing
 - **piexif** - Metadata handling
 
-## Step 8: Install py2app
-
-py2app is the tool that converts Python scripts into Mac applications:
-
-```bash
-python3 -m pip install py2app
-```
-
-## Step 9: Build the Application
-
-Now we'll build the actual .app file:
-
-```bash
-python3 setup.py py2app
-```
-
 :::{.callout-note}
-## Build Time
-This may take 2-5 minutes. You'll see lots of messages - this is normal!
-:::
-
-When complete, you'll see:
-```
-done running py2app
-```
-
-The app is now built in the `dist` folder!
-
-## Step 10: Move to Applications Folder
-
-**Remove old version (if exists):**
-```bash
-rm -rf "/Applications/Photo Metadata Editor.app"
-```
-
-**Copy the new version:**
-```bash
-cp -R "dist/Photo Metadata Editor.app" /Applications/
-```
-
-## Step 11: Launch the App
-
-You can now:
-
-**Option A - From Terminal:**
-```bash
-open "/Applications/Photo Metadata Editor.app"
-```
-
-**Option B - From Finder:**
-1. Open **Finder**
-2. Go to **Applications**
-3. Find **Photo Metadata Editor**
-4. Double-click to open
-
-:::{.callout-warning}
-## First Launch Security
-If you get a security warning, right-click the app, choose **Open**, then click **Open** again.
+For macOS app bundling, use the provided installers above (Apple Silicon or Intel). Manual bundling is optional and not required for normal use.
 :::
 
 ---

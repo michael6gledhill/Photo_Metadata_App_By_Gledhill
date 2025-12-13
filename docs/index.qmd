@@ -62,25 +62,31 @@ Professional metadata editing for photographers.
 
 ---
 
-## ⚡ Quick Install (GUI-first)
+## ⚡ Quick Install
 
 - **macOS (M1/M2/M3 — Apple Silicon)**:
   ```bash
   curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py | python3
   ```
-- **macOS (Intel)** — GUI installer:
+- **macOS (Intel)**:
   ```bash
-  curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh | bash
+  sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
   ```
 - **Windows** — PowerShell (Run as Administrator):
   ```powershell
   Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))
   ```
-- **Linux** — See the [Installation Guide](INSTALL_GUIDE.html#method-2-automatic-terminal-installation) for distro-specific steps. Typical prerequisites:
+- **Linux** — Typical prerequisites:
   ```bash
   sudo apt-get install -y git python3 python3-pip python3-venv
   ```
-  then run the macOS CLI installer command (it also works on Linux).
+  then clone and run:
+  ```bash
+  git clone https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git
+  cd Photo_Metadata_App_By_Gledhill
+  python3 -m pip install -r requirements.txt
+  python3 main.py
+  ```
 
 :::{.callout-warning}
 ### Apple Silicon (M1/M2) Tips

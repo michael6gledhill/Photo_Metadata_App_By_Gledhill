@@ -295,6 +295,8 @@ Canon_EOS_R5_2025-12-08_0001.jpg
 - `{sequence:03d}` - Three digits: 001, 002, 003...
 - `{sequence:04d}` - Four digits: 0001, 0002, 0003...
 
+**Default:** `{sequence}` (no padding) → `1, 2, 3...`
+
 **Use case:** Creating numbered sequences of photos that sort correctly.
 
 **Example patterns:**

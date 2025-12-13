@@ -27,13 +27,10 @@ The app will be installed to your Applications folder and launch automatically.
 ### macOS (Intel)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_gui.sh | bash
+sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash
 ```
 
-Launches a graphical installer. If it fails, run the app directly:
-```bash
-cd ~/App/Photo_Metadata_App_By_Gledhill && python3 main.py
-```
+Installs and launches the app via Terminal.
 
 ---
 

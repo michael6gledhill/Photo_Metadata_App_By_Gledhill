@@ -325,7 +325,7 @@ class NamingDialog(QDialog):
     
     def init_ui(self):
         self.setWindowTitle("Edit Naming Convention" if self.is_editing else "Create Naming Convention")
-        self.setGeometry(100, 100, 600, 300)
+        self.setGeometry(100, 100, 700, 380)
         
         layout = QVBoxLayout()
         
@@ -350,11 +350,42 @@ class NamingDialog(QDialog):
         self.pattern_input.setPlaceholderText("{userid}_{date}_{original_name}")
         pattern_layout.addWidget(self.pattern_input)
         layout.addLayout(pattern_layout)
+
+        # Quick insert tokens toolbar
+        tokens_bar = QHBoxLayout()
+        tokens = [
+            ("{date}", "Date"),
+            ("{datetime:%Y%m%d_%H%M%S}", "DateTime"),
+            ("{title}", "Title"),
+            ("{camera_model}", "Camera"),
+            ("{sequence:03d}", "Seq(3)"),
+            ("{sequence:04d}", "Seq(4)"),
+            ("{original_name}", "Original"),
+            ("{userid}", "User"),
+        ]
+        for token, label in tokens:
+            btn = QPushButton(label)
+            btn.setFixedHeight(24)
+            btn.setStyleSheet("font-size: 11px; padding: 2px 6px;")
+            btn.clicked.connect(lambda _, t=token: self._insert_token(t))
+            tokens_bar.addWidget(btn)
+        layout.addLayout(tokens_bar)
         
-        info = QLabel("Tokens: {date}, {datetime:%Y%m%d_%H%M%S}, {title}, {camera_model}, {sequence:03d}, {original_name}, {userid}")
+        info = QLabel("Tokens: {date}, {datetime:%Y%m%d_%H%M%S}, {title}, {camera_model}, {sequence:NNd}, {original_name}, {userid}")
         info.setWordWrap(True)
         info.setStyleSheet("color: #666; font-size: 10px;")
         layout.addWidget(info)
+
+        # Live preview
+        preview_layout = QHBoxLayout()
+        preview_layout.addWidget(QLabel("Preview:"))
+        self.preview_output = QLineEdit()
+        self.preview_output.setReadOnly(True)
+        preview_layout.addWidget(self.preview_output)
+        layout.addLayout(preview_layout)
+        self.pattern_input.textChanged.connect(self.update_preview_example)
+        # Prime initial preview
+        self.update_preview_example()
         
         button_layout = QHBoxLayout()
         save_btn = QPushButton("Save Convention")
@@ -372,6 +403,42 @@ class NamingDialog(QDialog):
         layout.addLayout(button_layout)
         
         self.setLayout(layout)
+
+    def _insert_token(self, token: str):
+        """Insert token into the pattern at the current cursor position."""
+        text = self.pattern_input.text()
+        pos = self.pattern_input.cursorPosition()
+        new_text = text[:pos] + token + text[pos:]
+        self.pattern_input.setText(new_text)
+        # Move cursor to end of inserted token
+        self.pattern_input.setCursorPosition(pos + len(token))
+
+    def update_preview_example(self):
+        """Update preview based on current pattern using sample metadata."""
+        try:
+            pattern = self.pattern_input.text().strip() or "{userid}_{date}_{original_name}"
+            # Try to use a selected file from parent window, else dummy path
+            file_path = None
+            parent = self.parent()
+            if parent and hasattr(parent, "_get_primary_file"):
+                file_path = parent._get_primary_file()
+            if not file_path:
+                file_path = str(Path.home() / "Pictures" / "example.jpg")
+
+            # Sample metadata: use parent metadata manager if available
+            metadata = {'exif': {}, 'xmp': {}}
+            if parent and hasattr(parent, "metadata_manager"):
+                try:
+                    metadata = parent.metadata_manager.get_metadata(file_path)
+                except Exception:
+                    metadata = {'exif': {}, 'xmp': {}}
+
+            from metadata_handler import NamingEngine
+            engine = NamingEngine()
+            preview = engine.generate_filename(pattern, file_path, metadata, 1)
+            self.preview_output.setText(preview)
+        except Exception:
+            self.preview_output.setText("")
     
     def load_naming(self, naming_name: str):
         namings = self.template_manager.get_naming_conventions()

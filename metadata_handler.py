@@ -657,15 +657,16 @@ class NamingEngine:
                 value = datetime.now().isoformat()
             result = result.replace(datetime_match.group(0), value)
         
-        # Handle {sequence:format} - format string for sequence number
-        seq_match = re.search(r'\{sequence:([^}]+)\}', result)
-        if seq_match:
-            fmt = seq_match.group(1)
-            try:
-                value = fmt % sequence
-            except Exception:
-                value = str(sequence)
-            result = result.replace(seq_match.group(0), value)
+        # Handle {sequence} and {sequence:NNd} for zero-padded numbering
+        def _seq_repl(match: re.Match) -> str:
+            width = match.group(1)
+            if width:
+                try:
+                    return f"{sequence:0{int(width)}d}"
+                except Exception:
+                    return str(sequence)
+            return str(sequence)
+        result = re.sub(r"\{sequence(?::(\d+)d)?\}", _seq_repl, result)
         
         # Handle standard tokens
         for token, func in self.TOKENS.items():

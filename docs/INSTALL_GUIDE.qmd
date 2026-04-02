@@ -17,7 +17,7 @@ format:
 This guide will walk you through installing the Photo Metadata Editor application with simple, non-GUI methods:
 
 1. **Command Line (macOS)** — One-line installers for Apple Silicon and Intel
-2. **Windows (PowerShell)** — One command to install and run
+2. **Windows (PowerShell)** — One command to install and run; includes a fallback batch installer
 3. **Linux** — Prerequisites + clone + run
 4. **Manual Installation (advanced)** — Step-by-step for custom setups
 
@@ -83,17 +83,22 @@ The app is ready to use!
 # Method 2: Windows (PowerShell)
 
 ### Step 1: Open PowerShell (Administrator)
-1. Right-click PowerShell
+1. Open Windows PowerShell or PowerShell
 2. Select "Run as administrator"
 
 ### Step 2: Run the Installer
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))
 ```
 
 :::{.callout-note}
-Installs dependencies and launches the app.
+Installs dependencies and launches the app. The PowerShell installer is compatible with Windows PowerShell 5.1 and newer PowerShell versions.
 :::
+
+### Fallback: Batch Installer
+
+If PowerShell is restricted on your machine, download `Install.bat` from the [GitHub repository](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill) and run it from an elevated Command Prompt.
 
 ---
 

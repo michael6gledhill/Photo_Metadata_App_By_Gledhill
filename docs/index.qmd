@@ -74,8 +74,10 @@ Professional metadata editing for photographers.
   ```
 - **Windows** — PowerShell (Run as Administrator):
   ```powershell
-  Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))
+  Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+  iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))
   ```
+  The installer is compatible with Windows PowerShell 5.1 and newer PowerShell versions.
 - **Linux** — Typical prerequisites:
   ```bash
   sudo apt-get install -y git python3 python3-pip python3-venv

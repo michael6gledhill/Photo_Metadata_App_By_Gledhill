@@ -10,7 +10,7 @@ Write-Host ""
 $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Host "❌ Error: This script must be run as Administrator."
+    Write-Host "Error: This script must be run as Administrator."
     Write-Host "Please right-click on PowerShell and select 'Run as administrator'."
     exit 1
 }
@@ -18,6 +18,7 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
 $REPO_URL = "https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git"
 $INSTALL_DIR = "$env:USERPROFILE\Apps"
 $APP_NAME = "Photo Metadata Editor"
+$CHOCO_EXE = Join-Path $env:ProgramData "chocolatey\bin\choco.exe"
 
 # Create installation directory
 Write-Host "Creating installation directory..."
@@ -29,7 +30,7 @@ Set-Location $INSTALL_DIR
 # Check and install Git if not present
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     Write-Host "Git not found. Installing Git..."
-    
+
     # Try to install via Chocolatey first
     if (Get-Command choco -ErrorAction SilentlyContinue) {
         choco install git -y
@@ -38,18 +39,22 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         Write-Host "Installing Chocolatey package manager..."
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
         iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-        choco install git -y
+        & $CHOCO_EXE install git -y
     }
 } else {
-    Write-Host "✓ Git already installed"
+    Write-Host "OK Git already installed"
 }
 
 # Check Python 3
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     Write-Host "Python 3 not found. Installing Python 3..."
-    choco install python -y
+    if (Get-Command choco -ErrorAction SilentlyContinue) {
+        choco install python -y
+    } else {
+        & $CHOCO_EXE install python -y
+    }
 } else {
-    Write-Host "✓ Python 3 already installed ($(python --version))"
+    Write-Host ("OK Python 3 already installed ({0})" -f ((python --version) 2>&1))
 }
 
 # Clone or update repository
@@ -60,7 +65,7 @@ if (Test-Path $REPO_PATH) {
     git pull
 } else {
     Write-Host "Cloning repository..."
-    git clone $REPO_URL
+    git clone $REPO_URL $REPO_PATH
     Set-Location $REPO_PATH
 }
 
@@ -93,16 +98,21 @@ $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
 $Shortcut.TargetPath = $LAUNCHER_PATH
 $Shortcut.WorkingDirectory = $LAUNCHER_DIR
 $Shortcut.Description = "Photo Metadata Editor"
-$Shortcut.IconLocation = "$(python -c 'import sys; print(sys.executable)')"
+
+$PythonCommand = Get-Command python -ErrorAction SilentlyContinue
+if ($PythonCommand) {
+    $Shortcut.IconLocation = $PythonCommand.Source
+}
+
 $Shortcut.Save()
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host "✓ Installation Complete!"
+Write-Host "Installation Complete!"
 Write-Host "========================================"
 Write-Host ""
 Write-Host "A shortcut has been created on your Desktop: '$APP_NAME'"
 Write-Host "Click it to launch the application."
 Write-Host ""
-Write-Host "To uninstall, simply delete the folder: $LAUNCHER_DIR"
+Write-Host ("To uninstall, simply delete the folder: {0}" -f $LAUNCHER_DIR)
 Write-Host ""

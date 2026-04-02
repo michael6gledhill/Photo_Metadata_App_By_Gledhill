@@ -37,16 +37,20 @@ Installs and launches the app via Terminal.
 ### Windows
 
 **PowerShell (Recommended):**
-1. Right-click PowerShell and select "Run as administrator"
-2. Run:
+1. Open Windows PowerShell or PowerShell and select "Run as administrator"
+2. Run this one-liner:
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))
 ```
 
+The PowerShell installer is now Windows-compatible and should work cleanly on Windows PowerShell 5.1 as well as newer PowerShell versions.
+
 **Command Prompt:**
 1. Right-click cmd.exe and select "Run as administrator"
 2. Download and run `Install.bat` from the [GitHub repository](https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill)
+
+**Fallback:** If your environment blocks `iex` or script download execution, download `Install.ps1` locally and run it from an elevated PowerShell window.
 
 ---
 

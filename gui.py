@@ -18,7 +18,8 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QFileDialog, QListWidget, QListWidgetItem, QTextEdit, QDialog, QSplitter,
     QProgressDialog, QMessageBox, QAbstractItemView, QLineEdit, QTableWidget, 
-    QTableWidgetItem, QCheckBox, QGroupBox, QFormLayout, QTabWidget, QToolBar, QSizePolicy
+    QTableWidgetItem, QCheckBox, QGroupBox, QFormLayout, QTabWidget, QToolBar, QSizePolicy,
+    QComboBox
 )
 from PySide6.QtCore import Qt, QSize, QMimeData, QPoint, QItemSelectionModel, Signal, QObject
 from PySide6.QtGui import QIcon, QColor, QDragEnterEvent, QDropEvent, QFont, QPixmap
@@ -31,6 +32,34 @@ logger = logging.getLogger(__name__)
 
 class TemplateDialog(QDialog):
     """Dialog for creating/editing templates."""
+
+    EXIF_FIELD_EXAMPLES = {
+        "Artist": "e.g. Michael Gledhill",
+        "Copyright": "e.g. © 2026 Studio Name",
+        "ImageDescription": "e.g. Sunset wedding portrait",
+        "Software": "e.g. Photo Metadata Editor",
+        "DateTime": "e.g. 2026:04:03 14:35:00",
+        "DateTimeOriginal": "e.g. 2026:04:03 14:34:22",
+        "DateTimeDigitized": "e.g. 2026:04:03 14:34:22",
+        "Make": "e.g. Canon",
+        "Model": "e.g. EOS R5",
+        "UserComment": "e.g. Client approved final edit",
+        "XPSubject": "e.g. Wedding",
+        "XPKeywords": "e.g. wedding;portrait;outdoor",
+        "XPComment": "e.g. Delivered to client April 2026",
+    }
+
+    XMP_FIELD_EXAMPLES = {
+        "title": "e.g. Golden Hour Portrait",
+        "description": "e.g. Bride and groom at sunset",
+        "creator": "e.g. Michael Gledhill",
+        "subject": "e.g. wedding|portrait|sunset",
+        "rights": "e.g. © 2026 Studio Name",
+        "Headline": "e.g. Wedding Session",
+        "DateCreated": "e.g. 2026-04-03",
+        "AuthorsPosition": "e.g. Lead Photographer",
+        "CreateDate": "e.g. 2026-04-03T14:34:22",
+    }
     
     def __init__(self, parent=None, template_manager=None, template_name=None):
         super().__init__(parent)
@@ -63,9 +92,19 @@ class TemplateDialog(QDialog):
         layout.addLayout(name_layout)
         
         layout.addWidget(QLabel("EXIF Tags:"))
-        self.exif_table = QTableWidget(0, 2)
-        self.exif_table.setHorizontalHeaderLabels(["Tag", "Value"])
+        self.exif_table = QTableWidget(0, 3)
+        self.exif_table.setHorizontalHeaderLabels(["Tag", "Value", "Example"])
         layout.addWidget(self.exif_table)
+
+        exif_picker_layout = QHBoxLayout()
+        exif_picker_layout.addWidget(QLabel("Quick add:"))
+        self.exif_field_combo = QComboBox()
+        self.exif_field_combo.addItems(sorted(self.EXIF_FIELD_EXAMPLES.keys()))
+        exif_picker_layout.addWidget(self.exif_field_combo)
+        add_selected_exif_btn = QPushButton("Add Selected Field")
+        add_selected_exif_btn.clicked.connect(self.add_selected_exif_field)
+        exif_picker_layout.addWidget(add_selected_exif_btn)
+        layout.addLayout(exif_picker_layout)
         
         exif_btn_layout = QHBoxLayout()
         add_exif_btn = QPushButton("Add EXIF Tag")
@@ -77,9 +116,19 @@ class TemplateDialog(QDialog):
         layout.addLayout(exif_btn_layout)
         
         layout.addWidget(QLabel("XMP Properties:"))
-        self.xmp_table = QTableWidget(0, 2)
-        self.xmp_table.setHorizontalHeaderLabels(["Property", "Value"])
+        self.xmp_table = QTableWidget(0, 3)
+        self.xmp_table.setHorizontalHeaderLabels(["Property", "Value", "Example"])
         layout.addWidget(self.xmp_table)
+
+        xmp_picker_layout = QHBoxLayout()
+        xmp_picker_layout.addWidget(QLabel("Quick add:"))
+        self.xmp_field_combo = QComboBox()
+        self.xmp_field_combo.addItems(sorted(self.XMP_FIELD_EXAMPLES.keys()))
+        xmp_picker_layout.addWidget(self.xmp_field_combo)
+        add_selected_xmp_btn = QPushButton("Add Selected Field")
+        add_selected_xmp_btn.clicked.connect(self.add_selected_xmp_field)
+        xmp_picker_layout.addWidget(add_selected_xmp_btn)
+        layout.addLayout(xmp_picker_layout)
         
         xmp_btn_layout = QHBoxLayout()
         add_xmp_btn = QPushButton("Add XMP Property")
@@ -114,12 +163,62 @@ class TemplateDialog(QDialog):
         self.exif_table.insertRow(row)
         self.exif_table.setItem(row, 0, QTableWidgetItem(""))
         self.exif_table.setItem(row, 1, QTableWidgetItem(""))
+        self._set_example_item(self.exif_table, row, "")
     
     def add_xmp_row(self):
         row = self.xmp_table.rowCount()
         self.xmp_table.insertRow(row)
         self.xmp_table.setItem(row, 0, QTableWidgetItem(""))
         self.xmp_table.setItem(row, 1, QTableWidgetItem(""))
+        self._set_example_item(self.xmp_table, row, "")
+
+    def _set_example_item(self, table: QTableWidget, row: int, example_text: str):
+        """Set a read-only, gray example cell."""
+        example_item = QTableWidgetItem(example_text)
+        example_item.setFlags(example_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+        example_item.setForeground(QColor("#888888"))
+        table.setItem(row, 2, example_item)
+
+    def _find_row_for_field(self, table: QTableWidget, field_name: str) -> int:
+        for row in range(table.rowCount()):
+            item = table.item(row, 0)
+            if item and item.text().strip().lower() == field_name.strip().lower():
+                return row
+        return -1
+
+    def add_selected_exif_field(self):
+        field = self.exif_field_combo.currentText().strip()
+        if not field:
+            return
+
+        existing_row = self._find_row_for_field(self.exif_table, field)
+        if existing_row >= 0:
+            self.exif_table.setCurrentCell(existing_row, 1)
+            return
+
+        row = self.exif_table.rowCount()
+        self.exif_table.insertRow(row)
+        self.exif_table.setItem(row, 0, QTableWidgetItem(field))
+        self.exif_table.setItem(row, 1, QTableWidgetItem(""))
+        self._set_example_item(self.exif_table, row, self.EXIF_FIELD_EXAMPLES.get(field, ""))
+        self.exif_table.setCurrentCell(row, 1)
+
+    def add_selected_xmp_field(self):
+        field = self.xmp_field_combo.currentText().strip()
+        if not field:
+            return
+
+        existing_row = self._find_row_for_field(self.xmp_table, field)
+        if existing_row >= 0:
+            self.xmp_table.setCurrentCell(existing_row, 1)
+            return
+
+        row = self.xmp_table.rowCount()
+        self.xmp_table.insertRow(row)
+        self.xmp_table.setItem(row, 0, QTableWidgetItem(field))
+        self.xmp_table.setItem(row, 1, QTableWidgetItem(""))
+        self._set_example_item(self.xmp_table, row, self.XMP_FIELD_EXAMPLES.get(field, ""))
+        self.xmp_table.setCurrentCell(row, 1)
     
     def remove_row(self, table: QTableWidget):
         current_row = table.currentRow()
@@ -137,12 +236,14 @@ class TemplateDialog(QDialog):
                 self.exif_table.insertRow(row)
                 self.exif_table.setItem(row, 0, QTableWidgetItem(tag))
                 self.exif_table.setItem(row, 1, QTableWidgetItem(str(value)))
+                self._set_example_item(self.exif_table, row, self.EXIF_FIELD_EXAMPLES.get(tag, ""))
             
             for prop, value in template.get('xmp', {}).items():
                 row = self.xmp_table.rowCount()
                 self.xmp_table.insertRow(row)
                 self.xmp_table.setItem(row, 0, QTableWidgetItem(prop))
                 self.xmp_table.setItem(row, 1, QTableWidgetItem(str(value)))
+                self._set_example_item(self.xmp_table, row, self.XMP_FIELD_EXAMPLES.get(prop, ""))
     
     def save_template(self):
         name = self.name_input.text().strip()
@@ -699,9 +800,21 @@ class PhotoMetadataEditor(QMainWindow):
         # Options
         options_group = QGroupBox("Options")
         options_layout = QVBoxLayout()
+        self.apply_metadata_checkbox = QCheckBox("Apply metadata")
+        self.apply_metadata_checkbox.setChecked(True)
+        self.apply_metadata_checkbox.toggled.connect(self._update_apply_button_text)
+        options_layout.addWidget(self.apply_metadata_checkbox)
+        self.apply_naming_checkbox = QCheckBox("Apply naming")
+        self.apply_naming_checkbox.setChecked(True)
+        self.apply_naming_checkbox.toggled.connect(self._update_apply_button_text)
+        options_layout.addWidget(self.apply_naming_checkbox)
+        self.apply_selected_only_checkbox = QCheckBox("Apply to highlighted files only (otherwise all added files)")
+        self.apply_selected_only_checkbox.toggled.connect(self._update_apply_button_text)
+        options_layout.addWidget(self.apply_selected_only_checkbox)
         self.merge_checkbox = QCheckBox("Merge metadata (don't overwrite)")
         options_layout.addWidget(self.merge_checkbox)
         self.dry_run_checkbox = QCheckBox("Dry run (preview only)")
+        self.dry_run_checkbox.toggled.connect(self._update_apply_button_text)
         options_layout.addWidget(self.dry_run_checkbox)
         options_group.setLayout(options_layout)
         left_layout.addWidget(options_group)
@@ -790,8 +903,8 @@ class PhotoMetadataEditor(QMainWindow):
         main_vertical = QVBoxLayout()
         main_vertical.addLayout(main_layout)
         
-        apply_btn = QPushButton("APPLY TEMPLATE & RENAME")
-        apply_btn.setStyleSheet("""
+        self.apply_btn = QPushButton("APPLY")
+        self.apply_btn.setStyleSheet("""
             QPushButton {
                 background-color: #28a745;
                 color: white;
@@ -800,13 +913,13 @@ class PhotoMetadataEditor(QMainWindow):
                 padding: 15px;
             }
         """)
-        apply_btn.clicked.connect(self.apply_template)
+        self.apply_btn.clicked.connect(self.apply_template)
         
         self.status_text = QTextEdit()
         self.status_text.setReadOnly(True)
         self.status_text.setMaximumHeight(150)
         
-        main_vertical.addWidget(apply_btn)
+        main_vertical.addWidget(self.apply_btn)
         main_vertical.addWidget(self.status_text)
         
         central.setLayout(main_vertical)
@@ -814,6 +927,7 @@ class PhotoMetadataEditor(QMainWindow):
         
         self.refresh_templates()
         self.refresh_namings()
+        self._update_apply_button_text()
     
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
@@ -843,12 +957,14 @@ class PhotoMetadataEditor(QMainWindow):
         self.log_status(f"Added {len(files)} file(s)")
         self.preview_index = 0
         self.update_preview()
+        self._update_apply_button_text()
     
     def clear_files(self):
         self.selected_files.clear()
         self.file_list_widget.clear()
         self.preview_index = 0
         self.update_preview()
+        self._update_apply_button_text()
     
     def create_template(self):
         dialog = TemplateDialog(self, self.template_manager)
@@ -1014,12 +1130,14 @@ class PhotoMetadataEditor(QMainWindow):
             dialog.exif_table.insertRow(row)
             dialog.exif_table.setItem(row, 0, QTableWidgetItem(tag))
             dialog.exif_table.setItem(row, 1, QTableWidgetItem(str(value)))
+            dialog._set_example_item(dialog.exif_table, row, dialog.EXIF_FIELD_EXAMPLES.get(tag, ""))
         
         for prop, value in original_template.get('xmp', {}).items():
             row = dialog.xmp_table.rowCount()
             dialog.xmp_table.insertRow(row)
             dialog.xmp_table.setItem(row, 0, QTableWidgetItem(prop))
             dialog.xmp_table.setItem(row, 1, QTableWidgetItem(str(value)))
+            dialog._set_example_item(dialog.xmp_table, row, dialog.XMP_FIELD_EXAMPLES.get(prop, ""))
         
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.refresh_templates()
@@ -1095,12 +1213,37 @@ class PhotoMetadataEditor(QMainWindow):
         if current_item:
             self.selected_template = current_item.text()
             self.update_preview()
+            self._update_apply_button_text()
     
     def on_naming_selected(self):
         current_item = self.naming_list.currentItem()
         if current_item:
             self.selected_naming = current_item.text()
             self.update_preview()
+            self._update_apply_button_text()
+
+    def _update_apply_button_text(self):
+        """Update the main action button text based on current mode and scope."""
+        if not hasattr(self, 'apply_btn'):
+            return
+
+        apply_metadata = getattr(self, 'apply_metadata_checkbox', None) and self.apply_metadata_checkbox.isChecked()
+        apply_naming = getattr(self, 'apply_naming_checkbox', None) and self.apply_naming_checkbox.isChecked()
+        selected_only = getattr(self, 'apply_selected_only_checkbox', None) and self.apply_selected_only_checkbox.isChecked()
+        dry_run = getattr(self, 'dry_run_checkbox', None) and self.dry_run_checkbox.isChecked()
+
+        if apply_metadata and apply_naming:
+            action = "APPLY + RENAME"
+        elif apply_metadata:
+            action = "APPLY METADATA"
+        elif apply_naming:
+            action = "RENAME FILES"
+        else:
+            action = "SELECT OPERATION"
+
+        scope = "SELECTED" if selected_only else "ALL"
+        prefix = "PREVIEW" if dry_run else "RUN"
+        self.apply_btn.setText(f"{prefix} {action} ({scope})")
     
     def refresh_templates(self):
         self.template_list.clear()
@@ -1183,6 +1326,7 @@ class PhotoMetadataEditor(QMainWindow):
             if selected_path in self.selected_files:
                 self.preview_index = self.selected_files.index(selected_path)
         self.update_preview()
+        self._update_apply_button_text()
     
     def update_preview(self):
         preview = []
@@ -1210,39 +1354,89 @@ class PhotoMetadataEditor(QMainWindow):
             preview.append(f"Result: {new_name}\n")
         
         self.preview_text.setText(''.join(preview))
+
+    def _get_target_files(self) -> List[str]:
+        """Return files to process based on selection scope option."""
+        if not self.apply_selected_only_checkbox.isChecked():
+            return list(self.selected_files)
+
+        selected_items = self.file_list_widget.selectedItems()
+        selected_paths: List[str] = []
+        for item in selected_items:
+            path = item.data(Qt.ItemDataRole.UserRole)
+            if path:
+                selected_paths.append(path)
+
+        # Preserve original ordering and deduplicate
+        selected_set = set(selected_paths)
+        return [path for path in self.selected_files if path in selected_set]
     
     def apply_template(self):
-        if not self.selected_files or not self.selected_template or not self.selected_naming:
-            QMessageBox.warning(self, "Warning", "Please select files, template, and naming convention.")
+        if not self.selected_files:
+            QMessageBox.warning(self, "Warning", "Please add at least one file.")
+            return
+
+        apply_metadata = self.apply_metadata_checkbox.isChecked()
+        apply_naming = self.apply_naming_checkbox.isChecked()
+
+        if not apply_metadata and not apply_naming:
+            QMessageBox.warning(self, "Warning", "Choose at least one operation: metadata and/or naming.")
+            return
+
+        if apply_metadata and not self.selected_template:
+            QMessageBox.warning(self, "Warning", "Please select a metadata template or disable 'Apply metadata'.")
+            return
+
+        if apply_naming and not self.selected_naming:
+            QMessageBox.warning(self, "Warning", "Please select a naming convention or disable 'Apply naming'.")
+            return
+
+        target_files = self._get_target_files()
+        if not target_files:
+            QMessageBox.warning(self, "Warning", "No highlighted files selected. Select files or disable 'Apply to highlighted files only'.")
             return
         
-        templates = self.template_manager.get_templates()
-        template = self.template_manager._normalize_template_data(dict(templates.get(self.selected_template, {})))
+        template = {'exif': {}, 'xmp': {}}
+        if apply_metadata:
+            templates = self.template_manager.get_templates()
+            template = self.template_manager._normalize_template_data(dict(templates.get(self.selected_template, {})))
         
-        conventions = self.template_manager.get_naming_conventions()
-        convention = conventions.get(self.selected_naming, {})
-        pattern = convention.get('pattern', '')
+        pattern = ''
+        if apply_naming:
+            conventions = self.template_manager.get_naming_conventions()
+            convention = conventions.get(self.selected_naming, {})
+            pattern = convention.get('pattern', '')
         
         merge = self.merge_checkbox.isChecked()
         dry_run = self.dry_run_checkbox.isChecked()
+
+        mode_parts = []
+        if apply_metadata:
+            mode_parts.append("metadata")
+        if apply_naming:
+            mode_parts.append("rename")
+        mode_label = " + ".join(mode_parts)
+        scope_label = "selected" if self.apply_selected_only_checkbox.isChecked() else "all"
         
         action = "preview" if dry_run else "apply"
-        if QMessageBox.question(self, "Confirm", f"Apply template to {len(self.selected_files)} file(s)? ({action})") != QMessageBox.StandardButton.Yes:
+        if QMessageBox.question(self, "Confirm", f"{action.title()} {mode_label} to {len(target_files)} {scope_label} file(s)?") != QMessageBox.StandardButton.Yes:
             return
         
-        progress = QProgressDialog("Processing...", None, 0, len(self.selected_files), self)
+        progress = QProgressDialog("Processing...", None, 0, len(target_files), self)
         progress.setWindowModality(Qt.WindowModality.WindowModal)
         
         success_count = 0
         rename_map = {}
         
-        for i, file_path in enumerate(self.selected_files):
+        for i, file_path in enumerate(target_files):
             try:
                 metadata = self.metadata_manager.get_metadata(file_path)
-                new_filename = self.naming_engine.generate_filename(pattern, file_path, metadata, i + 1)
-                new_path = Path(file_path).parent / new_filename
+                new_path = Path(file_path)
+                if apply_naming:
+                    new_filename = self.naming_engine.generate_filename(pattern, file_path, metadata, i + 1)
+                    new_path = Path(file_path).parent / new_filename
                 
-                if new_path.exists() and str(new_path) != file_path:
+                if apply_naming and new_path.exists() and str(new_path) != file_path:
                     base = new_path.stem
                     ext = new_path.suffix
                     counter = 1
@@ -1251,44 +1445,59 @@ class PhotoMetadataEditor(QMainWindow):
                         counter += 1
                 
                 if not dry_run:
-                    exif = self._prepare_metadata_values(template.get('exif', {}), is_xmp=False)
-                    xmp = self._prepare_metadata_values(template.get('xmp', {}), is_xmp=True)
+                    exif = self._prepare_metadata_values(template.get('exif', {}), is_xmp=False) if apply_metadata else {}
+                    xmp = self._prepare_metadata_values(template.get('xmp', {}), is_xmp=True) if apply_metadata else {}
 
                     # Required order:
                     # 1) Delete all metadata when NOT combining
                     # 2) Write new metadata
                     # 3) Rename file
                     # 4) Verify metadata matches expected values
-                    if not merge:
+                    if apply_metadata and not merge:
                         if not self.metadata_manager.delete_metadata(file_path):
                             self.log_status(f"✗ Failed to clear metadata: {Path(file_path).name}")
                             progress.setValue(i + 1)
                             QApplication.processEvents()
                             continue
 
-                    if not self.metadata_manager.set_metadata(file_path, exif, xmp, merge=merge):
-                        self.log_status(f"✗ Failed to write metadata: {Path(file_path).name}")
-                        progress.setValue(i + 1)
-                        QApplication.processEvents()
-                        continue
+                    if apply_metadata:
+                        if not self.metadata_manager.set_metadata(file_path, exif, xmp, merge=merge):
+                            self.log_status(f"✗ Failed to write metadata: {Path(file_path).name}")
+                            progress.setValue(i + 1)
+                            QApplication.processEvents()
+                            continue
 
                     final_path = file_path
-                    if str(new_path) != file_path:
+                    if apply_naming and str(new_path) != file_path:
                         shutil.move(file_path, new_path)
                         rename_map[file_path] = str(new_path)
                         final_path = str(new_path)
 
-                    verified, issues = self.metadata_manager.verify_metadata(final_path, exif, xmp)
+                    verified = True
+                    issues: List[str] = []
+                    if apply_metadata:
+                        verified, issues = self.metadata_manager.verify_metadata(final_path, exif, xmp)
+
                     if verified:
                         success_count += 1
-                        self.log_status(f"✓ {Path(file_path).name} → {Path(final_path).name}")
+                        if apply_naming and str(final_path) != file_path:
+                            self.log_status(f"✓ {Path(file_path).name} → {Path(final_path).name}")
+                        elif apply_metadata:
+                            self.log_status(f"✓ Metadata updated: {Path(final_path).name}")
+                        else:
+                            self.log_status(f"✓ Renamed: {Path(final_path).name}")
                     else:
                         issue_summary = "; ".join(issues[:3])
                         if len(issues) > 3:
                             issue_summary += f" (+{len(issues) - 3} more)"
                         self.log_status(f"✗ Verification failed: {Path(final_path).name} - {issue_summary}")
                 else:
-                    self.log_status(f"[DRY RUN] {Path(file_path).name} → {new_path.name}")
+                    if apply_naming and str(new_path) != file_path:
+                        self.log_status(f"[DRY RUN] {Path(file_path).name} → {new_path.name}")
+                    elif apply_metadata:
+                        self.log_status(f"[DRY RUN] Metadata update: {Path(file_path).name}")
+                    else:
+                        self.log_status(f"[DRY RUN] Rename unchanged: {Path(file_path).name}")
                     success_count += 1
             
             except Exception as e:
@@ -1302,9 +1511,9 @@ class PhotoMetadataEditor(QMainWindow):
         self._refresh_after_renames(rename_map)
         
         if dry_run:
-            self.log_status(f"\n[DRY RUN] Would process {success_count}/{len(self.selected_files)} files")
+            self.log_status(f"\n[DRY RUN] Would process {success_count}/{len(target_files)} files")
         else:
-            self.log_status(f"\nComplete: {success_count}/{len(self.selected_files)} successful")
+            self.log_status(f"\nComplete: {success_count}/{len(target_files)} successful")
     
     def undo_last(self):
         QMessageBox.information(self, "Info", "Undo not yet implemented.")

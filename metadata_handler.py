@@ -953,6 +953,21 @@ class NamingEngine:
             metadata = {'exif': {}, 'xmp': {}}
         
         result = pattern
+
+        # Enforce sequence numbers as an end-suffix only.
+        # If any {sequence} token is present, we compute one suffix and append it at the end.
+        sequence_suffix = ""
+        sequence_match = re.search(r"\{sequence(?::(\d+)d)?\}", result)
+        if sequence_match:
+            width = sequence_match.group(1)
+            if width:
+                try:
+                    sequence_suffix = f"{sequence:0{int(width)}d}"
+                except Exception:
+                    sequence_suffix = str(sequence)
+            else:
+                sequence_suffix = str(sequence)
+            result = re.sub(r"\{sequence(?::(\d+)d)?\}", "", result)
         
         # Handle {datetime:%format} - strftime formatting
         datetime_match = re.search(r'\{datetime:([^}]+)\}', result)
@@ -964,17 +979,6 @@ class NamingEngine:
                 value = datetime.now().isoformat()
             result = result.replace(datetime_match.group(0), value)
         
-        # Handle {sequence} and {sequence:NNd} for zero-padded numbering
-        def _seq_repl(match: re.Match) -> str:
-            width = match.group(1)
-            if width:
-                try:
-                    return f"{sequence:0{int(width)}d}"
-                except Exception:
-                    return str(sequence)
-            return str(sequence)
-        result = re.sub(r"\{sequence(?::(\d+)d)?\}", _seq_repl, result)
-        
         # Handle standard tokens
         for token, func in self.TOKENS.items():
             placeholder = '{' + token + '}'
@@ -985,6 +989,14 @@ class NamingEngine:
                 except Exception as e:
                     logger.debug(f"Error generating token {token}: {e}")
                     result = result.replace(placeholder, '')
+
+        # Clean trailing separators after token removal and append sequence suffix at end.
+        result = result.rstrip(" _-")
+        if sequence_suffix:
+            if result:
+                result = f"{result}_{sequence_suffix}"
+            else:
+                result = sequence_suffix
         
         # Append original extension
         ext = Path(file_path).suffix

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installation Guide - Photo Metadata Editor</title>
+  <meta name="description" content="Install Photo Metadata Editor on macOS, Windows, and Linux.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' fill='%2328a745'%3E%F0%9F%93%B8%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+      <a href="index.html" class="logo-link"><div class="logo-section"><span class="logo-mark">📸</span><div class="logo-copy"><strong>Photo Metadata Editor</strong><span>Documentation Hub</span></div></div></a>
+      <nav class="header-nav">
+        <a href="index.html" class="header-nav-link">Home</a>
+        <a href="INSTALL_GUIDE.html" class="header-nav-link active">Install</a>
+        <a href="METADATA_GUIDE.html" class="header-nav-link">Metadata</a>
+        <a href="NAMING_CONVENTIONS.html" class="header-nav-link">Naming</a>
+      </nav>
+      <div class="search-container"><input type="text" class="search-input" id="searchInput" placeholder="Search this guide..." aria-label="Search this guide"><button class="search-button" id="searchButton" aria-label="Search"><i class="fas fa-search"></i></button></div>
+      <a href="https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill" class="github-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository"><i class="fab fa-github"></i></a>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close Sidebar"><i class="fas fa-times"></i></button>
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="#intro" class="nav-link">Introduction</a></li>
+        <li><a href="#macos" class="nav-link">macOS</a></li>
+        <li><a href="#windows" class="nav-link">Windows</a></li>
+        <li><a href="#linux" class="nav-link">Linux</a></li>
+        <li><a href="#manual" class="nav-link">Manual Install</a></li>
+        <li><a href="#troubleshooting" class="nav-link">Troubleshooting</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main-content">
+    <section class="hero searchable" id="intro" data-searchable-text="install guide macos windows linux manual installation troubleshooting">
+      <span class="hero-badge">🚀 Installation Guide</span>
+      <h1>Install Photo Metadata Editor</h1>
+      <p>Follow the steps below to get the app running on macOS, Windows, or Linux.</p>
+      <div class="hero-cta-group">
+        <a href="#windows" class="youtube-button"><i class="fab fa-windows"></i> Jump to Windows</a>
+        <a href="#manual" class="hero-secondary-btn"><i class="fas fa-screwdriver-wrench"></i> Manual Setup</a>
+      </div>
+    </section>
+
+    <section class="content-section searchable" data-searchable-text="quick overview platforms">
+      <div class="section-header"><h2><i class="fas fa-list-check"></i> Quick Overview</h2><p class="section-description">Pick the method that matches your system.</p></div>
+      <div class="cards-grid four-up">
+        <article class="info-card searchable" data-searchable-text="macos apple silicon m1 m2 m3">
+          <div class="card-icon"><i class="fab fa-apple"></i></div>
+          <h3>macOS Apple Silicon</h3>
+          <p>One-line installer for M1/M2/M3 Macs.</p>
+        </article>
+        <article class="info-card searchable" data-searchable-text="macos intel bash">
+          <div class="card-icon"><i class="fab fa-apple"></i></div>
+          <h3>macOS Intel</h3>
+          <p>Use the shell installer through Terminal.</p>
+        </article>
+        <article class="info-card searchable" data-searchable-text="windows powershell batch install.ps1 install.bat">
+          <div class="card-icon"><i class="fab fa-windows"></i></div>
+          <h3>Windows</h3>
+          <p>PowerShell recommended; batch fallback included.</p>
+        </article>
+        <article class="info-card searchable" data-searchable-text="linux ubuntu debian apt git python3">
+          <div class="card-icon"><i class="fab fa-linux"></i></div>
+          <h3>Linux</h3>
+          <p>Install prerequisites, clone, and launch.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="macos" data-searchable-text="macos apple silicon intel homebrew python3 git install.sh install_m1.py">
+      <div class="section-header"><h2><i class="fab fa-apple"></i> macOS Installation</h2><p class="section-description">Choose the command for your Mac.</p></div>
+      <div class="doc-card">
+        <h3>Apple Silicon (M1/M2/M3)</h3>
+        <pre><code>curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py | python3</code></pre>
+      </div>
+      <div class="doc-card">
+        <h3>Intel Mac</h3>
+        <pre><code>sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash</code></pre>
+      </div>
+      <div class="callout note-callout"><strong>Tip:</strong> The app will install to your Applications folder and launch automatically.</div>
+    </section>
+
+    <section class="content-section searchable" id="windows" data-searchable-text="windows powershell install.ps1 install.bat run as administrator windows powershell 5.1">
+      <div class="section-header"><h2><i class="fab fa-windows"></i> Windows Installation</h2><p class="section-description">PowerShell is recommended, and a batch file fallback is available.</p></div>
+      <div class="docs-grid two-up">
+        <article class="doc-card searchable" data-searchable-text="powershell administrator iex install.ps1">
+          <h3>PowerShell (Recommended)</h3>
+          <ol>
+            <li>Open Windows PowerShell or PowerShell as administrator.</li>
+            <li>Run the commands below.</li>
+          </ol>
+          <pre><code>Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))</code></pre>
+          <p class="muted">Compatible with Windows PowerShell 5.1 and newer PowerShell versions.</p>
+        </article>
+        <article class="doc-card searchable" data-searchable-text="command prompt install.bat administrator fallback">
+          <h3>Command Prompt Fallback</h3>
+          <ol>
+            <li>Open Command Prompt as administrator.</li>
+            <li>Download <code>Install.bat</code> from the repository.</li>
+            <li>Run it from the downloaded location.</li>
+          </ol>
+          <div class="callout note-callout">Use this if PowerShell execution policies are restricted on your machine.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="linux" data-searchable-text="linux ubuntu debian apt-get git python3-pip clone requirements.txt main.py">
+      <div class="section-header"><h2><i class="fab fa-linux"></i> Linux Installation</h2><p class="section-description">Install prerequisites, clone the repo, then launch the app.</p></div>
+      <div class="doc-card">
+        <pre><code>sudo apt-get install -y git python3 python3-pip
+
+git clone https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git
+cd Photo_Metadata_App_By_Gledhill
+python3 -m pip install -r requirements.txt
+python3 main.py</code></pre>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="manual" data-searchable-text="manual installation advanced homebrew brew install python git troubleshooting">
+      <div class="section-header"><h2><i class="fas fa-screwdriver-wrench"></i> Manual Installation</h2><p class="section-description">Use these steps if you want to install dependencies one by one.</p></div>
+      <div class="doc-card">
+        <ol>
+          <li>Install Homebrew if needed.</li>
+          <li>Install Git and Python.</li>
+          <li>Create a folder for the project.</li>
+          <li>Clone the repository.</li>
+          <li>Install Python dependencies.</li>
+          <li>Run <code>main.py</code>.</li>
+        </ol>
+        <pre><code>brew install git
+brew install python@3
+
+cd ~
+mkdir -p App
+cd App
+
+git clone https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git
+cd Photo_Metadata_App_By_Gledhill
+python3 -m pip install --upgrade pip
+python3 -m pip install -r requirements.txt</code></pre>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="troubleshooting" data-searchable-text="troubleshooting command not found permission denied update install">
+      <div class="section-header"><h2><i class="fas fa-triangle-exclamation"></i> Troubleshooting</h2><p class="section-description">Common install issues and how to fix them.</p></div>
+      <div class="docs-grid two-up">
+        <article class="doc-card"><h3>Command Not Found</h3><p>Make sure Git and Python are installed and available on your PATH.</p></article>
+        <article class="doc-card"><h3>Permission Denied</h3><p>Re-open Terminal or PowerShell with administrator privileges and try again.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-brand"><div class="footer-logo-wrap"><span class="logo-mark">📸</span></div><p>Installation help for macOS, Windows, and Linux.</p></div>
+      <div class="footer-links"><div class="footer-column"><h4>Docs</h4><a href="index.html">Home</a><a href="METADATA_GUIDE.html">Metadata</a><a href="NAMING_CONVENTIONS.html">Naming</a></div></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Michael Gledhill</p></div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

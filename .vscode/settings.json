@@ -13,5 +13,6 @@
         "c:\\Users\\cadet\\.vscode\\extensions\\wmerkens.vscode-circuitpython-v2-0.3.3\\stubs",
         "c:\\Users\\cadet\\AppData\\Roaming\\Code\\User\\globalStorage\\wmerkens.vscode-circuitpython-v2\\bundle\\20251009\\adafruit-circuitpython-bundle-py-20251009\\lib",
         "c:\\Users\\cadet\\AppData\\Roaming\\Code\\User\\globalStorage\\padgettholdings.circuitpythonsync\\stubs\\circuitpython_stubs-10.0.3"
-    ]
+    ],
+    "liveServer.settings.port": 5501
 }

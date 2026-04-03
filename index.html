@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Metadata Editor Docs</title>
+  <meta name="description" content="Documentation hub for Photo Metadata Editor: install guides, metadata reference, and naming conventions.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' fill='%2328a745'%3E%F0%9F%93%B8%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+      <a href="index.html" class="logo-link">
+        <div class="logo-section">
+          <span class="logo-mark">📸</span>
+          <div class="logo-copy">
+            <strong>Photo Metadata Editor</strong>
+            <span>Documentation Hub</span>
+          </div>
+        </div>
+      </a>
+      <nav class="header-nav">
+        <a href="index.html" class="header-nav-link active">Home</a>
+        <a href="INSTALL_GUIDE.html" class="header-nav-link">Install</a>
+        <a href="METADATA_GUIDE.html" class="header-nav-link">Metadata</a>
+        <a href="NAMING_CONVENTIONS.html" class="header-nav-link">Naming</a>
+      </nav>
+      <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search docs..." aria-label="Search docs">
+        <button class="search-button" id="searchButton" aria-label="Search"><i class="fas fa-search"></i></button>
+      </div>
+      <a href="https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill" class="github-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository"><i class="fab fa-github"></i></a>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close Sidebar"><i class="fas fa-times"></i></button>
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="INSTALL_GUIDE.html" class="nav-link">Install Guide</a></li>
+        <li><a href="METADATA_GUIDE.html" class="nav-link">Metadata Reference</a></li>
+        <li><a href="NAMING_CONVENTIONS.html" class="nav-link">Naming Conventions</a></li>
+        <li><a href="#quick-install" class="nav-link">Quick Install</a></li>
+        <li><a href="#guides" class="nav-link">Guides</a></li>
+        <li><a href="#support" class="nav-link">Support</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main-content">
+    <section class="hero searchable" data-searchable-text="Photo Metadata Editor documentation hub install guide metadata reference naming conventions">
+      <span class="hero-badge">📚 Documentation Hub</span>
+      <h1>Photo Metadata Editor</h1>
+      <p>Everything you need to install the app, understand EXIF/XMP metadata, and build reusable naming patterns.</p>
+      <div class="hero-cta-group">
+        <a href="INSTALL_GUIDE.html" class="youtube-button"><i class="fas fa-download"></i> Install Guide</a>
+        <a href="METADATA_GUIDE.html" class="hero-secondary-btn"><i class="fas fa-table"></i> Metadata Reference</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="stat-number">4</span><span class="stat-label">Core Guides</span></div>
+        <div class="hero-stat"><span class="stat-number">EXIF</span><span class="stat-label">& XMP</span></div>
+        <div class="hero-stat"><span class="stat-number">HTML</span><span class="stat-label">Static Site</span></div>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="quick-install" data-searchable-text="quick install windows powershell linux macos"> 
+      <div class="section-header">
+        <h2><i class="fas fa-bolt"></i> Quick Install</h2>
+        <p class="section-description">Choose the command that matches your platform.</p>
+      </div>
+      <div class="docs-grid three-up">
+        <article class="doc-card searchable" data-searchable-text="macos apple silicon install_m1.py">
+          <h3><i class="fab fa-apple"></i> macOS Apple Silicon</h3>
+          <pre><code>curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py | python3</code></pre>
+        </article>
+        <article class="doc-card searchable" data-searchable-text="windows powershell install.ps1 install.bat">
+          <h3><i class="fab fa-windows"></i> Windows</h3>
+          <pre><code>Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))</code></pre>
+        </article>
+        <article class="doc-card searchable" data-searchable-text="linux install main.py requirements.txt">
+          <h3><i class="fab fa-linux"></i> Linux</h3>
+          <pre><code>git clone https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git
+cd Photo_Metadata_App_By_Gledhill
+python3 -m pip install -r requirements.txt
+python3 main.py</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="guides" data-searchable-text="install guide metadata guide naming conventions quick links"> 
+      <div class="section-header">
+        <h2><i class="fas fa-compass"></i> Guides</h2>
+        <p class="section-description">Jump straight to the topic you need.</p>
+      </div>
+      <div class="cards-grid">
+        <article class="info-card searchable" data-searchable-text="install guide windows macos linux manual troubleshooting">
+          <div class="card-icon"><i class="fas fa-download"></i></div>
+          <h3>Installation Guide</h3>
+          <p>Step-by-step setup for macOS, Windows, Linux, and manual installation.</p>
+          <a href="INSTALL_GUIDE.html" class="app-link">Open guide <i class="fas fa-arrow-right"></i></a>
+        </article>
+        <article class="info-card searchable" data-searchable-text="metadata guide exif xmp fields datetime rating creator subject">
+          <div class="card-icon"><i class="fas fa-layer-group"></i></div>
+          <h3>Metadata Reference</h3>
+          <p>EXIF and XMP field descriptions, examples, and best practices.</p>
+          <a href="METADATA_GUIDE.html" class="app-link">Open guide <i class="fas fa-arrow-right"></i></a>
+        </article>
+        <article class="info-card searchable" data-searchable-text="naming conventions tokens date datetime sequence original_name userid">
+          <div class="card-icon"><i class="fas fa-font"></i></div>
+          <h3>Naming Conventions</h3>
+          <p>Build powerful filename patterns with tokens, previews, and examples.</p>
+          <a href="NAMING_CONVENTIONS.html" class="app-link">Open guide <i class="fas fa-arrow-right"></i></a>
+        </article>
+        <article class="info-card searchable" data-searchable-text="github releases issues source code updates">
+          <div class="card-icon"><i class="fab fa-github"></i></div>
+          <h3>Source & Updates</h3>
+          <p>View the code, check releases, or open an issue on GitHub.</p>
+          <a href="https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill" class="app-link" target="_blank" rel="noopener noreferrer">Open repository <i class="fas fa-arrow-right"></i></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="support" data-searchable-text="support documentation release notes open source">
+      <div class="section-header">
+        <h2><i class="fas fa-circle-info"></i> About this site</h2>
+        <p class="section-description">A plain HTML/CSS/JS documentation site built for fast browsing and easy publishing.</p>
+      </div>
+      <div class="callout note-callout">
+        <strong>Tip:</strong> Use the sidebar to jump between pages, or search above to filter the cards and sections on the current page.
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="footer-logo-wrap"><span class="logo-mark">📸</span></div>
+        <p>Photo Metadata Editor docs for install, metadata fields, and filename tokens.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-column">
+          <h4>Docs</h4>
+          <a href="INSTALL_GUIDE.html">Install</a>
+          <a href="METADATA_GUIDE.html">Metadata</a>
+          <a href="NAMING_CONVENTIONS.html">Naming</a>
+        </div>
+        <div class="footer-column">
+          <h4>Connect</h4>
+          <a href="https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Michael Gledhill</p></div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

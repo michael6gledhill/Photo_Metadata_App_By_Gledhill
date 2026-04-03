@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metadata Reference - Photo Metadata Editor</title>
+  <meta name="description" content="EXIF and XMP metadata reference for Photo Metadata Editor.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' fill='%2328a745'%3E%F0%9F%93%B8%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+      <a href="index.html" class="logo-link"><div class="logo-section"><span class="logo-mark">📸</span><div class="logo-copy"><strong>Photo Metadata Editor</strong><span>Documentation Hub</span></div></div></a>
+      <nav class="header-nav">
+        <a href="index.html" class="header-nav-link">Home</a>
+        <a href="INSTALL_GUIDE.html" class="header-nav-link">Install</a>
+        <a href="METADATA_GUIDE.html" class="header-nav-link active">Metadata</a>
+        <a href="NAMING_CONVENTIONS.html" class="header-nav-link">Naming</a>
+      </nav>
+      <div class="search-container"><input type="text" class="search-input" id="searchInput" placeholder="Search metadata..." aria-label="Search metadata"><button class="search-button" id="searchButton" aria-label="Search"><i class="fas fa-search"></i></button></div>
+      <a href="https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill" class="github-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository"><i class="fab fa-github"></i></a>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close Sidebar"><i class="fas fa-times"></i></button>
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="#overview" class="nav-link">Overview</a></li>
+        <li><a href="#dynamic" class="nav-link">Dynamic Values</a></li>
+        <li><a href="#quickref" class="nav-link">Quick Reference</a></li>
+        <li><a href="#exif" class="nav-link">EXIF</a></li>
+        <li><a href="#xmp" class="nav-link">XMP</a></li>
+        <li><a href="#best-practices" class="nav-link">Best Practices</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main-content">
+    <section class="hero searchable" id="overview" data-searchable-text="metadata exif xmp reference overview">
+      <span class="hero-badge">🗂️ Metadata Reference</span>
+      <h1>EXIF and XMP Fields</h1>
+      <p>Use this guide to understand the metadata fields supported by Photo Metadata Editor.</p>
+      <div class="hero-cta-group">
+        <a href="#quickref" class="youtube-button"><i class="fas fa-table"></i> Quick Reference</a>
+        <a href="#best-practices" class="hero-secondary-btn"><i class="fas fa-lightbulb"></i> Best Practices</a>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="dynamic" data-searchable-text="datetime formatting strftime codes iso 8601">
+      <div class="section-header"><h2><i class="fas fa-calendar-days"></i> Dynamic Values</h2><p class="section-description">Many fields support date/time formatting for timestamps and filename-friendly values.</p></div>
+      <div class="docs-grid two-up">
+        <article class="doc-card">
+          <h3>Common Date/Time Codes</h3>
+          <table>
+            <thead><tr><th>Code</th><th>Meaning</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td>%Y</td><td>4-digit year</td><td>2026</td></tr>
+              <tr><td>%m</td><td>Month</td><td>04</td></tr>
+              <tr><td>%d</td><td>Day</td><td>02</td></tr>
+              <tr><td>%H</td><td>Hour</td><td>16</td></tr>
+              <tr><td>%M</td><td>Minutes</td><td>34</td></tr>
+              <tr><td>%S</td><td>Seconds</td><td>58</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="doc-card">
+          <h3>Useful Patterns</h3>
+          <pre><code>%Y-%m-%d %H:%M:%S
+%Y%m%d_%H%M%S
+%B %d, %Y</code></pre>
+          <p class="muted">Use these in `DateTime` fields or filename patterns that rely on timestamps.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="quickref" data-searchable-text="artist copyright image description datetime title creator subject rights headline rating make model lens model">
+      <div class="section-header"><h2><i class="fas fa-bookmark"></i> Quick Reference</h2><p class="section-description">The most commonly used fields in this app.</p></div>
+      <div class="docs-grid two-up">
+        <article class="doc-card">
+          <h3>Common EXIF Fields</h3>
+          <table>
+            <thead><tr><th>Field</th><th>Purpose</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td>Artist</td><td>Photographer/creator name</td><td>Alex Smith</td></tr>
+              <tr><td>Copyright</td><td>Ownership statement</td><td>© 2026 Example Media</td></tr>
+              <tr><td>ImageDescription</td><td>Short description</td><td>Sunset over mountains</td></tr>
+              <tr><td>DateTime</td><td>Capture date/time</td><td>2026:04:02 16:34:58</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="doc-card">
+          <h3>Common XMP Fields</h3>
+          <table>
+            <thead><tr><th>Field</th><th>Purpose</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td>title</td><td>Photo title</td><td>Annual Tech Summit</td></tr>
+              <tr><td>description</td><td>Longer description</td><td>Keynote sessions...</td></tr>
+              <tr><td>creator</td><td>Creator name</td><td>Alex Smith</td></tr>
+              <tr><td>subject</td><td>Keywords / tags</td><td>["conference", "2026"]</td></tr>
+              <tr><td>rights</td><td>Copyright info</td><td>Example Media</td></tr>
+              <tr><td>Headline</td><td>Caption / headline</td><td>Opening Day</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="exif" data-searchable-text="exif artist copyright imagedescription datetime make model lensmodel">
+      <div class="section-header"><h2><i class="fas fa-camera"></i> EXIF Fields</h2><p class="section-description">Camera and descriptive fields commonly found in JPEG and TIFF images.</p></div>
+      <div class="docs-grid two-up">
+        <article class="doc-card"><h3>Artist</h3><p>The photographer or creator name. Great for credits and ownership tracking.</p><pre><code>"Artist": "Alex Smith"</code></pre></article>
+        <article class="doc-card"><h3>Copyright</h3><p>Copyright notice and ownership statement.</p><pre><code>"Copyright": "© 2026 Example Media"</code></pre></article>
+        <article class="doc-card"><h3>ImageDescription</h3><p>A concise summary of what the image shows.</p><pre><code>"ImageDescription": "Sunset over the bay"</code></pre></article>
+        <article class="doc-card"><h3>DateTime</h3><p>The original capture date/time using `YYYY:MM:DD HH:MM:SS`.</p><pre><code>"DateTime": "2026:04:02 16:34:58"</code></pre></article>
+        <article class="doc-card"><h3>Make / Model</h3><p>Camera manufacturer and model.</p><pre><code>"Make": "Canon"
+"Model": "Canon EOS R5"</code></pre></article>
+        <article class="doc-card"><h3>LensModel</h3><p>Optional lens information when it is available in the file.</p><pre><code>"LensModel": "RF24-70mm F2.8 L IS USM"</code></pre></article>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="xmp" data-searchable-text="xmp title description creator subject rights headline rating">
+      <div class="section-header"><h2><i class="fas fa-pen-nib"></i> XMP Fields</h2><p class="section-description">Rich descriptive metadata, keywords, and headline fields.</p></div>
+      <div class="docs-grid two-up">
+        <article class="doc-card"><h3>title / description</h3><p>Use `title` for a short label and `description` for a fuller summary.</p><pre><code>"title": "Annual Tech Summit"
+"description": "Keynote sessions and product demos"</code></pre></article>
+        <article class="doc-card"><h3>creator / subject</h3><p>`creator` stores a person or organization; `subject` is perfect for keywords.</p><pre><code>"creator": "Alex Smith"
+"subject": ["conference", "2026", "metropolis"]</code></pre></article>
+        <article class="doc-card"><h3>rights / Headline</h3><p>Use `rights` for legal ownership and `Headline` for caption-style text.</p><pre><code>"rights": "Example Media"
+"Headline": "Opening Day at the Summit"</code></pre></article>
+        <article class="doc-card"><h3>Rating</h3><p>Optional XMP rating when supported by the source file and workflow.</p><pre><code>"Rating": 5</code></pre></article>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="best-practices" data-searchable-text="best practices consistent naming backup overwrite merge">
+      <div class="section-header"><h2><i class="fas fa-shield-heart"></i> Best Practices</h2><p class="section-description">A few practical habits that keep metadata tidy.</p></div>
+      <div class="callout note-callout">
+        <ul>
+          <li>Use consistent creator and copyright values across a project.</li>
+          <li>Keep keywords short and reusable.</li>
+          <li>Use `DateTime` for capture time and filename tokens for exported copies.</li>
+          <li>Test on a copy of an important file before batch processing a whole folder.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-content"><div class="footer-brand"><div class="footer-logo-wrap"><span class="logo-mark">📸</span></div><p>Reference tables for EXIF and XMP fields.</p></div><div class="footer-links"><div class="footer-column"><h4>Docs</h4><a href="index.html">Home</a><a href="INSTALL_GUIDE.html">Install</a><a href="NAMING_CONVENTIONS.html">Naming</a></div></div></div>
+    <div class="footer-bottom"><p>&copy; 2026 Michael Gledhill</p></div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

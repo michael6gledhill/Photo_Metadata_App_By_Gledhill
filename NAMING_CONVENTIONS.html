@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naming Conventions - Photo Metadata Editor</title>
+  <meta name="description" content="Token reference and filename pattern guide for Photo Metadata Editor.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' fill='%2328a745'%3E%F0%9F%93%B8%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+      <a href="index.html" class="logo-link"><div class="logo-section"><span class="logo-mark">📸</span><div class="logo-copy"><strong>Photo Metadata Editor</strong><span>Documentation Hub</span></div></div></a>
+      <nav class="header-nav">
+        <a href="index.html" class="header-nav-link">Home</a>
+        <a href="INSTALL_GUIDE.html" class="header-nav-link">Install</a>
+        <a href="METADATA_GUIDE.html" class="header-nav-link">Metadata</a>
+        <a href="NAMING_CONVENTIONS.html" class="header-nav-link active">Naming</a>
+      </nav>
+      <div class="search-container"><input type="text" class="search-input" id="searchInput" placeholder="Search naming tokens..." aria-label="Search naming tokens"><button class="search-button" id="searchButton" aria-label="Search"><i class="fas fa-search"></i></button></div>
+      <a href="https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill" class="github-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository"><i class="fab fa-github"></i></a>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close Sidebar"><i class="fas fa-times"></i></button>
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="#overview" class="nav-link">Overview</a></li>
+        <li><a href="#quickref" class="nav-link">Quick Reference</a></li>
+        <li><a href="#tokens" class="nav-link">Token Details</a></li>
+        <li><a href="#examples" class="nav-link">Examples</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main-content">
+    <section class="hero searchable" id="overview" data-searchable-text="naming conventions tokens filename patterns sequence original_name userid">
+      <span class="hero-badge">🏷️ Naming Guide</span>
+      <h1>Filename Tokens & Patterns</h1>
+      <p>Create reusable file naming conventions with metadata-driven tokens and live preview ideas.</p>
+      <div class="hero-cta-group">
+        <a href="#quickref" class="youtube-button"><i class="fas fa-table"></i> Token Table</a>
+        <a href="#examples" class="hero-secondary-btn"><i class="fas fa-wand-magic-sparkles"></i> Examples</a>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="quickref" data-searchable-text="date datetime title description creator camera_model lens_model sequence original_name userid copyright rating">
+      <div class="section-header"><h2><i class="fas fa-book-bookmark"></i> Quick Reference</h2><p class="section-description">The most commonly used tokens in the app.</p></div>
+      <div class="doc-card">
+        <table>
+          <thead><tr><th>Token</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>{date}</code></td><td>Current date in YYYY-MM-DD format</td></tr>
+            <tr><td><code>{datetime:%FORMAT}</code></td><td>Custom formatted date/time</td></tr>
+            <tr><td><code>{title}</code></td><td>Photo title from metadata</td></tr>
+            <tr><td><code>{description}</code></td><td>Photo description from metadata</td></tr>
+            <tr><td><code>{creator}</code></td><td>Creator / artist name</td></tr>
+            <tr><td><code>{camera_model}</code></td><td>Camera model used</td></tr>
+            <tr><td><code>{lens_model}</code></td><td>Lens model used</td></tr>
+            <tr><td><code>{sequence:N}</code></td><td>Sequential number with padding</td></tr>
+            <tr><td><code>{original_name}</code></td><td>Original filename without extension</td></tr>
+            <tr><td><code>{userid}</code></td><td>User identifier</td></tr>
+            <tr><td><code>{copyright}</code></td><td>Copyright information</td></tr>
+            <tr><td><code>{rating}</code></td><td>Photo rating (0-5)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="tokens" data-searchable-text="date datetime title description creator copyright rating camera_model lens_model sequence original_name userid">
+      <div class="section-header"><h2><i class="fas fa-code"></i> Token Details</h2><p class="section-description">How each token behaves in filename patterns.</p></div>
+      <div class="docs-grid two-up">
+        <article class="doc-card"><h3>{date}</h3><p>Current date in ISO format.</p><pre><code>{date}_{original_name}</code></pre></article>
+        <article class="doc-card"><h3>{datetime:%FORMAT}</h3><p>Use any `strftime` format you want.</p><pre><code>{datetime:%Y%m%d_%H%M%S}_{original_name}</code></pre></article>
+        <article class="doc-card"><h3>{title}</h3><p>Uses XMP title or EXIF description.</p><pre><code>{date}_{title}</code></pre></article>
+        <article class="doc-card"><h3>{description}</h3><p>Longer description from XMP.</p><pre><code>{userid}_{description}_{sequence:03d}</code></pre></article>
+        <article class="doc-card"><h3>{creator}</h3><p>Photographer or artist name.</p><pre><code>{creator}_{date}_{original_name}</code></pre></article>
+        <article class="doc-card"><h3>{camera_model}</h3><p>Camera body name from EXIF `Model`.</p><pre><code>{camera_model}_{date}_{sequence:04d}</code></pre></article>
+        <article class="doc-card"><h3>{lens_model}</h3><p>Lens model when available in the metadata.</p><pre><code>{lens_model}_{original_name}</code></pre></article>
+        <article class="doc-card"><h3>{sequence:N}</h3><p>Zero-padded numbering for series and batches.</p><pre><code>{sequence:03d}
+{sequence:04d}</code></pre></article>
+        <article class="doc-card"><h3>{userid}</h3><p>Your custom user identifier or account name.</p><pre><code>{userid}_{date}_{title}</code></pre></article>
+        <article class="doc-card"><h3>{copyright}</h3><p>Copyright or rights owner text.</p><pre><code>{date}_{title}_©{copyright}</code></pre></article>
+        <article class="doc-card"><h3>{rating}</h3><p>Rating token for filtering or organizing picks.</p><pre><code>{rating}star_{date}_{original_name}</code></pre></article>
+      </div>
+    </section>
+
+    <section class="content-section searchable" id="examples" data-searchable-text="examples patterns output photo filename">
+      <div class="section-header"><h2><i class="fas fa-wand-magic-sparkles"></i> Pattern Examples</h2><p class="section-description">Some practical combinations you can copy and tweak.</p></div>
+      <div class="docs-grid two-up">
+        <article class="doc-card"><h3>Simple dated filename</h3><pre><code>{date}_{original_name}.jpg</code></pre><p class="muted">Example output: <code>2026-04-02_vacation.jpg</code></p></article>
+        <article class="doc-card"><h3>Event workflow</h3><pre><code>{datetime:%Y%m%d_%H%M%S}_{creator}_{sequence:03d}</code></pre><p class="muted">Great for photos that need strict ordering.</p></article>
+        <article class="doc-card"><h3>Readable archive</h3><pre><code>{creator}_{title}_{date}</code></pre><p class="muted">Useful when human-friendly file names matter.</p></article>
+        <article class="doc-card"><h3>Portfolio export</h3><pre><code>{rating}_{camera_model}_{original_name}</code></pre><p class="muted">Handy when sorting by camera and favorite shots.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-content"><div class="footer-brand"><div class="footer-logo-wrap"><span class="logo-mark">📸</span></div><p>Token reference and examples for generated filenames.</p></div><div class="footer-links"><div class="footer-column"><h4>Docs</h4><a href="index.html">Home</a><a href="INSTALL_GUIDE.html">Install</a><a href="METADATA_GUIDE.html">Metadata</a></div></div></div>
+    <div class="footer-bottom"><p>&copy; 2026 Michael Gledhill</p></div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

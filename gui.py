@@ -9,6 +9,7 @@ import json
 import shutil
 import logging
 import traceback
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, List, Any
@@ -581,6 +582,8 @@ class MetadataViewDialog(QDialog):
 
 class PhotoMetadataEditor(QMainWindow):
     """Main application window."""
+
+    update_check_finished = Signal(object, bool)
     
     def __init__(self):
         super().__init__()
@@ -598,6 +601,8 @@ class PhotoMetadataEditor(QMainWindow):
         self.last_operation = None
         self.preview_index = 0
         self.update_available = False
+
+        self.update_check_finished.connect(self._on_update_check_finished)
         
         self.init_ui()
         self.setAcceptDrops(True)
@@ -967,15 +972,20 @@ class PhotoMetadataEditor(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Failed to export naming convention: {str(e)}")
     
     def delete_template(self):
-        current_item = self.template_list.currentItem()
+        current_item = self.template_list.currentItem() or (self.template_list.selectedItems()[0] if self.template_list.selectedItems() else None)
         if not current_item:
             QMessageBox.warning(self, "Warning", "Please select a template.")
             return
         
-        if QMessageBox.question(self, "Confirm", "Delete this template?") == QMessageBox.StandardButton.Yes:
-            if self.template_manager.delete_template(current_item.text()):
+        template_name = current_item.text().strip()
+        if QMessageBox.question(self, "Confirm", f"Delete template '{template_name}'?") == QMessageBox.StandardButton.Yes:
+            if self.template_manager.delete_template(template_name):
+                self.selected_template = None
                 self.refresh_templates()
-                self.log_status("Template deleted")
+                self.update_preview()
+                self.log_status(f"Template '{template_name}' deleted")
+            else:
+                QMessageBox.warning(self, "Warning", f"Template '{template_name}' could not be deleted.")
     
     def duplicate_template(self):
         current_item = self.template_list.currentItem()
@@ -1016,15 +1026,20 @@ class PhotoMetadataEditor(QMainWindow):
             self.log_status(f"Template duplicated as '{dialog.name_input.text()}'")
     
     def delete_naming(self):
-        current_item = self.naming_list.currentItem()
+        current_item = self.naming_list.currentItem() or (self.naming_list.selectedItems()[0] if self.naming_list.selectedItems() else None)
         if not current_item:
             QMessageBox.warning(self, "Warning", "Please select a naming convention.")
             return
         
-        if QMessageBox.question(self, "Confirm", "Delete this naming convention?") == QMessageBox.StandardButton.Yes:
-            if self.template_manager.delete_naming(current_item.text()):
+        naming_name = current_item.text().strip()
+        if QMessageBox.question(self, "Confirm", f"Delete naming convention '{naming_name}'?") == QMessageBox.StandardButton.Yes:
+            if self.template_manager.delete_naming(naming_name):
+                self.selected_naming = None
                 self.refresh_namings()
-                self.log_status("Naming convention deleted")
+                self.update_preview()
+                self.log_status(f"Naming convention '{naming_name}' deleted")
+            else:
+                QMessageBox.warning(self, "Warning", f"Naming convention '{naming_name}' could not be deleted.")
     
     def view_metadata(self):
         # Get the currently selected item from the file list widget
@@ -1056,13 +1071,20 @@ class PhotoMetadataEditor(QMainWindow):
         
         success_count = 0
         for i, file_path in enumerate(self.selected_files):
-            if self.metadata_manager.delete_metadata(file_path):
-                success_count += 1
+            try:
+                if self.metadata_manager.delete_metadata(file_path):
+                    success_count += 1
+                else:
+                    self.log_status(f"✗ Failed to delete metadata: {Path(file_path).name}")
+            except Exception as e:
+                logger.error(f"Unexpected delete metadata error for {file_path}: {e}")
+                self.log_status(f"✗ Error deleting metadata: {Path(file_path).name} - {e}")
             progress.setValue(i + 1)
             QApplication.processEvents()
         
         progress.close()
         self.log_status(f"Metadata deletion complete: {success_count}/{len(self.selected_files)} successful")
+        self.update_preview()
     
     def on_template_selected(self):
         current_item = self.template_list.currentItem()
@@ -1308,28 +1330,44 @@ class PhotoMetadataEditor(QMainWindow):
     def check_for_updates_background(self):
         """Check for updates in background and update UI if available."""
         def callback(result):
-            try:
-                update_available, latest_version = result
-                if update_available:
-                    self.update_available = True
-                    self.update_btn.setText("✨")
-                    self.update_btn.setToolTip(f"Update Available ({latest_version})")
-                    self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
-                    self.update_status_label.setText(f"✨ v{latest_version}")
-                elif latest_version:
-                    self.update_status_label.setText(f"✓ v{latest_version}")
-                else:
-                    self.update_status_label.setText("⚠️ Offline")
-                    if self.update_checker.last_error:
-                        logger.warning(f"Update check (background) failed: {self.update_checker.last_error}")
-            except Exception as e:
-                logger.error(f"Update check callback crashed: {e}")
-                self.update_status_label.setText("⚠️ Error")
+            self.update_check_finished.emit(result, False)
         
         try:
             self.update_checker.check_for_updates_async(callback)
         except Exception as e:
             logger.error(f"Failed to start update check: {e}")
+
+    def _on_update_check_finished(self, result, manual_check: bool):
+        """Update the UI after an async update check finishes."""
+        try:
+            update_available, latest_version = result
+            self.update_btn.setEnabled(True)
+
+            if update_available:
+                self.update_available = True
+                self.update_btn.setText("✨")
+                self.update_btn.setToolTip(f"Update Available ({latest_version})")
+                self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
+                self.update_status_label.setText(f"✨ v{latest_version}")
+                if manual_check:
+                    self.log_status(f"✨ Update {latest_version} available! Click the ✨ button to install.")
+            elif latest_version:
+                self.update_status_label.setText(f"✓ v{latest_version}")
+                if manual_check:
+                    self.log_status(f"✓ Online latest is v{latest_version}; you have v{self.update_checker.current_version}")
+            else:
+                self.update_status_label.setText("⚠️ Offline")
+                err = self.update_checker.last_error or "no response"
+                if manual_check:
+                    self.log_status(f"⚠️ Update check failed: {err}")
+                else:
+                    logger.warning(f"Update check (background) failed: {err}")
+        except Exception as e:
+            logger.error(f"Update check callback crashed: {e}")
+            self.update_btn.setEnabled(True)
+            self.update_status_label.setText("⚠️ Error")
+            if manual_check:
+                self.log_status(f"⚠️ Update check error: {e}")
     
     def open_documentation(self):
         """Open GitHub Pages homepage in browser."""
@@ -1346,28 +1384,7 @@ class PhotoMetadataEditor(QMainWindow):
             self.update_btn.setEnabled(False)
             
             def callback(result):
-                try:
-                    update_available, latest_version = result
-                    self.update_btn.setEnabled(True)
-                    
-                    if update_available:
-                        self.update_available = True
-                        self.update_btn.setText("✨")
-                        self.update_btn.setToolTip(f"Update Available ({latest_version})")
-                        self.update_btn.setStyleSheet("padding: 2px; font-size: 14px; background-color: #ff9800; color: white; border-radius: 4px;")
-                        self.log_status(f"✨ Update {latest_version} available! Click the ✨ button to install.")
-                        self.update_status_label.setText(f"✨ v{latest_version}")
-                    elif latest_version:
-                        self.log_status(f"✓ Online latest is v{latest_version}; you have v{self.update_checker.current_version}")
-                        self.update_status_label.setText(f"✓ v{latest_version}")
-                    else:
-                        err = self.update_checker.last_error or "no response"
-                        self.log_status(f"⚠️ Update check failed: {err}")
-                        self.update_status_label.setText("⚠️ Offline")
-                except Exception as e:
-                    logger.error(f"Manual update check callback crashed: {e}")
-                    self.update_btn.setEnabled(True)
-                    self.log_status(f"⚠️ Update check error: {e}")
+                self.update_check_finished.emit(result, True)
             
             try:
                 self.update_checker.check_for_updates_async(callback)
@@ -1417,7 +1434,7 @@ class PhotoMetadataEditor(QMainWindow):
                     f'tell application "Terminal" to do script "{cmd}"'
                 ])
             else:
-                # Windows/Linux: pull and restart
+                # Windows/Linux: pull, reinstall deps, and relaunch
                 repo_path = Path(__file__).parent
                 result = subprocess.run(
                     ["git", "pull", "origin", "main"],
@@ -1428,6 +1445,22 @@ class PhotoMetadataEditor(QMainWindow):
                 )
                 if result.returncode != 0:
                     raise RuntimeError(f"Git pull failed: {result.stderr}")
+
+                pip_result = subprocess.run(
+                    [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
+                    cwd=repo_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=300
+                )
+                if pip_result.returncode != 0:
+                    raise RuntimeError(f"Dependency install failed: {pip_result.stderr}")
+
+                main_script = repo_path / "main.py"
+                if not main_script.exists():
+                    raise RuntimeError("Could not find main.py after update")
+
+                subprocess.Popen([sys.executable, str(main_script)], cwd=repo_path)
             
             success = True
         except Exception as e:
@@ -1441,11 +1474,11 @@ class PhotoMetadataEditor(QMainWindow):
             QMessageBox.information(
                 self,
                 "Update In Progress",
-                "The update installer is running in the background.\n\n"
-                "This app will now close. The updated version will launch automatically when ready."
+                "The update has been installed and the app will now close.\n\n"
+                "The updated version should launch automatically."
             )
             
-            # Close the app; the installer will relaunch the new version
+            # Close the current app after the updated process starts
             QApplication.quit()
         else:
             QMessageBox.critical(

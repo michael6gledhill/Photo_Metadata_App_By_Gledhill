@@ -204,7 +204,7 @@ class UpdateChecker:
             logger.info("Installing dependencies...")
             # Install/update requirements
             subprocess.run(
-                [sys.executable, "-m", "pip", "install", "-q", "-r", "requirements.txt"],
+                [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
                 cwd=repo_path,
                 check=True,
                 capture_output=True
@@ -214,6 +214,10 @@ class UpdateChecker:
             if self.latest_version:
                 self.save_current_version(self.latest_version)
                 self.current_version = self.latest_version
+
+            main_script = repo_path / "main.py"
+            if main_script.exists():
+                subprocess.Popen([sys.executable, str(main_script)], cwd=repo_path)
             
             logger.info("Update completed successfully")
             return True

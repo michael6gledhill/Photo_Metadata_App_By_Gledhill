@@ -189,7 +189,7 @@ class MetadataManager:
             success = self._set_metadata_python(temp_path, exif_data, xmp_data, merge)
             
             if success:
-                shutil.move(temp_path, file_path)
+                os.replace(temp_path, file_path)
                 return True
             else:
                 os.unlink(temp_path)
@@ -289,7 +289,7 @@ class MetadataManager:
             shutil.copy2(file_path, temp_path)
             
             success = False
-            if HAS_PIEXIF:
+            if self._is_jpeg(temp_path) and HAS_PIEXIF:
                 try:
                     piexif.insert(piexif.dump({
                         "0th": {}, "Exif": {}, "GPS": {}, "1st": {}, "thumbnail": None
@@ -298,6 +298,14 @@ class MetadataManager:
                     logger.info(f"Deleted EXIF metadata from {Path(file_path).name}")
                 except Exception as e:
                     logger.warning(f"piexif delete error: {e}")
+                    success = False
+            elif HAS_PIL:
+                try:
+                    self._strip_metadata_with_pillow(temp_path)
+                    success = True
+                    logger.info(f"Deleted metadata from {Path(file_path).name} using Pillow")
+                except Exception as e:
+                    logger.warning(f"Pillow delete error: {e}")
             
             # Delete embedded XMP from JPEG files
             if self._is_jpeg(temp_path):
@@ -306,9 +314,10 @@ class MetadataManager:
                     logger.info(f"Deleted XMP metadata from {Path(file_path).name}")
                 except Exception as e:
                     logger.warning(f"XMP deletion error: {e}")
+                    success = False
             
             if success:
-                shutil.move(temp_path, file_path)
+                os.replace(temp_path, file_path)
                 return True
             else:
                 os.unlink(temp_path)
@@ -371,6 +380,27 @@ class MetadataManager:
         
         with open(file_path, 'wb') as f:
             f.write(new_data)
+
+    def _strip_metadata_with_pillow(self, file_path: str) -> None:
+        """Strip metadata from non-JPEG images by re-saving via Pillow."""
+        if not HAS_PIL:
+            raise RuntimeError("Pillow is not available")
+
+        ext = Path(file_path).suffix.lower()
+        with Image.open(file_path) as img:
+            clean = img.copy()
+            save_kwargs: Dict[str, Any] = {}
+
+            if ext == '.png':
+                save_kwargs.update({"pnginfo": None, "exif": b""})
+            elif ext in {'.tif', '.tiff'}:
+                # Pillow will re-save the image data without metadata if we do not
+                # pass the original TIFF tags back in.
+                save_kwargs = {}
+            elif ext in {'.jpg', '.jpeg'}:
+                save_kwargs.update({"exif": b""})
+
+            clean.save(file_path, **save_kwargs)
 
     def _build_xmp_packet(self, xmp_data: Dict[str, Any]) -> str:
         """Build a minimal XMP packet from a dict of fields."""
@@ -807,10 +837,13 @@ class TemplateManager:
 
     def delete_template(self, name: str) -> bool:
         try:
+            target_name = name.strip()
+            target_stem = target_name.lower().replace(' ', '_')
             for file in self.template_dir.glob('*.json'):
                 with open(file, 'r') as f:
                     data = json.load(f)
-                    if data.get('name') == name:
+                    file_name = data.get('name', file.stem)
+                    if file_name == target_name or file.stem == target_stem or file_name.lower().replace(' ', '_') == target_stem:
                         file.unlink()
                         return True
         except Exception as e:
@@ -819,10 +852,13 @@ class TemplateManager:
 
     def delete_naming(self, name: str) -> bool:
         try:
+            target_name = name.strip()
+            target_stem = target_name.lower().replace(' ', '_')
             for file in self.naming_dir.glob('*.json'):
                 with open(file, 'r') as f:
                     data = json.load(f)
-                    if data.get('name') == name:
+                    file_name = data.get('name', file.stem)
+                    if file_name == target_name or file.stem == target_stem or file_name.lower().replace(' ', '_') == target_stem:
                         file.unlink()
                         return True
         except Exception as e:

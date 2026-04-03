@@ -9,6 +9,7 @@ import os
 import json
 import subprocess
 import logging
+import shutil
 from pathlib import Path
 from typing import Optional
 import threading
@@ -112,14 +113,30 @@ class PhotoMetadataInstaller:
         try:
             self.install_dir.parent.mkdir(parents=True, exist_ok=True)
             if self.install_dir.exists():
-                self.signals.log.emit("Updating existing repository...")
-                result = subprocess.run(
-                    ["git", "pull", "origin", "main"],
-                    cwd=self.install_dir,
-                    capture_output=True,
-                    text=True,
-                    timeout=60
-                )
+                if mode == "install":
+                    self.signals.log.emit("Existing installation detected. Removing for clean reinstall...")
+                    try:
+                        shutil.rmtree(self.install_dir)
+                    except Exception as e:
+                        self.signals.log.emit(f"❌ Could not remove existing install: {e}")
+                        return False
+
+                    self.signals.log.emit("Cloning repository...")
+                    result = subprocess.run(
+                        ["git", "clone", self.repo_url, str(self.install_dir)],
+                        capture_output=True,
+                        text=True,
+                        timeout=120
+                    )
+                else:
+                    self.signals.log.emit("Updating existing repository...")
+                    result = subprocess.run(
+                        ["git", "pull", "origin", "main"],
+                        cwd=self.install_dir,
+                        capture_output=True,
+                        text=True,
+                        timeout=60
+                    )
             else:
                 self.signals.log.emit("Cloning repository...")
                 result = subprocess.run(

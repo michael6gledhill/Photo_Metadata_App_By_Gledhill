@@ -11,13 +11,10 @@ echo Photo Metadata Editor - Installation
 echo ========================================
 echo.
 
-REM Check if running as Administrator
+REM Check if running as Administrator (optional for user-mode install/update)
 net session >nul 2>&1
 if %errorLevel% neq 0 (
-    echo Error: This script must be run as Administrator.
-    echo Please right-click on cmd.exe and select "Run as administrator"
-    pause
-    exit /b 1
+    echo Note: Running without Administrator privileges ^(user-mode install/update^).
 )
 
 set "REPO_URL=https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git"

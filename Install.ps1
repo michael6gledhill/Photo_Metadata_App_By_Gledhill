@@ -9,10 +9,11 @@ Write-Host ""
 # Check if running as Administrator
 $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
-if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Host "Error: This script must be run as Administrator."
-    Write-Host "Please right-click on PowerShell and select 'Run as administrator'."
-    exit 1
+$IS_ADMIN = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $IS_ADMIN) {
+    Write-Host "Note: Running without Administrator privileges (user-mode install/update)."
+    Write-Host "System package installs (Chocolatey) will be skipped if needed."
 }
 
 $REPO_URL = "https://github.com/michael6gledhill/Photo_Metadata_App_By_Gledhill.git"
@@ -33,6 +34,13 @@ Set-Location $INSTALL_DIR
 
 # Check and install Git if not present
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    if (-not $IS_ADMIN) {
+        Write-Host "Error: Git not found and script is not elevated."
+        Write-Host "Please install Git manually from https://git-scm.com/download/win"
+        Write-Host "Then re-run this installer."
+        exit 1
+    }
+
     Write-Host "Git not found. Installing Git..."
 
     # Try to install via Chocolatey first
@@ -51,6 +59,13 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
 
 # Check Python 3
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+    if (-not $IS_ADMIN) {
+        Write-Host "Error: Python 3 not found and script is not elevated."
+        Write-Host "Please install Python manually from https://www.python.org/downloads/"
+        Write-Host "Then re-run this installer."
+        exit 1
+    }
+
     Write-Host "Python 3 not found. Installing Python 3..."
     if (Get-Command choco -ErrorAction SilentlyContinue) {
         choco install python -y

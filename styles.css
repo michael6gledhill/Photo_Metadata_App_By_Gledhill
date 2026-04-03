@@ -64,6 +64,11 @@ code, pre { font-family: Consolas, "SFMono-Regular", Menlo, Monaco, monospace; }
   background: linear-gradient(135deg, rgba(40,167,69,0.18), rgba(14,165,233,0.18));
   font-size: 1.25rem;
 }
+.logo-mark-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
 .logo-copy { display: flex; flex-direction: column; line-height: 1.15; }
 .logo-copy strong { font-size: 1rem; }
 .logo-copy span { font-size: 0.82rem; color: rgba(255,255,255,0.68); }

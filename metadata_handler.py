@@ -39,6 +39,15 @@ class MetadataManager:
     """Handles metadata reading/writing using piexif (EXIF) and sidecar XMP."""
     
     SUPPORTED_FORMATS = {'.jpg', '.jpeg', '.png', '.tiff', '.tif', '.gif', '.bmp'}
+    WRITABLE_EXIF_TAGS = {
+        "Artist", "Copyright", "ImageDescription", "Software", "DateTime",
+        "DateTimeOriginal", "DateTimeDigitized", "Make", "Model",
+        "UserComment", "XPSubject", "XPKeywords", "XPComment"
+    }
+    WRITABLE_XMP_KEYS = {
+        "title", "description", "creator", "subject", "rights",
+        "headline", "datecreated", "authorsposition", "createdate"
+    }
 
     def __init__(self):
         self.method = "piexif + embedded XMP"
@@ -281,6 +290,15 @@ class MetadataManager:
         actual = self.get_metadata_for_view(file_path)
         actual_exif = actual.get('exif', {}) or {}
         actual_xmp = actual.get('xmp', {}) or {}
+
+        expected_exif = {
+            k: v for k, v in (expected_exif or {}).items()
+            if str(k) in self.WRITABLE_EXIF_TAGS
+        }
+        expected_xmp = {
+            k: v for k, v in (expected_xmp or {}).items()
+            if self._canonical_xmp_key(k) in self.WRITABLE_XMP_KEYS
+        }
 
         ext = Path(file_path).suffix.lower()
         supports_exif_verify = ext in {'.jpg', '.jpeg'}
@@ -1223,12 +1241,24 @@ class TemplateManager:
     def _normalize_template_data(data: Dict) -> Dict:
         exif = data.get('exif') or data.get('EXIF') or {}
         raw_xmp = data.get('xmp') or data.get('XMP') or {}
+
+        # Remove noisy read-only EXIF keys that can appear in metadata viewers
+        # but are not intended as writable template fields.
+        cleaned_exif = {}
+        for key, value in exif.items():
+            key_str = str(key)
+            if key_str.startswith('PIL:'):
+                continue
+            if key_str.startswith('ImageInfo:'):
+                continue
+            cleaned_exif[key_str] = value
+
         xmp = {}
         for key, value in raw_xmp.items():
             clean_key = str(key).split(':')[-1] if ':' in str(key) else str(key)
             xmp[clean_key] = value
         name = data.get('name') or data.get('Name') or ''
-        data['exif'] = exif
+        data['exif'] = cleaned_exif
         data['xmp'] = xmp
         data['name'] = name
         return data

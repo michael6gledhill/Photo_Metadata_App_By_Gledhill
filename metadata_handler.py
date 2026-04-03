@@ -438,12 +438,14 @@ class MetadataManager:
             shutil.copy2(file_path, temp_path)
             
             success = False
+            used_pillow_jpeg = False
             if self._is_jpeg(temp_path):
                 # JPEG path: prefer Pillow rewrite for stability, then clear EXIF/XMP leftovers.
                 if HAS_PIL and Image is not None:
                     try:
                         self._strip_metadata_with_pillow(temp_path)
                         success = True
+                        used_pillow_jpeg = True
                     except Exception as e:
                         logger.warning(f"Pillow JPEG delete error: {e}")
 
@@ -456,7 +458,8 @@ class MetadataManager:
                     except Exception as e:
                         logger.warning(f"piexif JPEG delete error: {e}")
 
-                if success:
+                # Only run byte-level XMP cleanup when we did NOT rewrite via Pillow.
+                if success and not used_pillow_jpeg:
                     try:
                         self._remove_xmp_from_jpeg(temp_path)
                     except Exception as e:
@@ -471,12 +474,14 @@ class MetadataManager:
                     logger.warning(f"Pillow delete error: {e}")
 
             # Remove sidecar XMP, if present
-            sidecar = Path(file_path).with_suffix('.xmp')
-            if sidecar.exists():
-                try:
-                    sidecar.unlink()
-                except Exception as e:
-                    logger.warning(f"Failed to remove sidecar XMP {sidecar.name}: {e}")
+            stem = Path(file_path).stem
+            parent = Path(file_path).parent
+            for candidate in parent.glob(f"{stem}.*"):
+                if candidate.suffix.lower() == '.xmp':
+                    try:
+                        candidate.unlink()
+                    except Exception as e:
+                        logger.warning(f"Failed to remove sidecar XMP {candidate.name}: {e}")
 
             # Verify temp image is still readable before replacing original
             if success and not self._is_readable_image(temp_path):
@@ -641,9 +646,14 @@ class MetadataManager:
                 clean.save(file_path, format="GIF", save_all=False)
                 return
 
-            clean = Image.new(img.mode, img.size)
-            pixel_data = [px for px in img.getdata()]
-            clean.putdata(pixel_data)
+            clean = Image.frombytes(img.mode, img.size, img.tobytes())
+            if img.mode == 'P':
+                try:
+                    palette = img.getpalette()
+                    if palette:
+                        clean.putpalette(palette)
+                except Exception:
+                    pass
 
             save_kwargs: Dict[str, Any] = {}
             if ext in {'.jpg', '.jpeg'} or fmt == "JPEG":

@@ -1116,13 +1116,22 @@ class PhotoMetadataEditor(QMainWindow):
         if not self.selected_files:
             return None
         self.preview_index = max(0, min(self.preview_index, len(self.selected_files) - 1))
-        file_path = self.selected_files[self.preview_index]
-        for i in range(self.file_list_widget.count()):
-            item = self.file_list_widget.item(i)
-            if item.data(Qt.ItemDataRole.UserRole) == file_path:
-                self.file_list_widget.setCurrentItem(item, QItemSelectionModel.ClearAndSelect)
-                break
-        return file_path
+        return self.selected_files[self.preview_index]
+
+    def _sync_current_item_to_preview_index(self):
+        """Sync list selection to preview index without triggering recursive refresh."""
+        file_path = self._get_primary_file()
+        if not file_path:
+            return
+        self.file_list_widget.blockSignals(True)
+        try:
+            for i in range(self.file_list_widget.count()):
+                item = self.file_list_widget.item(i)
+                if item.data(Qt.ItemDataRole.UserRole) == file_path:
+                    self.file_list_widget.setCurrentItem(item, QItemSelectionModel.ClearAndSelect)
+                    break
+        finally:
+            self.file_list_widget.blockSignals(False)
     
     def _update_image_preview(self):
         file_path = self._get_primary_file()
@@ -1156,21 +1165,14 @@ class PhotoMetadataEditor(QMainWindow):
     def preview_next(self):
         if self.selected_files:
             self.preview_index = (self.preview_index + 1) % len(self.selected_files)
+            self._sync_current_item_to_preview_index()
             self.update_preview()
     
     def preview_prev(self):
         if self.selected_files:
             self.preview_index = (self.preview_index - 1) % len(self.selected_files)
+            self._sync_current_item_to_preview_index()
             self.update_preview()
-    
-    def on_file_selected(self):
-        """Called when user clicks on a file in the file list. Updates preview to show that file."""
-        current_item = self.file_list_widget.currentItem()
-        if current_item:
-            selected_path = current_item.data(Qt.ItemDataRole.UserRole)
-            if selected_path and selected_path in self.selected_files:
-                self.preview_index = self.selected_files.index(selected_path)
-                self.update_preview()
     
     def on_file_selected(self):
         """Called when user clicks on a file in the file list."""

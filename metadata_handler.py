@@ -716,6 +716,8 @@ class MetadataManager:
             lines.append(f'<photoshop:Headline>{_escape(xmp_data["Headline"])}</photoshop:Headline>')
         if 'DateCreated' in xmp_data:
             lines.append(f'<photoshop:DateCreated>{_escape(xmp_data["DateCreated"])}</photoshop:DateCreated>')
+        if 'AuthorsPosition' in xmp_data:
+            lines.append(f'<photoshop:AuthorsPosition>{_escape(xmp_data["AuthorsPosition"])}</photoshop:AuthorsPosition>')
         
         # XMP fields
         if 'CreateDate' in xmp_data:
@@ -1114,13 +1116,31 @@ class TemplateManager:
         try:
             target_name = name.strip()
             target_stem = target_name.lower().replace(' ', '_')
+            direct_file = self.template_dir / f"{target_stem}.json"
+            if direct_file.exists():
+                direct_file.unlink()
+                return True
+
             for file in self.template_dir.glob('*.json'):
-                with open(file, 'r') as f:
-                    data = json.load(f)
-                    file_name = data.get('name', file.stem)
-                    if file_name == target_name or file.stem == target_stem or file_name.lower().replace(' ', '_') == target_stem:
-                        file.unlink()
-                        return True
+                # Filename match fallback (case-insensitive)
+                if file.stem.lower() == target_stem:
+                    file.unlink()
+                    return True
+
+                try:
+                    with open(file, 'r') as f:
+                        data = json.load(f)
+                except Exception:
+                    continue
+
+                file_name = str(data.get('name', file.stem)).strip()
+                if (
+                    file_name == target_name
+                    or file_name.lower() == target_name.lower()
+                    or file_name.lower().replace(' ', '_') == target_stem
+                ):
+                    file.unlink()
+                    return True
         except Exception as e:
             logger.error(f"Error deleting template: {e}")
         return False
@@ -1129,13 +1149,30 @@ class TemplateManager:
         try:
             target_name = name.strip()
             target_stem = target_name.lower().replace(' ', '_')
+            direct_file = self.naming_dir / f"{target_stem}.json"
+            if direct_file.exists():
+                direct_file.unlink()
+                return True
+
             for file in self.naming_dir.glob('*.json'):
-                with open(file, 'r') as f:
-                    data = json.load(f)
-                    file_name = data.get('name', file.stem)
-                    if file_name == target_name or file.stem == target_stem or file_name.lower().replace(' ', '_') == target_stem:
-                        file.unlink()
-                        return True
+                if file.stem.lower() == target_stem:
+                    file.unlink()
+                    return True
+
+                try:
+                    with open(file, 'r') as f:
+                        data = json.load(f)
+                except Exception:
+                    continue
+
+                file_name = str(data.get('name', file.stem)).strip()
+                if (
+                    file_name == target_name
+                    or file_name.lower() == target_name.lower()
+                    or file_name.lower().replace(' ', '_') == target_stem
+                ):
+                    file.unlink()
+                    return True
         except Exception as e:
             logger.error(f"Error deleting naming convention {name}: {e}")
         return False

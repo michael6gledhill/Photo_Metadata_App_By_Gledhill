@@ -22,12 +22,14 @@ try:
     import piexif
     HAS_PIEXIF = True
 except ImportError:
+    piexif = None
     HAS_PIEXIF = False
 
 try:
     from PIL import Image
     HAS_PIL = True
 except ImportError:
+    Image = None
     HAS_PIL = False
 
 logger = logging.getLogger(__name__)
@@ -40,6 +42,8 @@ class MetadataManager:
 
     def __init__(self):
         self.method = "piexif + embedded XMP"
+        self.naming_dir = Path.home() / '.photo_meta_editor' / 'naming'
+        self.naming_dir.mkdir(parents=True, exist_ok=True)
 
     def get_metadata(self, file_path: str) -> Dict[str, Any]:
         """
@@ -49,13 +53,26 @@ class MetadataManager:
         """
         metadata = {'exif': {}, 'xmp': {}, 'method': 'piexif + embedded XMP'}
         try:
-            metadata.update(self._get_metadata_python(file_path))
+            metadata.update(self._get_metadata_python(file_path, comprehensive=False))
         except Exception as e:
             logger.warning(f"Error reading metadata from {file_path}: {e}")
         return metadata
 
+    def get_metadata_for_view(self, file_path: str) -> Dict[str, Any]:
+        """
+        Read metadata using a comprehensive, view-only strategy.
+        This is intentionally separate from write/apply logic so the viewer can
+        expose as much on-disk metadata as possible.
+        """
+        metadata = {'exif': {}, 'xmp': {}, 'method': 'comprehensive view read'}
+        try:
+            metadata.update(self._get_metadata_python(file_path, comprehensive=True))
+        except Exception as e:
+            logger.warning(f"Error reading metadata for view from {file_path}: {e}")
+        return metadata
 
-    def _get_metadata_python(self, file_path: str) -> Dict[str, Any]:
+
+    def _get_metadata_python(self, file_path: str, comprehensive: bool = False) -> Dict[str, Any]:
         """
         Extract metadata using piexif (EXIF) and XMP (sidecar and embedded).
         Robust handling of all tag types and encodings.
@@ -64,7 +81,7 @@ class MetadataManager:
         xmp_data = {}
 
         # EXIF via piexif - robust parsing
-        if HAS_PIEXIF:
+        if HAS_PIEXIF and piexif is not None:
             try:
                 img_data = piexif.load(file_path)
                 for ifd_name, ifd in img_data.items():
@@ -105,13 +122,77 @@ class MetadataManager:
             except Exception as e:
                 logger.debug(f"piexif read error: {e}")
 
-        # Only embedded XMP
+        # Embedded XMP
         try:
             xmp_data.update(self._read_embedded_xmp(file_path))
         except Exception as e:
             logger.debug(f"embedded XMP read error: {e}")
 
+        # Sidecar XMP (view mode only)
+        if comprehensive:
+            try:
+                xmp_data.update(self._read_sidecar_xmp(file_path))
+            except Exception as e:
+                logger.debug(f"sidecar XMP read error: {e}")
+
+            # Pillow-level metadata often exposes additional fields not surfaced by piexif
+            if HAS_PIL and Image is not None:
+                try:
+                    with Image.open(file_path) as img:
+                        # EXIF via Pillow map
+                        try:
+                            pil_exif = img.getexif()
+                            if pil_exif:
+                                for tag_id, value in pil_exif.items():
+                                    tag_name = f"PIL:0x{int(tag_id):04X}"
+                                    exif_data.setdefault(tag_name, value)
+                        except Exception:
+                            pass
+
+                        # Generic info dict may include textual metadata chunks
+                        try:
+                            for k, v in (img.info or {}).items():
+                                key = str(k)
+                                if key.lower() in {"xmp", "xml:com.adobe.xmp", "raw profile type exif", "exif"}:
+                                    continue
+                                exif_data.setdefault(f"ImageInfo:{key}", v)
+                        except Exception:
+                            pass
+                except Exception as e:
+                    logger.debug(f"Pillow comprehensive read error: {e}")
+
         return {'exif': exif_data, 'xmp': xmp_data}
+
+    def _read_sidecar_xmp(self, file_path: str) -> Dict[str, Any]:
+        """Read sidecar XMP metadata from <image>.xmp when present."""
+        sidecar = Path(file_path).with_suffix('.xmp')
+        if not sidecar.exists():
+            return {}
+
+        try:
+            text = sidecar.read_text(encoding='utf-8', errors='replace')
+            root = ET.fromstring(text)
+        except Exception:
+            return {}
+
+        xmp_dict: Dict[str, Any] = {}
+        descriptions = root.findall('.//{http://www.w3.org/1999/02/22-rdf-syntax-ns#}Description')
+        for desc in descriptions:
+            for attr_name, attr_value in desc.attrib.items():
+                local_name = attr_name.split('}')[-1] if '}' in attr_name else attr_name
+                xmp_dict[local_name] = attr_value
+            for child in desc:
+                tag = child.tag
+                local_name = tag.split('}')[-1] if '}' in tag else tag
+                li_nodes = child.findall('.//{http://www.w3.org/1999/02/22-rdf-syntax-ns#}li')
+                if li_nodes:
+                    values = [(li.text or '').strip() for li in li_nodes if (li.text or '').strip()]
+                    xmp_dict[local_name] = values if len(values) > 1 else (values[0] if values else '')
+                else:
+                    text_value = (child.text or '').strip()
+                    if text_value:
+                        xmp_dict[local_name] = text_value
+        return xmp_dict
 
     def _read_embedded_xmp(self, file_path: str) -> Dict[str, Any]:
         """
@@ -162,8 +243,76 @@ class MetadataManager:
         except Exception as e:
             logger.debug(f"Error reading embedded XMP: {e}")
         return xmp_dict
+
+    @staticmethod
+    def _normalize_metadata_dict(values: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize metadata values into JSON/view friendly scalar or list forms."""
+        normalized: Dict[str, Any] = {}
+        for key, value in values.items():
+            if isinstance(value, bytes):
+                normalized[key] = value.decode('utf-8', errors='replace').rstrip('\x00')
+            elif isinstance(value, tuple):
+                normalized[key] = [str(v) for v in value]
+            elif isinstance(value, list):
+                normalized[key] = [str(v) for v in value]
+            else:
+                normalized[key] = value
+        return normalized
+
+    @staticmethod
+    def _canonical_xmp_key(key: str) -> str:
+        key_str = str(key)
+        key_str = key_str.split(':')[-1] if ':' in key_str else key_str
+        return key_str.strip().lower()
+
+    @staticmethod
+    def _normalize_compare_value(value: Any) -> Any:
+        if isinstance(value, bytes):
+            return value.decode('utf-8', errors='replace').strip()
+        if isinstance(value, list):
+            return [str(v).strip() for v in value]
+        if isinstance(value, tuple):
+            return [str(v).strip() for v in value]
+        return str(value).strip() if value is not None else ""
+
+    def verify_metadata(self, file_path: str, expected_exif: Dict[str, Any], expected_xmp: Dict[str, Any]) -> Tuple[bool, List[str]]:
+        """Verify that written metadata matches expected values."""
+        issues: List[str] = []
+        actual = self.get_metadata_for_view(file_path)
+        actual_exif = actual.get('exif', {}) or {}
+        actual_xmp = actual.get('xmp', {}) or {}
+
+        ext = Path(file_path).suffix.lower()
+        supports_exif_verify = ext in {'.jpg', '.jpeg'}
+        supports_xmp_verify = ext in {'.jpg', '.jpeg'}
+
+        if supports_exif_verify:
+            for key, expected in (expected_exif or {}).items():
+                if key not in actual_exif:
+                    issues.append(f"EXIF missing: {key}")
+                    continue
+                actual_value = self._normalize_compare_value(actual_exif.get(key))
+                expected_value = self._normalize_compare_value(expected)
+                if actual_value != expected_value:
+                    issues.append(f"EXIF mismatch: {key} (expected '{expected_value}', got '{actual_value}')")
+
+        canonical_actual_xmp = {
+            self._canonical_xmp_key(k): v for k, v in actual_xmp.items()
+        }
+        if supports_xmp_verify:
+            for key, expected in (expected_xmp or {}).items():
+                canonical = self._canonical_xmp_key(key)
+                if canonical not in canonical_actual_xmp:
+                    issues.append(f"XMP missing: {key}")
+                    continue
+                actual_value = self._normalize_compare_value(canonical_actual_xmp.get(canonical))
+                expected_value = self._normalize_compare_value(expected)
+                if actual_value != expected_value:
+                    issues.append(f"XMP mismatch: {key} (expected '{expected_value}', got '{actual_value}')")
+
+        return len(issues) == 0, issues
     
-    def set_metadata(self, file_path: str, exif_data: Dict = None, xmp_data: Dict = None,
+    def set_metadata(self, file_path: str, exif_data: Optional[Dict] = None, xmp_data: Optional[Dict] = None,
                      merge: bool = False) -> bool:
         """
         Write EXIF and XMP metadata to a file.
@@ -201,15 +350,15 @@ class MetadataManager:
                 os.unlink(temp_path)
             return False
     
-    def _set_metadata_python(self, file_path: str, exif_data: Dict = None,
-                             xmp_data: Dict = None, merge: bool = False) -> bool:
+    def _set_metadata_python(self, file_path: str, exif_data: Optional[Dict] = None,
+                             xmp_data: Optional[Dict] = None, merge: bool = False) -> bool:
         """
         Write metadata using piexif and sidecar XMP.
         Robust encoding handling and tag mapping.
         """
         try:
             # Write EXIF using piexif
-            if HAS_PIEXIF and exif_data:
+            if HAS_PIEXIF and piexif is not None and exif_data:
                 try:
                     # Load existing or create new
                     exif_dict = piexif.load(file_path) if merge else {
@@ -289,32 +438,21 @@ class MetadataManager:
             shutil.copy2(file_path, temp_path)
             
             success = False
-            if self._is_jpeg(temp_path) and HAS_PIEXIF:
+            if self._is_jpeg(temp_path):
                 try:
-                    piexif.insert(piexif.dump({
-                        "0th": {}, "Exif": {}, "GPS": {}, "1st": {}, "thumbnail": None
-                    }), temp_path)
+                    self._strip_jpeg_metadata_segments(temp_path)
                     success = True
-                    logger.info(f"Deleted EXIF metadata from {Path(file_path).name}")
+                    logger.info(f"Deleted JPEG metadata segments from {Path(file_path).name}")
                 except Exception as e:
-                    logger.warning(f"piexif delete error: {e}")
+                    logger.warning(f"JPEG segment strip error: {e}")
                     success = False
-            elif HAS_PIL:
+            elif HAS_PIL and Image is not None:
                 try:
                     self._strip_metadata_with_pillow(temp_path)
                     success = True
                     logger.info(f"Deleted metadata from {Path(file_path).name} using Pillow")
                 except Exception as e:
                     logger.warning(f"Pillow delete error: {e}")
-            
-            # Delete embedded XMP from JPEG files
-            if self._is_jpeg(temp_path):
-                try:
-                    self._remove_xmp_from_jpeg(temp_path)
-                    logger.info(f"Deleted XMP metadata from {Path(file_path).name}")
-                except Exception as e:
-                    logger.warning(f"XMP deletion error: {e}")
-                    success = False
             
             if success:
                 os.replace(temp_path, file_path)
@@ -327,6 +465,64 @@ class MetadataManager:
             if os.path.exists(temp_path):
                 os.unlink(temp_path)
             return False
+
+    def _strip_jpeg_metadata_segments(self, file_path: str) -> None:
+        """Remove APPn and COM segments from JPEG while preserving image scan data."""
+        with open(file_path, 'rb') as f:
+            data = f.read()
+
+        if len(data) < 4 or data[0:2] != b'\xff\xd8':
+            raise ValueError("Not a valid JPEG file")
+
+        out = bytearray(data[0:2])  # SOI
+        pos = 2
+
+        while pos < len(data):
+            if pos + 1 >= len(data):
+                break
+
+            if data[pos] != 0xFF:
+                # Unexpected raw data before SOS; keep remaining bytes
+                out.extend(data[pos:])
+                break
+
+            # Skip padding FF bytes
+            while pos < len(data) and data[pos] == 0xFF:
+                pos += 1
+            if pos >= len(data):
+                break
+
+            marker = data[pos]
+            pos += 1
+
+            # Markers without length
+            if marker in (0xD8, 0xD9) or 0xD0 <= marker <= 0xD7:
+                out.extend([0xFF, marker])
+                if marker == 0xD9:
+                    break
+                continue
+
+            if pos + 1 >= len(data):
+                break
+
+            seg_len = (data[pos] << 8) | data[pos + 1]
+            if seg_len < 2 or pos + seg_len > len(data):
+                break
+
+            segment_start = pos - 1  # marker byte position
+            segment_end = pos + seg_len
+
+            # Start of scan: keep SOS + entropy data through EOI as-is
+            if marker == 0xDA:
+                out.extend(data[segment_start:segment_end])
+                out.extend(data[segment_end:])
+                break
+
+            # Drop APPn (E0-EF) and COM (FE), keep others
+            if not ((0xE0 <= marker <= 0xEF) or marker == 0xFE):
+                out.extend(data[segment_start:segment_end])
+
+            pos = segment_end
 
     def _is_jpeg(self, file_path: str) -> bool:
         """Check if file is a JPEG."""
@@ -383,7 +579,7 @@ class MetadataManager:
 
     def _strip_metadata_with_pillow(self, file_path: str) -> None:
         """Strip metadata from non-JPEG images by re-saving via Pillow."""
-        if not HAS_PIL:
+        if not HAS_PIL or Image is None:
             raise RuntimeError("Pillow is not available")
 
         ext = Path(file_path).suffix.lower()
@@ -659,7 +855,7 @@ class NamingEngine:
         'userid': lambda fp, m, i: os.environ.get('USER') or 'user',
     }
     
-    def generate_filename(self, pattern: str, file_path: str, metadata: Dict = None, sequence: int = 1) -> str:
+    def generate_filename(self, pattern: str, file_path: str, metadata: Optional[Dict] = None, sequence: int = 1) -> str:
         """
         Generate a new filename based on pattern and metadata.
         
@@ -898,7 +1094,11 @@ class TemplateManager:
     @staticmethod
     def _normalize_template_data(data: Dict) -> Dict:
         exif = data.get('exif') or data.get('EXIF') or {}
-        xmp = data.get('xmp') or data.get('XMP') or {}
+        raw_xmp = data.get('xmp') or data.get('XMP') or {}
+        xmp = {}
+        for key, value in raw_xmp.items():
+            clean_key = str(key).split(':')[-1] if ':' in str(key) else str(key)
+            xmp[clean_key] = value
         name = data.get('name') or data.get('Name') or ''
         data['exif'] = exif
         data['xmp'] = xmp

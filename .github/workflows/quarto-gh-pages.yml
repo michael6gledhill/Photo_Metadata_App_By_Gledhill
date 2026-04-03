@@ -1,4 +1,4 @@
-name: "Render and Deploy Quarto"
+name: "Deploy Static Docs"
 
 on:
   push:
@@ -18,12 +18,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Quarto
-        uses: quarto-dev/quarto-actions/setup@v2
-
-      - name: Render Quarto project
+      - name: Prepare static docs artifact
         run: |
-          quarto render --to html
+          set -e
+          mkdir -p _site
+          cp index.html INSTALL_GUIDE.html METADATA_GUIDE.html NAMING_CONVENTIONS.html styles.css script.js _site/
+          if [ -d assets ]; then
+            cp -r assets _site/
+          fi
 
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3

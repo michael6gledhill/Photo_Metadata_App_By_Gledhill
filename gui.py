@@ -1054,7 +1054,7 @@ class PhotoMetadataEditor(QMainWindow):
             QMessageBox.warning(self, "Error", "Selected file not found.")
             return
         
-        metadata = self.metadata_manager.get_metadata(file_path)
+        metadata = self.metadata_manager.get_metadata_for_view(file_path)
         dialog = MetadataViewDialog(self, file_path, metadata)
         dialog.exec()
     
@@ -1247,15 +1247,40 @@ class PhotoMetadataEditor(QMainWindow):
                 if not dry_run:
                     exif = self._prepare_metadata_values(template.get('exif', {}), is_xmp=False)
                     xmp = self._prepare_metadata_values(template.get('xmp', {}), is_xmp=True)
-                    
-                    if self.metadata_manager.set_metadata(file_path, exif, xmp, merge):
-                        if str(new_path) != file_path:
-                            shutil.move(file_path, new_path)
-                            rename_map[file_path] = str(new_path)
+
+                    # Required order:
+                    # 1) Delete all metadata when NOT combining
+                    # 2) Write new metadata
+                    # 3) Rename file
+                    # 4) Verify metadata matches expected values
+                    if not merge:
+                        if not self.metadata_manager.delete_metadata(file_path):
+                            self.log_status(f"✗ Failed to clear metadata: {Path(file_path).name}")
+                            progress.setValue(i + 1)
+                            QApplication.processEvents()
+                            continue
+
+                    if not self.metadata_manager.set_metadata(file_path, exif, xmp, merge=merge):
+                        self.log_status(f"✗ Failed to write metadata: {Path(file_path).name}")
+                        progress.setValue(i + 1)
+                        QApplication.processEvents()
+                        continue
+
+                    final_path = file_path
+                    if str(new_path) != file_path:
+                        shutil.move(file_path, new_path)
+                        rename_map[file_path] = str(new_path)
+                        final_path = str(new_path)
+
+                    verified, issues = self.metadata_manager.verify_metadata(final_path, exif, xmp)
+                    if verified:
                         success_count += 1
-                        self.log_status(f"✓ {Path(file_path).name} → {new_path.name}")
+                        self.log_status(f"✓ {Path(file_path).name} → {Path(final_path).name}")
                     else:
-                        self.log_status(f"✗ Failed: {Path(file_path).name}")
+                        issue_summary = "; ".join(issues[:3])
+                        if len(issues) > 3:
+                            issue_summary += f" (+{len(issues) - 3} more)"
+                        self.log_status(f"✗ Verification failed: {Path(final_path).name} - {issue_summary}")
                 else:
                     self.log_status(f"[DRY RUN] {Path(file_path).name} → {new_path.name}")
                     success_count += 1
@@ -1420,6 +1445,7 @@ class PhotoMetadataEditor(QMainWindow):
         progress.show()
         QApplication.processEvents()
         
+        error_details = ""
         try:
             # macOS: choose installer per architecture
             if sys.platform == "darwin":
@@ -1434,37 +1460,59 @@ class PhotoMetadataEditor(QMainWindow):
                     f'tell application "Terminal" to do script "{cmd}"'
                 ])
             else:
-                # Windows/Linux: pull, reinstall deps, and relaunch
+                # Windows/Linux: try in-place update first, fallback to installer script.
                 repo_path = Path(__file__).parent
-                result = subprocess.run(
-                    ["git", "pull", "origin", "main"],
-                    cwd=repo_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=60
-                )
-                if result.returncode != 0:
-                    raise RuntimeError(f"Git pull failed: {result.stderr}")
+                in_place_error = None
+                try:
+                    result = subprocess.run(
+                        ["git", "pull", "origin", "main"],
+                        cwd=repo_path,
+                        capture_output=True,
+                        text=True,
+                        timeout=60
+                    )
+                    if result.returncode != 0:
+                        raise RuntimeError(f"Git pull failed: {(result.stderr or result.stdout or '').strip()}")
 
-                pip_result = subprocess.run(
-                    [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
-                    cwd=repo_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=300
-                )
-                if pip_result.returncode != 0:
-                    raise RuntimeError(f"Dependency install failed: {pip_result.stderr}")
+                    pip_result = subprocess.run(
+                        [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
+                        cwd=repo_path,
+                        capture_output=True,
+                        text=True,
+                        timeout=300
+                    )
+                    if pip_result.returncode != 0:
+                        raise RuntimeError(f"Dependency install failed: {(pip_result.stderr or pip_result.stdout or '').strip()}")
 
-                main_script = repo_path / "main.py"
-                if not main_script.exists():
-                    raise RuntimeError("Could not find main.py after update")
+                    main_script = repo_path / "main.py"
+                    if not main_script.exists():
+                        raise RuntimeError("Could not find main.py after update")
 
-                subprocess.Popen([sys.executable, str(main_script)], cwd=repo_path)
+                    subprocess.Popen([sys.executable, str(main_script)], cwd=repo_path)
+                except Exception as e:
+                    in_place_error = str(e)
+
+                if in_place_error:
+                    if sys.platform == "win32":
+                        install_cmd = "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))"
+                        subprocess.Popen([
+                            "powershell",
+                            "-NoProfile",
+                            "-ExecutionPolicy", "Bypass",
+                            "-Command", install_cmd
+                        ])
+                    else:
+                        subprocess.Popen([
+                            "bash",
+                            "-lc",
+                            "curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash"
+                        ])
+                    error_details = in_place_error
             
             success = True
         except Exception as e:
             logger.error(f"Update failed: {e}")
+            error_details = str(e)
             success = False
         
         progress.close()
@@ -1484,8 +1532,9 @@ class PhotoMetadataEditor(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Update Failed",
-                "Failed to install the update. Please check your internet connection "
-                "and try again.\n\nYou can also visit the GitHub repository manually."
+                "Failed to install the update automatically.\n\n"
+                f"Details: {error_details or 'Unknown error'}\n\n"
+                "Please try again, or run the installer manually from the GitHub repository."
             )
             self.log_status("✗ Update failed")
 

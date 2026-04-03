@@ -1084,7 +1084,11 @@ class PhotoMetadataEditor(QMainWindow):
         
         progress.close()
         self.log_status(f"Metadata deletion complete: {success_count}/{len(self.selected_files)} successful")
-        self.update_preview()
+        try:
+            self.update_preview()
+        except Exception as e:
+            logger.error(f"Preview refresh failed after metadata deletion: {e}")
+            self.log_status(f"⚠️ Metadata deleted, but preview refresh failed: {e}")
     
     def on_template_selected(self):
         current_item = self.template_list.currentItem()
@@ -1433,6 +1437,7 @@ class PhotoMetadataEditor(QMainWindow):
     
     def perform_update(self):
         """Perform the actual update by re-running the installer."""
+        import subprocess as _subprocess
         progress = QProgressDialog(
             "Updating application...",
             None,
@@ -1455,7 +1460,7 @@ class PhotoMetadataEditor(QMainWindow):
                     cmd = "curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/install_m1.py | python3"
                 else:
                     cmd = "sudo curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash"
-                subprocess.Popen([
+                _subprocess.Popen([
                     "osascript", "-e",
                     f'tell application "Terminal" to do script "{cmd}"'
                 ])
@@ -1464,7 +1469,7 @@ class PhotoMetadataEditor(QMainWindow):
                 repo_path = Path(__file__).parent
                 in_place_error = None
                 try:
-                    result = subprocess.run(
+                    result = _subprocess.run(
                         ["git", "pull", "origin", "main"],
                         cwd=repo_path,
                         capture_output=True,
@@ -1474,7 +1479,7 @@ class PhotoMetadataEditor(QMainWindow):
                     if result.returncode != 0:
                         raise RuntimeError(f"Git pull failed: {(result.stderr or result.stdout or '').strip()}")
 
-                    pip_result = subprocess.run(
+                    pip_result = _subprocess.run(
                         [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
                         cwd=repo_path,
                         capture_output=True,
@@ -1488,21 +1493,21 @@ class PhotoMetadataEditor(QMainWindow):
                     if not main_script.exists():
                         raise RuntimeError("Could not find main.py after update")
 
-                    subprocess.Popen([sys.executable, str(main_script)], cwd=repo_path)
+                    _subprocess.Popen([sys.executable, str(main_script)], cwd=repo_path)
                 except Exception as e:
                     in_place_error = str(e)
 
                 if in_place_error:
                     if sys.platform == "win32":
                         install_cmd = "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.ps1'))"
-                        subprocess.Popen([
+                        _subprocess.Popen([
                             "powershell",
                             "-NoProfile",
                             "-ExecutionPolicy", "Bypass",
                             "-Command", install_cmd
                         ])
                     else:
-                        subprocess.Popen([
+                        _subprocess.Popen([
                             "bash",
                             "-lc",
                             "curl -fsSL https://raw.githubusercontent.com/michael6gledhill/Photo_Metadata_App_By_Gledhill/main/Install.sh | bash"

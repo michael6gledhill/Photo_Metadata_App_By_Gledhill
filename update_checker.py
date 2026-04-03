@@ -97,6 +97,14 @@ class UpdateChecker:
             with urlopen(req, timeout=6, context=self._get_ssl_context()) as response:
                 data = json.loads(response.read().decode('utf-8'))
                 return data.get('tag_name', '').lstrip('v') or None
+        except HTTPError as e:
+            # GitHub returns 404 when there are no releases yet; not a fatal update-check error.
+            if getattr(e, "code", None) == 404:
+                logger.info("Releases API returned 404 (no published releases); falling back to raw version.txt")
+                return None
+            self.last_error = f"Releases API failed: {e}"
+            logger.warning(self.last_error)
+            return None
         except URLError as e:
             # Retry once with insecure SSL if certs are broken locally
             if isinstance(getattr(e, "reason", None), ssl.SSLError):
@@ -114,7 +122,7 @@ class UpdateChecker:
             self.last_error = f"Releases API failed: {e}"
             logger.warning(self.last_error)
             return None
-        except (HTTPError, json.JSONDecodeError, KeyError) as e:
+        except (json.JSONDecodeError, KeyError) as e:
             self.last_error = f"Releases API failed: {e}"
             logger.warning(self.last_error)
             return None
@@ -189,12 +197,13 @@ class UpdateChecker:
         Perform the update by pulling the latest code and rebuilding.
         Returns: True if successful, False otherwise
         """
+        import subprocess as _subprocess
         try:
             repo_path = Path(__file__).parent
             
             logger.info("Fetching latest code...")
             # Pull latest from GitHub
-            subprocess.run(
+            _subprocess.run(
                 ["git", "pull", "origin", "main"],
                 cwd=repo_path,
                 check=True,
@@ -203,7 +212,7 @@ class UpdateChecker:
             
             logger.info("Installing dependencies...")
             # Install/update requirements
-            subprocess.run(
+            _subprocess.run(
                 [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
                 cwd=repo_path,
                 check=True,
@@ -217,11 +226,11 @@ class UpdateChecker:
 
             main_script = repo_path / "main.py"
             if main_script.exists():
-                subprocess.Popen([sys.executable, str(main_script)], cwd=repo_path)
+                _subprocess.Popen([sys.executable, str(main_script)], cwd=repo_path)
             
             logger.info("Update completed successfully")
             return True
-        except subprocess.CalledProcessError as e:
+        except _subprocess.CalledProcessError as e:
             logger.error(f"Update failed: {e}")
             return False
         except Exception as e:

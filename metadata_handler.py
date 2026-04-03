@@ -439,13 +439,29 @@ class MetadataManager:
             
             success = False
             if self._is_jpeg(temp_path):
-                try:
-                    self._strip_jpeg_metadata_segments(temp_path)
-                    success = True
-                    logger.info(f"Deleted JPEG metadata segments from {Path(file_path).name}")
-                except Exception as e:
-                    logger.warning(f"JPEG segment strip error: {e}")
-                    success = False
+                # JPEG path: prefer Pillow rewrite for stability, then clear EXIF/XMP leftovers.
+                if HAS_PIL and Image is not None:
+                    try:
+                        self._strip_metadata_with_pillow(temp_path)
+                        success = True
+                    except Exception as e:
+                        logger.warning(f"Pillow JPEG delete error: {e}")
+
+                if not success and HAS_PIEXIF and piexif is not None:
+                    try:
+                        piexif.insert(piexif.dump({
+                            "0th": {}, "Exif": {}, "GPS": {}, "1st": {}, "thumbnail": None
+                        }), temp_path)
+                        success = True
+                    except Exception as e:
+                        logger.warning(f"piexif JPEG delete error: {e}")
+
+                if success:
+                    try:
+                        self._remove_xmp_from_jpeg(temp_path)
+                    except Exception as e:
+                        logger.warning(f"JPEG XMP delete error: {e}")
+
             elif HAS_PIL and Image is not None:
                 try:
                     self._strip_metadata_with_pillow(temp_path)
@@ -453,6 +469,19 @@ class MetadataManager:
                     logger.info(f"Deleted metadata from {Path(file_path).name} using Pillow")
                 except Exception as e:
                     logger.warning(f"Pillow delete error: {e}")
+
+            # Remove sidecar XMP, if present
+            sidecar = Path(file_path).with_suffix('.xmp')
+            if sidecar.exists():
+                try:
+                    sidecar.unlink()
+                except Exception as e:
+                    logger.warning(f"Failed to remove sidecar XMP {sidecar.name}: {e}")
+
+            # Verify temp image is still readable before replacing original
+            if success and not self._is_readable_image(temp_path):
+                logger.error(f"Metadata delete produced unreadable file for {Path(file_path).name}; rolling back")
+                success = False
             
             if success:
                 os.replace(temp_path, file_path)
@@ -465,6 +494,24 @@ class MetadataManager:
             if os.path.exists(temp_path):
                 os.unlink(temp_path)
             return False
+
+    def _is_readable_image(self, file_path: str) -> bool:
+        """Best-effort validation to avoid committing corrupted image output."""
+        path = Path(file_path)
+        if not path.exists() or path.stat().st_size == 0:
+            return False
+
+        if HAS_PIL and Image is not None:
+            try:
+                with Image.open(file_path) as img:
+                    img.verify()
+                return True
+            except Exception as e:
+                logger.warning(f"Image readability check failed for {path.name}: {e}")
+                return False
+
+        # If Pillow isn't available, at least require non-empty file
+        return True
 
     def _strip_jpeg_metadata_segments(self, file_path: str) -> None:
         """Remove APPn and COM segments from JPEG while preserving image scan data."""
@@ -584,19 +631,41 @@ class MetadataManager:
 
         ext = Path(file_path).suffix.lower()
         with Image.open(file_path) as img:
-            clean = img.copy()
+            fmt = (img.format or "").upper()
+
+            # Rebuild image from pixels to avoid carrying metadata dict/info chunks.
+            # This is more stable than passing format-specific metadata kwargs.
+            if fmt == "GIF":
+                # Keep first frame only for metadata stripping consistency.
+                clean = img.convert("RGBA")
+                clean.save(file_path, format="GIF", save_all=False)
+                return
+
+            clean = Image.new(img.mode, img.size)
+            pixel_data = [px for px in img.getdata()]
+            clean.putdata(pixel_data)
+
             save_kwargs: Dict[str, Any] = {}
+            if ext in {'.jpg', '.jpeg'} or fmt == "JPEG":
+                save_kwargs.update({"quality": 95, "subsampling": 0, "optimize": True})
+                clean = clean.convert("RGB")
+                clean.save(file_path, format="JPEG", **save_kwargs)
+                return
 
-            if ext == '.png':
-                save_kwargs.update({"pnginfo": None, "exif": b""})
-            elif ext in {'.tif', '.tiff'}:
-                # Pillow will re-save the image data without metadata if we do not
-                # pass the original TIFF tags back in.
-                save_kwargs = {}
-            elif ext in {'.jpg', '.jpeg'}:
-                save_kwargs.update({"exif": b""})
+            if ext == '.png' or fmt == "PNG":
+                clean.save(file_path, format="PNG", optimize=True)
+                return
 
-            clean.save(file_path, **save_kwargs)
+            if ext in {'.tif', '.tiff'} or fmt == "TIFF":
+                clean.save(file_path, format="TIFF")
+                return
+
+            if ext == '.bmp' or fmt == "BMP":
+                clean.save(file_path, format="BMP")
+                return
+
+            # Generic fallback
+            clean.save(file_path)
 
     def _build_xmp_packet(self, xmp_data: Dict[str, Any]) -> str:
         """Build a minimal XMP packet from a dict of fields."""
